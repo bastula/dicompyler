@@ -1,0 +1,202 @@
+<?xml version="1.0" ?>
+<resource>
+  <object class="wxDialog" name="DicomImporterDialog" subclass="dicomgui.DicomImporterDialog">
+    <object class="wxBoxSizer">
+      <orient>wxVERTICAL</orient>
+      <object class="sizeritem">
+        <object class="wxStaticBoxSizer">
+          <object class="sizeritem">
+            <object class="wxBoxSizer">
+              <object class="sizeritem">
+                <object class="wxTextCtrl" name="txtDicomImport">
+                  <style>wxTE_READONLY</style>
+                </object>
+                <option>1</option>
+                <flag>wxALIGN_LEFT|wxALIGN_CENTRE_VERTICAL</flag>
+              </object>
+              <object class="spacer">
+                <size>5,0</size>
+              </object>
+              <object class="sizeritem">
+                <object class="wxButton" name="btnDicomImport">
+                  <label>&amp;Browse...</label>
+                </object>
+              </object>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+          </object>
+          <label>DICOM Import Location</label>
+          <orient>wxVERTICAL</orient>
+        </object>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+        <border>3</border>
+      </object>
+      <object class="sizeritem">
+        <object class="wxStaticBoxSizer">
+          <object class="sizeritem">
+            <object class="wxBoxSizer">
+              <object class="sizeritem">
+                <object class="wxStaticText" name="lblDirections">
+                  <label> Select a patient that has a valid RT Structure Set, Plan and Dose with DVH:</label>
+                </object>
+                <option>1</option>
+                <flag>wxALIGN_CENTRE</flag>
+              </object>
+              <orient>wxHORIZONTAL</orient>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+          </object>
+          <object class="spacer">
+            <size>0,5</size>
+          </object>
+          <object class="sizeritem">
+            <object class="wxTreeCtrl" name="tcPatients">
+              <size>425,300</size>
+              <style>wxTR_HAS_BUTTONS|wxTR_LINES_AT_ROOT|wxTR_SINGLE</style>
+            </object>
+            <option>1</option>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+          </object>
+          <object class="spacer">
+            <size>0,5</size>
+          </object>
+          <label>Patients</label>
+          <object class="sizeritem">
+            <object class="wxBoxSizer">
+              <object class="sizeritem">
+                <object class="wxStaticText" name="lblProgressLabel">
+                  <label>Progress: </label>
+                </object>
+                <flag>wxALIGN_CENTRE</flag>
+              </object>
+              <object class="sizeritem">
+                <object class="wxStaticText" name="lblProgress">
+                  <label>n/a                               </label>
+                </object>
+                <option>1</option>
+                <flag>wxALIGN_CENTRE</flag>
+              </object>
+              <object class="spacer">
+                <size>5,0</size>
+              </object>
+              <object class="sizeritem">
+                <object class="wxGauge" name="gaugeProgress">
+                  <size>100,15</size>
+                  <range>100</range>
+                  <value>75</value>
+                  <style>wxGA_HORIZONTAL|wxGA_SMOOTH</style>
+                </object>
+                <flag>wxALIGN_CENTRE</flag>
+              </object>
+              <object class="spacer">
+                <size>5,0</size>
+              </object>
+              <object class="sizeritem">
+                <object class="wxStaticText" name="lblProgressPercent">
+                  <label>100</label>
+                  <style>wxALIGN_RIGHT</style>
+                </object>
+                <flag>wxALIGN_CENTRE</flag>
+              </object>
+              <object class="sizeritem">
+                <object class="wxStaticText" name="lblProgressPercentSym">
+                  <label> %</label>
+                </object>
+                <flag>wxALIGN_CENTRE</flag>
+              </object>
+              <orient>wxHORIZONTAL</orient>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+          </object>
+          <object class="spacer">
+            <size>0,5</size>
+          </object>
+          <object class="sizeritem">
+            <object class="wxBoxSizer">
+              <object class="sizeritem">
+                <object class="wxStaticBitmap" name="bmpRxDose">
+                  <bitmap>error.png</bitmap>
+                </object>
+                <flag>wxALIGN_CENTRE</flag>
+              </object>
+              <object class="spacer">
+                <size>5,0</size>
+              </object>
+              <object class="sizeritem">
+                <object class="wxStaticText" name="lblRxDose">
+                  <label>Rx dose not found in RT Plan. Please enter Rx dose:</label>
+                </object>
+                <flag>wxALIGN_CENTRE</flag>
+              </object>
+              <object class="spacer">
+                <size>5,0</size>
+                <option>1</option>
+              </object>
+              <object class="sizeritem">
+                <object class="wxSpinCtrl" name="txtRxDose">
+                  <size>80,22</size>
+                  <value>1</value>
+                  <min>1</min>
+                  <max>99999</max>
+                </object>
+                <flag>wxALIGN_CENTRE</flag>
+              </object>
+              <object class="spacer">
+                <size>5,0</size>
+              </object>
+              <object class="sizeritem">
+                <object class="wxStaticText" name="lblRxDoseUnits">
+                  <label>cGy</label>
+                </object>
+                <flag>wxALIGN_CENTRE</flag>
+              </object>
+              <object class="sizeritem">
+                <object class="wxStaticText" name="lblSpacer">
+                  <label>  </label>
+                </object>
+                <flag>wxALIGN_CENTRE</flag>
+              </object>
+              <orient>wxHORIZONTAL</orient>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+          </object>
+          <object class="spacer">
+            <size>0,9</size>
+          </object>
+          <orient>wxVERTICAL</orient>
+        </object>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+        <border>3</border>
+      </object>
+      <object class="spacer">
+        <size>0,5</size>
+      </object>
+      <object class="sizeritem">
+        <object class="wxStdDialogButtonSizer">
+          <object class="button">
+            <object class="wxButton" name="wxID_CANCEL">
+              <label/>
+              <label>&amp;Cancel</label>
+            </object>
+          </object>
+          <object class="button">
+            <object class="wxButton" name="wxID_OK">
+              <label>Select</label>
+              <default>1</default>
+              <enabled>0</enabled>
+            </object>
+          </object>
+        </object>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+        <border>3</border>
+      </object>
+      <object class="spacer">
+        <size>0,5</size>
+      </object>
+    </object>
+    <title>Open Patient</title>
+    <centered>1</centered>
+    <icon>user.png</icon>
+    <style>wxDEFAULT_DIALOG_STYLE</style>
+  </object>
+</resource>
