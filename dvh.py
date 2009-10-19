@@ -2,8 +2,6 @@
 # -*- coding: ISO-8859-1 -*-
 
 import numpy as np
-from math import sqrt, pow
-from matplotlib import delaunay
 
 class DVH:
     """Processes the dose volume histogram from DICOM DVH data."""
