@@ -410,7 +410,7 @@
     <object class="wxMenu">
       <label>&amp;Help</label>
       <object class="wxMenuItem" name="menuAbout">
-        <label>&amp;About dicomPyler</label>
+        <label>&amp;About dicompyler</label>
       </object>
     </object>
   </object>

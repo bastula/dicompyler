@@ -297,10 +297,10 @@ class MainFrame(wx.Frame):
     def OnAbout(self, evt):
         # First we create and fill the info object
         info = wx.AboutDialogInfo()
-        info.Name = "dicomPyler"
-        info.Version = "1.0"
+        info.Name = "dicompyler"
+        info.Version = "0.1"
         info.Copyright = u"© 2009"
-        info.Developers = ["Aditya Panchal"]
+        info.Developers = ["Aditya Panchal (apanchal@bastula.org)"]
 
         # Then we call wx.AboutBox giving it that info object
         wx.AboutBox(info)
@@ -308,7 +308,7 @@ class MainFrame(wx.Frame):
     def OnClose(self, _):
         self.Close()
 
-class dicomPyler(wx.App):
+class dicompyler(wx.App):
     def OnInit(self):
         wx.InitAllImageHandlers()
 
@@ -319,14 +319,14 @@ class dicomPyler(wx.App):
         if guiutil.IsMac():
             wx.SystemOptions.SetOptionInt("mac.listctrl.always_use_generic", 0)
 
-        dicomPylerFrame = MainFrame(None, -1, "dicomPyler", self.res)
-        self.SetTopWindow(dicomPylerFrame)
-        dicomPylerFrame.Centre()
-        dicomPylerFrame.Show()
+        dicompylerFrame = MainFrame(None, -1, "dicompyler", self.res)
+        self.SetTopWindow(dicompylerFrame)
+        dicompylerFrame.Centre()
+        dicompylerFrame.Show()
         return 1
 
-# end of class dicomPyler
+# end of class dicompyler
 
 if __name__ == '__main__':
-    app = dicomPyler(0)
+    app = dicompyler(0)
     app.MainLoop()
