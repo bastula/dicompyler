@@ -166,7 +166,7 @@ class DicomImporterDialog(wx.Dialog):
 
                 files = os.listdir(path)
                 dcmfile = str(os.path.join(path, files[n]))
-                if (os.path.isfile(dcmfile) and fnmatch.fnmatch(dcmfile, '*.dcm')):
+                if (os.path.isfile(dcmfile) and fnmatch.fnmatch(dcmfile.lower(), '*.dcm')):
                     try:
                         print 'Reading:', files[n]
                         dp = dicomparser.DicomParser(dcmfile)
