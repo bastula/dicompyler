@@ -197,11 +197,8 @@ class DicomParser:
         if "DVHs" in self.ds:
             for item in self.ds.DVHs:
                 dvhitem = {}
-                data = []
-                for i in range(len(item.DVHData)):
-                    if ((i % 2) == 1):
-                        data.append(item.DVHData[i])
-                dvhitem['data'] = np.array(data)
+                # Remove "filler" values from DVH data array (even values are DVH values)
+                dvhitem['data'] = np.array(item.DVHData[1::2])
                 dvhitem['type'] = item.DVHType
                 dvhitem['doseunits'] = item.DoseUnits
                 dvhitem['volumeunits'] = item.DVHVolumeUnits
