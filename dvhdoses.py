@@ -62,7 +62,7 @@ def getdvhmean(dvh,doseref):
     v1 = dvh[0]
 
     # Calculate dDVH
-    j = 1
+    j = 0
     jmax = len(dvh) - 1
     ddvh = []
     while j < jmax:
@@ -70,7 +70,7 @@ def getdvhmean(dvh,doseref):
         j += 1
 
     # Calculate total dose
-    j = 1
+    j = 0
     dose = 0
     for d in ddvh:
         dose += d*j
