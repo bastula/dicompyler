@@ -5,7 +5,7 @@ import os
 import wx
 from wx.xrc import *
 from model import *
-import guiutil
+import guiutil, util
 import dicomgui, dicomparser, dvh, guidvh
 
 class MainFrame(wx.Frame):
@@ -22,6 +22,15 @@ class MainFrame(wx.Frame):
 
         # set up resource file and config file
         self.res = res
+
+        # Set window icon
+        if util.main_is_frozen():
+            import sys
+            exeName = sys.executable
+            icon = wx.Icon(exeName, wx.BITMAP_TYPE_ICO)
+        else:
+            icon = wx.Icon(util.GetResourcePath('dicompyler.ico'), wx.BITMAP_TYPE_ICO)
+        self.SetIcon(icon)
 
         # Load the main panel for the program
         self.panelGeneral = self.res.LoadPanel(self, 'panelGeneral')
@@ -313,7 +322,7 @@ class dicompyler(wx.App):
         wx.InitAllImageHandlers()
 
         # Load the XRC file for our gui resources
-        self.res = XmlResource('resources/main.xrc')
+        self.res = XmlResource(util.GetResourcePath('main.xrc'))
 
         # Use the native listctrl on Mac OS X
         if guiutil.IsMac():

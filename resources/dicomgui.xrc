@@ -196,7 +196,6 @@
     </object>
     <title>Open Patient</title>
     <centered>1</centered>
-    <icon>user.png</icon>
     <style>wxDEFAULT_DIALOG_STYLE</style>
   </object>
 </resource>
