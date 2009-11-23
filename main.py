@@ -112,6 +112,10 @@ class MainFrame(wx.Frame):
         self.SetMinSize(size)
         self.Centre(wx.BOTH)
 
+        # Set window icon
+        icon = wx.Icon('resources/dicompyler_icon11_16.png', wx.BITMAP_TYPE_PNG)
+        self.SetIcon(icon) 
+
         # Initalize the database
         setup_all()
         if not os.path.isfile('dicompyler.db'):

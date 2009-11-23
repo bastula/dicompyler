@@ -79,6 +79,10 @@ class DicomImporterDialog(wx.Dialog):
         # Initialize the patients dictionary
         self.patients = {}
 
+        # Set window icon
+        icon = wx.Icon('resources/dicompyler_icon11_16.png', wx.BITMAP_TYPE_PNG)
+        self.SetIcon(icon)
+
         # Initialize the import location
 
         # Get the location from the preferences if it hasn't been set,
