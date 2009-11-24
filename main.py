@@ -140,6 +140,8 @@ class MainFrame(wx.Frame):
             self.PopulatePlan(patient['plan'])
             self.PopulateStructures()
             self.currConstraintId = None
+            # show an empty plot when (re)loading a patient
+            self.guiDVH.Replot()
 
     def PopulateStructures(self):
         """Populate the structure list."""
