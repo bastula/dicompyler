@@ -6,7 +6,7 @@
 # Start - 20 Nov. 2009
 
 # It's assumed that the reference (prescription) dose is in cGy and the bin width
-#   of the cDVH is in cGy.
+#   of the cDVH is in cGy and fixed at 1 cGy.
 
 def getdvhmin(dvh,doseref):
     '''Return minimum dose to ROI derived from cDVH.'''
@@ -30,7 +30,18 @@ def getdvhmin(dvh,doseref):
 def getdvhmax(dvh,doseref):
     '''Return maximum dose to ROI derived from cDVH.'''
 
-    maxdose = 100*len(dvh[:-2])/doseref
+    # Calulate dDVH
+    ddvh = getddvh(dvh)
+
+    j = len(ddvh) - 1
+    while j >= 0:
+        if ddvh[j] > 0.0:
+            maxdose = j+1
+            break
+        else:
+            j -= 1
+
+    maxdose = 100.0*maxdose/doseref
 
     return maxdose
 
@@ -62,17 +73,12 @@ def getdvhmean(dvh,doseref):
     v1 = dvh[0]
 
     # Calculate dDVH
-    j = 1
-    jmax = len(dvh) - 1
-    ddvh = []
-    while j < jmax:
-        ddvh += [dvh[j] - dvh[j+1]]
-        j += 1
+    ddvh = getddvh(dvh)
 
     # Calculate total dose
     j = 1
     dose = 0
-    for d in ddvh:
+    for d in ddvh[1:]:
         dose += d*j
         j += 1
 
@@ -80,3 +86,16 @@ def getdvhmean(dvh,doseref):
     meandose = 100*meandose/doseref
 
     return meandose
+
+def getddvh(cdvh):
+    '''Retrun dDVH from cDVH array.'''
+
+    # dDVH is the negative "slope" of the cDVH    
+    j = 0
+    jmax = len(cdvh) - 1
+    ddvh = []
+    while j < jmax:
+        ddvh += [cdvh[j] - cdvh[j+1]]
+        j += 1
+
+    return ddvh
