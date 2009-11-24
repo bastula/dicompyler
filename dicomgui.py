@@ -5,13 +5,13 @@ import fnmatch, hashlib, os, threading
 import wx
 from wx.xrc import *
 from model import *
-import dicomparser, guiutil
+import dicomparser, dvhdoses, guiutil, util
 
 def ImportDicom(parent):
     """Prepare to show the dialog that will Import DICOM RT files."""
 
     # Load the XRC file for our gui resources
-    res = XmlResource("resources/dicomgui.xrc")
+    res = XmlResource(util.GetResourcePath('dicomgui.xrc'))
 
     dlgDicomImporter = res.LoadDialog(parent, "DicomImporterDialog")
     dlgDicomImporter.Init(res)
@@ -32,6 +32,15 @@ class DicomImporterDialog(wx.Dialog):
 
     def Init(self, res):
         """Method called after the panel has been initialized."""
+
+        # Set window icon
+        if util.main_is_frozen():
+            import sys
+            exeName = sys.executable
+            icon = wx.Icon(exeName, wx.BITMAP_TYPE_ICO)
+        else:
+            icon = wx.Icon(util.GetResourcePath('dicompyler.ico'), wx.BITMAP_TYPE_ICO)
+        self.SetIcon(icon)
 
         # Initialize controls
         self.txtDicomImport = XRCCTRL(self, 'txtDicomImport')
@@ -86,7 +95,7 @@ class DicomImporterDialog(wx.Dialog):
         sp = wx.StandardPaths.Get()
         self.path = unicode(sp.GetDocumentsDir())
         if not len(Preferences.query.all()):
-            Preferences(name='dicom_import_location', value=self.path)
+            Preferences(name=u'dicom_import_location', value=unicode(self.path))
             session.commit()
         else:
             path = Preferences.get_by(name=u'dicom_import_location').value
@@ -265,31 +274,31 @@ class DicomImporterDialog(wx.Dialog):
         iList = wx.ImageList(iSize[0], iSize[1])
         iList.Add(
             wx.Bitmap(
-                guiutil.GetResourcePath('group.png'),
+                util.GetResourcePath('group.png'),
                 wx.BITMAP_TYPE_PNG))
         iList.Add(
             wx.Bitmap(
-                guiutil.GetResourcePath('user.png'),
+                util.GetResourcePath('user.png'),
                 wx.BITMAP_TYPE_PNG))
         iList.Add(
             wx.Bitmap(
-                guiutil.GetResourcePath('pencil.png'),
+                util.GetResourcePath('pencil.png'),
                 wx.BITMAP_TYPE_PNG))
         iList.Add(
             wx.Bitmap(
-                guiutil.GetResourcePath('chart_bar.png'),
+                util.GetResourcePath('chart_bar.png'),
                 wx.BITMAP_TYPE_PNG))
         iList.Add(
             wx.Bitmap(
-                guiutil.GetResourcePath('chart_curve.png'),
+                util.GetResourcePath('chart_curve.png'),
                 wx.BITMAP_TYPE_PNG))
         iList.Add(
             wx.Bitmap(
-                guiutil.GetResourcePath('chart_bar_error.png'),
+                util.GetResourcePath('chart_bar_error.png'),
                 wx.BITMAP_TYPE_PNG))
         iList.Add(
             wx.Bitmap(
-                guiutil.GetResourcePath('chart_curve_error.png'),
+                util.GetResourcePath('chart_curve_error.png'),
                 wx.BITMAP_TYPE_PNG))
 
         self.tcPatients.AssignImageList(iList)
@@ -413,6 +422,14 @@ class DicomImporterDialog(wx.Dialog):
             elif (dp.GetSOPClassUID() == 'rtdose'):
                 self.patient['dvh'] = dp.GetDVHs()
             wx.CallAfter(progressFunc, n, len(filearray), 'Importing patient. Please wait...')
+        # if the min/max/mean dose was not present, calculate it and save it for each structure
+        for key, dvh in self.patient['dvh'].iteritems():
+            if (dvh['min'] == -1):
+                dvh['min'] = dvhdoses.get_dvh_min(dvh['data'], RxDose)
+            if (dvh['max'] == -1):
+                dvh['max'] = dvhdoses.get_dvh_max(dvh['data'], RxDose)
+            if (dvh['mean'] == -1):
+                dvh['mean'] = dvhdoses.get_dvh_mean(dvh['data'], RxDose)
         wx.CallAfter(progressFunc, 98, 100, 'Importing patient complete.')
 
     def GetPatient(self):

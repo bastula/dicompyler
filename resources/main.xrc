@@ -112,12 +112,28 @@
                     <object class="wxStaticText">
                       <label>Max Dose:</label>
                     </object>
+                    <flag>wxALIGN_RIGHT</flag>
                   </object>
                   <object class="sizeritem">
                     <object class="wxStaticText" name="lblStructureMaxDose">
                       <label>-</label>
                     </object>
                     <option>1</option>
+                  </object>
+                  <object class="sizeritem">
+                    <object class="wxStaticText">
+                      <label>%</label>
+                    </object>
+                  </object>
+                  <object class="sizeritem">
+                    <object class="wxStaticText">
+                      <label>Mean Dose:</label>
+                    </object>
+                  </object>
+                  <object class="sizeritem">
+                    <object class="wxStaticText" name="lblStructureMeanDose">
+                      <label>-</label>
+                    </object>
                   </object>
                   <object class="sizeritem">
                     <object class="wxStaticText">
@@ -406,7 +422,6 @@
         <accel>Alt+F4</accel>
       </object>
     </object>
-    
     <object class="wxMenu">
       <label>&amp;Help</label>
       <object class="wxMenuItem" name="menuAbout">

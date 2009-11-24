@@ -37,13 +37,13 @@ class guiDVH:
                     axes.plot(point[0], point[1], 'o', color=color)
                 else:
                     print point
+            axes.legend()
         # set the volume
         axes.grid(True)
         axes.set_ylim(0, 100)
         axes.set_xlabel('Dose (cGy)')
         axes.set_ylabel('Volume (%)')
         axes.set_title('DVH')
-        axes.legend()
 
         # redraw the display
         self.panelDVH.draw()

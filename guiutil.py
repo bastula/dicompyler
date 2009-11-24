@@ -2,7 +2,6 @@
 # -*- coding: ISO-8859-1 -*-
 """ Several gui utility functions that don't really belong anywhere"""
 
-import os
 import wx
 from wx.xrc import *
 
@@ -23,11 +22,6 @@ def IsMac():
 
     @rtype: Bool"""
     return wx.Platform=='__WXMAC__'
-
-def GetResourcePath(resource):
-    """Return the specified item from the resources folder."""
-
-    return os.path.join((os.path.join(os.getcwd(), 'resources')), resource)
 
 def GetItemsList(wxCtrl):
     # Return the list of values stored in a wxCtrlWithItems

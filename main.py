@@ -5,7 +5,7 @@ import os
 import wx
 from wx.xrc import *
 from model import *
-import guiutil
+import guiutil, util
 import dicomgui, dicomparser, dvh, guidvh
 
 class MainFrame(wx.Frame):
@@ -23,6 +23,15 @@ class MainFrame(wx.Frame):
         # set up resource file and config file
         self.res = res
 
+        # Set window icon
+        if util.main_is_frozen():
+            import sys
+            exeName = sys.executable
+            icon = wx.Icon(exeName, wx.BITMAP_TYPE_ICO)
+        else:
+            icon = wx.Icon(util.GetResourcePath('dicompyler.ico'), wx.BITMAP_TYPE_ICO)
+        self.SetIcon(icon)
+
         # Load the main panel for the program
         self.panelGeneral = self.res.LoadPanel(self, 'panelGeneral')
         self.guiDVH = guidvh.guiDVH(self)
@@ -38,6 +47,7 @@ class MainFrame(wx.Frame):
         self.lblStructureVolume = XRCCTRL(self, 'lblStructureVolume')
         self.lblStructureMinDose = XRCCTRL(self, 'lblStructureMinDose')
         self.lblStructureMaxDose = XRCCTRL(self, 'lblStructureMaxDose')
+        self.lblStructureMeanDose = XRCCTRL(self, 'lblStructureMeanDose')
         self.lbStructures = XRCCTRL(self, 'lbStructures')
         self.lbStructures.SetFocus()
 
@@ -184,6 +194,7 @@ class MainFrame(wx.Frame):
         if self.dvhs.has_key(id):
             self.lblStructureMinDose.SetLabel("%.3f" % self.dvhs[id]['min'])
             self.lblStructureMaxDose.SetLabel("%.3f" % self.dvhs[id]['max'])
+            self.lblStructureMeanDose.SetLabel("%.3f" % self.dvhs[id]['mean'])
             self.EnableConstraints(True)
             # Create an instance of the dvh class so we can access the functions
             self.dvh = dvh.DVH(self.dvhs[id])
@@ -192,6 +203,7 @@ class MainFrame(wx.Frame):
         else:
             self.lblStructureMinDose.SetLabel('-')
             self.lblStructureMaxDose.SetLabel('-')
+            self.lblStructureMeanDose.SetLabel('-')
             self.EnableConstraints(False)
             # Make an empty plot on the DVH
             self.guiDVH.Replot(None, {id:self.structures[id]})
@@ -313,7 +325,7 @@ class dicompyler(wx.App):
         wx.InitAllImageHandlers()
 
         # Load the XRC file for our gui resources
-        self.res = XmlResource('resources/main.xrc')
+        self.res = XmlResource(util.GetResourcePath('main.xrc'))
 
         # Use the native listctrl on Mac OS X
         if guiutil.IsMac():
