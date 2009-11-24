@@ -11,7 +11,17 @@ class DicomParser:
 
     def __init__(self, filename):
 
-        self.ds = dicom.read_file(filename, defer_size=100)
+        try:
+            self.ds = dicom.read_file(filename, defer_size=100)
+        except (EOFError, IOError):
+            # Raise the error for the calling method to handle
+            raise
+        else:
+            # Sometimes DICOM files may not have headers, but they should always
+            # have a SOPClassUID to declare what type of file it is. If the
+            # file doesn't have a SOPClassUID, then it probably isn't DICOM.
+            if not "SOPClassUID" in self.ds:
+                raise AttributeError
 
 ######################## SOP Class and Instance Methods ########################
 

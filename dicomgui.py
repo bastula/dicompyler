@@ -177,11 +177,11 @@ class DicomImporterDialog(wx.Dialog):
 
                 files = os.listdir(path)
                 dcmfile = str(os.path.join(path, files[n]))
-                if (os.path.isfile(dcmfile) and fnmatch.fnmatch(dcmfile.lower(), '*.dcm')):
+                if (os.path.isfile(dcmfile)):
                     try:
                         print 'Reading:', files[n]
                         dp = dicomparser.DicomParser(dcmfile)
-                    except (KeyError, IOError):
+                    except (AttributeError, EOFError, IOError, KeyError):
                         pass
                         print files[n] + " is not a valid DICOM file."
                     else:
@@ -218,7 +218,7 @@ class DicomImporterDialog(wx.Dialog):
                             patients[h]['doses'].append(dose)
                         else:
                             print files[n] + " is a " \
-                            + dp.ds.MediaStorageSOPClassUID.name \
+                            + dp.ds.SOPClassUID.name \
                             + " file and is not currently supported."
 
                 # Call the progress function to update the gui
