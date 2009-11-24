@@ -5,7 +5,7 @@ import fnmatch, hashlib, os, threading
 import wx
 from wx.xrc import *
 from model import *
-import dicomparser, guiutil, util
+import dicomparser, dvhdoses, guiutil, util
 
 def ImportDicom(parent):
     """Prepare to show the dialog that will Import DICOM RT files."""
@@ -422,6 +422,14 @@ class DicomImporterDialog(wx.Dialog):
             elif (dp.GetSOPClassUID() == 'rtdose'):
                 self.patient['dvh'] = dp.GetDVHs()
             wx.CallAfter(progressFunc, n, len(filearray), 'Importing patient. Please wait...')
+        # if the min/max/mean dose was not present, calculate it and save it for each structure
+        for key, dvh in self.patient['dvh'].iteritems():
+            if (dvh['min'] == -1):
+                dvh['min'] = dvhdoses.get_dvh_min(dvh['data'], RxDose)
+            if (dvh['max'] == -1):
+                dvh['max'] = dvhdoses.get_dvh_max(dvh['data'], RxDose)
+            if (dvh['mean'] == -1):
+                dvh['mean'] = dvhdoses.get_dvh_mean(dvh['data'], RxDose)
         wx.CallAfter(progressFunc, 98, 100, 'Importing patient complete.')
 
     def GetPatient(self):

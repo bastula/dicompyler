@@ -197,19 +197,28 @@ class DicomParser:
         if "DVHs" in self.ds:
             for item in self.ds.DVHs:
                 dvhitem = {}
-                data = []
-                for i in range(len(item.DVHData)):
-                    if ((i % 2) == 1):
-                        data.append(item.DVHData[i])
-                dvhitem['data'] = np.array(data)
+                # Remove "filler" values from DVH data array (even values are DVH values)
+                dvhitem['data'] = np.array(item.DVHData[1::2])
                 dvhitem['type'] = item.DVHType
                 dvhitem['doseunits'] = item.DoseUnits
                 dvhitem['volumeunits'] = item.DVHVolumeUnits
                 dvhitem['scaling'] = item.DVHDoseScaling
                 dvhitem['bins'] = int(item.DVHNumberofBins)
-                dvhitem['min'] = item.DVHMinimumDose
-                dvhitem['max'] = item.DVHMaximumDose
-                dvhitem['mean'] = item.DVHMeanDose
+                if "DVHMinimumDose" in item:
+                    dvhitem['min'] = item.DVHMinimumDose
+                else:
+                    # save the min dose as -1 so we can calculate it later
+                    dvhitem['min'] = -1
+                if "DVHMaximumDose" in item:
+                    dvhitem['max'] = item.DVHMaximumDose
+                else:
+                    # save the max dose as -1 so we can calculate it later
+                    dvhitem['max'] = -1
+                if "DVHMeanDose" in item:
+                    dvhitem['mean'] = item.DVHMeanDose
+                else:
+                    # save the mean dose as -1 so we can calculate it later
+                    dvhitem['mean'] = -1
                 self.dvhs[item.DVHReferencedROIs[0].ReferencedROINumber] = dvhitem
 
         return self.dvhs

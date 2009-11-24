@@ -47,6 +47,7 @@ class MainFrame(wx.Frame):
         self.lblStructureVolume = XRCCTRL(self, 'lblStructureVolume')
         self.lblStructureMinDose = XRCCTRL(self, 'lblStructureMinDose')
         self.lblStructureMaxDose = XRCCTRL(self, 'lblStructureMaxDose')
+        self.lblStructureMeanDose = XRCCTRL(self, 'lblStructureMeanDose')
         self.lbStructures = XRCCTRL(self, 'lbStructures')
         self.lbStructures.SetFocus()
 
@@ -193,6 +194,7 @@ class MainFrame(wx.Frame):
         if self.dvhs.has_key(id):
             self.lblStructureMinDose.SetLabel("%.3f" % self.dvhs[id]['min'])
             self.lblStructureMaxDose.SetLabel("%.3f" % self.dvhs[id]['max'])
+            self.lblStructureMeanDose.SetLabel("%.3f" % self.dvhs[id]['mean'])
             self.EnableConstraints(True)
             # Create an instance of the dvh class so we can access the functions
             self.dvh = dvh.DVH(self.dvhs[id])
@@ -201,6 +203,7 @@ class MainFrame(wx.Frame):
         else:
             self.lblStructureMinDose.SetLabel('-')
             self.lblStructureMaxDose.SetLabel('-')
+            self.lblStructureMeanDose.SetLabel('-')
             self.EnableConstraints(False)
             # Make an empty plot on the DVH
             self.guiDVH.Replot(None, {id:self.structures[id]})
