@@ -38,6 +38,8 @@ class DicomImporterDialog(wx.Dialog):
             import sys
             exeName = sys.executable
             icon = wx.Icon(exeName, wx.BITMAP_TYPE_ICO)
+        elif guiutil.IsGtk():
+            icon = wx.Icon(util.GetResourcePath('dicompyler_icon11_16.png'), wx.BITMAP_TYPE_PNG)
         else:
             icon = wx.Icon(util.GetResourcePath('dicompyler.ico'), wx.BITMAP_TYPE_ICO)
         self.SetIcon(icon)
