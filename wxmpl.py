@@ -1,9 +1,10 @@
 # Purpose: painless matplotlib embedding for wxPython
 # Author: Ken McIvor <mcivor@iit.edu>
+# Portions modified by Aditya Panchal
 #
 # Copyright 2005-2009 Illinois Institute of Technology
 #
-# See the file "LICENSE" for information on usage and redistribution
+# See the file "license.txt" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 
 """
@@ -15,7 +16,6 @@ missing features in the form of a better matplolib FigureCanvas.
 
 
 import wx
-import sys
 import os.path
 import weakref
 
@@ -23,12 +23,10 @@ import matplotlib
 matplotlib.use('WXAgg')
 import numpy as np
 from matplotlib.axes import _process_plot_var_args
-from matplotlib.backend_bases import FigureCanvasBase
-from matplotlib.backends.backend_agg import FigureCanvasAgg, RendererAgg
+from matplotlib.backends.backend_agg import RendererAgg
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg
 from matplotlib.figure import Figure
 from matplotlib.font_manager import FontProperties
-from matplotlib.projections.polar import PolarAxes
 from matplotlib.transforms import Bbox
 
 __version__ = '1.3.1'

@@ -1,12 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: ISO-8859-1 -*-
+# main.py
+"""Main file for dicompyler."""
+# Copyright (c) 2009 Aditya Panchal
+# Copyright (c) 2009 Roy Keyes
+# This file is part of dicompyler, relased under a BSD license.
+#    See the file license.txt included with this distribution, also
+#    available at http://code.google.com/p/dicompyler/
 
 import os
 import wx
 from wx.xrc import *
 from model import *
 import guiutil, util
-import dicomgui, dicomparser, dvh, guidvh
+import dicomgui, dvh, guidvh
 
 class MainFrame(wx.Frame):
     def __init__(self, parent, id, title, res):

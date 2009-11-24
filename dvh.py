@@ -1,5 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: ISO-8859-1 -*-
+# dvh.py
+"""Class and functions related to dose volume histogram (DVH) data."""
+# Copyright (c) 2009 Aditya Panchal
+# This file is part of dicompyler, relased under a BSD license.
+#    See the file license.txt included with this distribution, also
+#    available at http://code.google.com/p/dicompyler/
+#
+# It's assumed that the reference (prescription) dose is in cGy.
 
 import numpy as np
 
