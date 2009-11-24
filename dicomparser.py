@@ -1,8 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: ISO-8859-1 -*-
+# dicomparser.py
+"""Class that parses and returns formatted DICOM RT data."""
+# Copyright (c) 2009 Aditya Panchal
+# Copyright (c) 2009 Roy Keyes
+# This file is part of dicompyler, relased under a BSD license.
+#    See the file license.txt included with this distribution, also
+#    available at http://code.google.com/p/dicompyler/
 
-import os, sys
-from decimal import *
+from decimal import Decimal
 import numpy as np
 import dicom
 

@@ -1,7 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: ISO-8859-1 -*-
+# dicomgui.py
+"""Class that imports and returns DICOM data via a wxPython GUI dialog."""
+# Copyright (c) 2009 Aditya Panchal
+# Copyright (c) 2009 Roy Keyes
+# This file is part of dicompyler, relased under a BSD license.
+#    See the file license.txt included with this distribution, also
+#    available at http://code.google.com/p/dicompyler/
+#
+# It's assumed that the reference (prescription) dose is in cGy.
 
-import fnmatch, hashlib, os, threading
+import hashlib, os, threading
 import wx
 from wx.xrc import *
 from model import *

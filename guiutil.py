@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: ISO-8859-1 -*-
-""" Several gui utility functions that don't really belong anywhere"""
+# guiutil.py
+"""Several GUI utility functions that don't really belong anywhere."""
+# Copyright (c) 2009 Aditya Panchal
+# This file is part of dicompyler, relased under a BSD license.
+#    See the file license.txt included with this distribution, also
+#    available at http://code.google.com/p/dicompyler/
 
 import wx
 from wx.xrc import *
