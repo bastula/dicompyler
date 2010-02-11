@@ -27,3 +27,25 @@ def get_main_dir():
    if main_is_frozen():
        return os.path.dirname(sys.executable)
    return os.path.dirname(sys.argv[0])
+   
+def get_credits():
+    """Read the credits file and return the data from it."""
+    
+    developers = []
+    artists = []
+    with open('credits.txt', 'r') as cf:
+        credits = cf.readlines()
+        for i, v in enumerate(credits):
+            if (v == "Lead Developer\n"):
+                developers.append(credits[i+1].strip())
+            if (v == "Developers\n"):
+                for d in credits[i+1:len(credits)]:
+                    if (d.strip() == ""):
+                        break
+                    developers.append(d.strip())
+            if (v == "Artists\n"):
+                for a in credits[i+1:len(credits)]:
+                    if (a.strip() == ""):
+                        break
+                    artists.append(a.strip())
+    return {'developers':developers, 'artists':artists}
