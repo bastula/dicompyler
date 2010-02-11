@@ -11,6 +11,7 @@
 import os
 import wx
 from wx.xrc import *
+import wx.lib.dialogs, webbrowser
 from model import *
 import guiutil, util
 import dicomgui, dvh, guidvh
@@ -89,6 +90,8 @@ class MainFrame(wx.Frame):
 
         # Setup Help menu
         menuAbout = XRCCTRL(self, 'menuAbout')
+        menuHomepage = XRCCTRL(self, 'menuHomepage')
+        menuLicense = XRCCTRL(self, 'menuLicense')
 
         # If we are running on Mac OS X, alter the menu location
         if guiutil.IsMac():
@@ -102,6 +105,8 @@ class MainFrame(wx.Frame):
         wx.EVT_MENU(self, XRCID('menuOpen'), self.OnOpenPatient)
         wx.EVT_MENU(self, XRCID('menuExit'), self.OnClose)
         wx.EVT_MENU(self, XRCID('menuAbout'), self.OnAbout)
+        wx.EVT_MENU(self, XRCID('menuHomepage'), self.OnHomepage)
+        wx.EVT_MENU(self, XRCID('menuLicense'), self.OnLicense)
 
         # Load the toolbar for the frame
         toolbarMain = self.res.LoadToolBar(self, 'toolbarMain')
@@ -322,11 +327,34 @@ class MainFrame(wx.Frame):
         info = wx.AboutDialogInfo()
         info.Name = "dicompyler"
         info.Version = "0.1"
-        info.Copyright = u"© 2009"
-        info.Developers = ["Aditya Panchal (apanchal@bastula.org)"]
+        info.Copyright = "(c) 2009-2010 Aditya Panchal"
+        credits = util.get_credits()
+        info.Developers = credits['developers']
+        info.Artists = credits['artists']
+        desc =  "Python application to view and modify DICOM and DICOM-RT files." + \
+                "\n\ndicompyler is released under a BSD license.\n" + \
+                "See the Help menu for license information."
+        info.Description = desc
+        if guiutil.IsGtk():
+            info.WebSite = "http://code.google.com/p/dicompyler/"
 
         # Then we call wx.AboutBox giving it that info object
         wx.AboutBox(info)
+
+    def OnHomepage(self, evt):
+        """Show the homepage for dicompyler."""
+
+        webbrowser.open_new_tab("http://code.google.com/p/dicompyler/")
+        
+    def OnLicense(self, evt):
+        """Show the license document in a new dialog."""
+        
+        f = open("license.txt", "r")
+        msg = f.read()
+        f.close()
+
+        dlg = wx.lib.dialogs.ScrolledMessageDialog(self, msg, "dicompyler License")
+        dlg.ShowModal()
 
     def OnClose(self, _):
         self.Close()

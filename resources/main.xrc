@@ -424,6 +424,14 @@
     </object>
     <object class="wxMenu">
       <label>&amp;Help</label>
+      
+      <object class="wxMenuItem" name="menuHomepage">
+        <label>&amp;Homepage</label>
+      </object>
+      <object class="wxMenuItem" name="menuLicense">
+        <label>&amp;License</label>
+      </object>
+      <object class="separator"/>
       <object class="wxMenuItem" name="menuAbout">
         <label>&amp;About dicompyler</label>
       </object>

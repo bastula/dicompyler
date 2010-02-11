@@ -1,4 +1,4 @@
-Copyright (c) 2009 Aditya Panchal <apanchal@bastula.org>
+Copyright (c) 2009-2010 Aditya Panchal and dicompyler contributors
 
 All rights reserved.
 
@@ -32,6 +32,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 --------------------------------------------------------------------------------
 
+dicompyler uses the famfamfam Silk icon set created by Mark James found at:
+	http://famfamfam.com/lab/icons/silk/
+famfamfam Silk is licensed under the Creative Commons Attribution 2.5 License. 
+
+--------------------------------------------------------------------------------
+
 dicompyler uses the following libraries:
 
 elixir
@@ -39,7 +45,7 @@ Copyright (c) 2007, 2008 Jonathan LaCour, Daniel Haus, and Gaetan de Menten.
 SQLAlchemy is a trademark of Michael Bayer.
 
 pydicom
-Copyright (c) 2008-2009 Darcy Mason
+Copyright (c) 2008-2010 Darcy Mason and pydicom contributors
 
 SQLAlchemy
 Copyright (c) 2005, 2006, 2007, 2008, 2009 Michael Bayer and contributors.
