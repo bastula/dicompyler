@@ -7,6 +7,7 @@
 #    See the file license.txt included with this distribution, also
 #    available at http://code.google.com/p/dicompyler/
 
+from __future__ import with_statement
 import imp, os, sys
 
 def GetResourcePath(resource):
