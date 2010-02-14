@@ -327,7 +327,7 @@ class MainFrame(wx.Frame):
         info = wx.AboutDialogInfo()
         info.Name = "dicompyler"
         info.Version = "0.1"
-        info.Copyright = "(c) 2009-2010 Aditya Panchal"
+        info.Copyright = u"© 2009-2010 Aditya Panchal"
         credits = util.get_credits()
         info.Developers = credits['developers']
         info.Artists = credits['artists']
@@ -353,7 +353,12 @@ class MainFrame(wx.Frame):
         msg = f.read()
         f.close()
 
-        dlg = wx.lib.dialogs.ScrolledMessageDialog(self, msg, "dicompyler License")
+        if guiutil.IsMSWindows():
+            dlg = wx.lib.dialogs.ScrolledMessageDialog(self, msg,
+                "dicompyler License")
+        else:
+            dlg = wx.lib.dialogs.ScrolledMessageDialog(self, msg,
+                "dicompyler License", size=(650, 550))
         dlg.ShowModal()
 
     def OnClose(self, _):
