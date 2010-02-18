@@ -48,3 +48,9 @@ def SetItemsList(wxCtrl, list = [], data = []):
         i = i + 1
     if not (wxCtrl.IsEmpty()):
             wxCtrl.SetSelection(0)
+
+def get_data_dir():
+    """Returns the data location for the application."""
+
+    sp = wx.StandardPaths.Get()
+    return wx.StandardPaths.GetUserLocalDataDir(sp)
