@@ -137,8 +137,14 @@ class MainFrame(wx.Frame):
         self.Centre(wx.BOTH)
 
         # Initalize the database
+        datapath = guiutil.get_data_dir()
+        dbpath = os.path.join(datapath, 'dicompyler.db')
+        # Set the database path to the data path before writing to disk
+        metadata.bind = "sqlite:///" + dbpath
         setup_all()
-        if not os.path.isfile('dicompyler.db'):
+        if not os.path.exists(datapath):
+            os.mkdir(datapath)
+        if not os.path.isfile(dbpath):
             create_all()
 
         self.EnableConstraints(False)
@@ -367,6 +373,7 @@ class MainFrame(wx.Frame):
 class dicompyler(wx.App):
     def OnInit(self):
         wx.InitAllImageHandlers()
+        wx.GetApp().SetAppName("dicompyler")
 
         # Load the XRC file for our gui resources
         self.res = XmlResource(util.GetResourcePath('main.xrc'))
