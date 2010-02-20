@@ -34,7 +34,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 dicompyler uses the famfamfam Silk icon set created by Mark James found at:
 	http://famfamfam.com/lab/icons/silk/
-famfamfam Silk is licensed under the Creative Commons Attribution 2.5 License. 
+famfamfam Silk is licensed under the Creative Commons Attribution 2.5 License.
 
 --------------------------------------------------------------------------------
 
@@ -180,7 +180,7 @@ prepare derivative works, distribute, and otherwise use Python
 alone or in any derivative version, provided, however, that PSF's
 License Agreement and PSF's notice of copyright, i.e., "Copyright (c)
 2001, 2002, 2003, 2004, 2005, 2006 Python Software Foundation; All Rights
-Reserved" are retained in Python alone or in any derivative version 
+Reserved" are retained in Python alone or in any derivative version
 prepared by Licensee.
 
 3. In the event Licensee prepares a derivative work that is based on
@@ -258,12 +258,12 @@ dicompyler uses wxPython, which is distributed under the following license:
 
                        WXWINDOWS LIBRARY LICENCE
      TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
-  
+
   This library is free software; you can redistribute it and/or modify it
   under the terms of the GNU Library General Public Licence as published by
   the Free Software Foundation; either version 2 of the Licence, or (at
   your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful, but
   WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Library
@@ -296,6 +296,6 @@ dicompyler uses wxPython, which is distributed under the following license:
   accordingly.
 
   4. If you write modifications of your own for this library, it is your
-  choice whether to permit this exception to apply to your modifications. 
+  choice whether to permit this exception to apply to your modifications.
   If you do not wish that, you must delete the exception notice from such
   code and/or adjust the licensing conditions notice accordingly.

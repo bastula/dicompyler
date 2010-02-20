@@ -104,7 +104,11 @@ class DicomImporterDialog(wx.Dialog):
         # Get the location from the preferences if it hasn't been set,
         # otherwise set it
         sp = wx.StandardPaths.Get()
-        self.path = unicode(sp.GetDocumentsDir())
+        testdata = os.path.join(util.get_main_dir(), 'testdata')
+        if os.path.isdir(testdata):
+            self.path = unicode(testdata)
+        else:
+            self.path = unicode(sp.GetDocumentsDir())
         if not len(Preferences.query.all()):
             Preferences(name=u'dicom_import_location', value=unicode(self.path))
             session.commit()
