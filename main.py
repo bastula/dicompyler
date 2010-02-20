@@ -355,7 +355,7 @@ class MainFrame(wx.Frame):
     def OnLicense(self, evt):
         """Show the license document in a new dialog."""
         
-        f = open("license.txt", "r")
+        f = open("license.txt", "rU")
         msg = f.read()
         f.close()
 
