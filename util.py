@@ -34,7 +34,7 @@ def get_credits():
     
     developers = []
     artists = []
-    with open('credits.txt', 'r') as cf:
+    with open('credits.txt', 'rU') as cf:
         credits = cf.readlines()
         for i, v in enumerate(credits):
             if (v == "Lead Developer\n"):
