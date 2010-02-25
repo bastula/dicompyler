@@ -32,15 +32,8 @@ class MainFrame(wx.Frame):
         self.res = res
 
         # Set window icon
-        if util.main_is_frozen():
-            import sys
-            exeName = sys.executable
-            icon = wx.Icon(exeName, wx.BITMAP_TYPE_ICO)
-        elif guiutil.IsGtk():
-            icon = wx.Icon(util.GetResourcePath('dicompyler_icon11_16.png'), wx.BITMAP_TYPE_PNG)
-        else:
-            icon = wx.Icon(util.GetResourcePath('dicompyler.ico'), wx.BITMAP_TYPE_ICO)
-        self.SetIcon(icon)
+        if not guiutil.IsMac():
+            self.SetIcon(guiutil.get_icon())
 
         # Load the main panel for the program
         self.panelGeneral = self.res.LoadPanel(self, 'panelGeneral')

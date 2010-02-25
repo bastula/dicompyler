@@ -10,11 +10,21 @@
 from __future__ import with_statement
 import imp, os, sys
 
+def platform():
+    if sys.platform.startswith('win'):
+        return 'windows'
+    elif sys.platform.startswith('darwin'):
+        return 'mac'
+    return 'linux'
+
 def GetResourcePath(resource):
     """Return the specified item from the resources folder."""
 
     if main_is_frozen():
-        return os.path.join((os.path.join(get_main_dir(), 'resources')), resource)
+        if (platform() == 'mac'):
+            return os.path.join((os.path.join(get_main_dir(), '../Resources')), resource)
+        else:
+            return os.path.join((os.path.join(get_main_dir(), 'resources')), resource)
     else:
         return os.path.join((os.path.join(os.getcwd(), 'resources')), resource)
 
@@ -28,13 +38,25 @@ def get_main_dir():
    if main_is_frozen():
        return os.path.dirname(sys.executable)
    return os.path.dirname(sys.argv[0])
-   
+
+def get_text_resources(resource):
+    """Return the resources that are located in the root folder of the
+        distribution, except for the Mac py2app version, which is located
+        in the Resources folder in the app bundle."""
+
+    if (main_is_frozen() and (platform() == 'mac')):
+        credits = GetResourcePath(resource)
+    else:
+        resource = resource
+
+    return resource
+
 def get_credits():
     """Read the credits file and return the data from it."""
     
     developers = []
     artists = []
-    with open('credits.txt', 'rU') as cf:
+    with open(get_text_resources('credits.txt'), 'rU') as cf:
         credits = cf.readlines()
         for i, v in enumerate(credits):
             if (v == "Lead Developer\n"):
