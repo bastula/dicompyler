@@ -54,3 +54,19 @@ def get_data_dir():
 
     sp = wx.StandardPaths.Get()
     return wx.StandardPaths.GetUserLocalDataDir(sp)
+
+def get_icon():
+    """Returns the icon for the application."""
+
+    icon = None
+    if guiutil.IsMSWindows():
+        if util.main_is_frozen():
+            import sys
+            exeName = sys.executable
+            icon = wx.Icon(exeName, wx.BITMAP_TYPE_ICO)
+        else:
+            icon = wx.Icon(util.GetResourcePath('dicompyler.ico'), wx.BITMAP_TYPE_ICO)
+    elif guiutil.IsGtk():
+        icon = wx.Icon(util.GetResourcePath('dicompyler_icon11_16.png'), wx.BITMAP_TYPE_PNG)
+
+    return icon

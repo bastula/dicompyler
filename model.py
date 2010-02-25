@@ -8,6 +8,7 @@
 #    available at http://code.google.com/p/dicompyler/
 
 from elixir import *
+from sqlalchemy.databases import sqlite
 import util
 
 metadata.bind = "sqlite:///dicompyler.db"
