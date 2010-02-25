@@ -7,6 +7,7 @@
 #    See the file license.txt included with this distribution, also
 #    available at http://code.google.com/p/dicompyler/
 
+import util
 import wx
 from wx.xrc import *
 
@@ -59,14 +60,14 @@ def get_icon():
     """Returns the icon for the application."""
 
     icon = None
-    if guiutil.IsMSWindows():
+    if IsMSWindows():
         if util.main_is_frozen():
             import sys
             exeName = sys.executable
             icon = wx.Icon(exeName, wx.BITMAP_TYPE_ICO)
         else:
             icon = wx.Icon(util.GetResourcePath('dicompyler.ico'), wx.BITMAP_TYPE_ICO)
-    elif guiutil.IsGtk():
+    elif IsGtk():
         icon = wx.Icon(util.GetResourcePath('dicompyler_icon11_16.png'), wx.BITMAP_TYPE_PNG)
 
     return icon
