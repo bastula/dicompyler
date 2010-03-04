@@ -428,10 +428,10 @@ class DicomImporterDialog(wx.Dialog):
                 self.patient['plan'] = dp.GetPlan()
                 self.patient['plan']['rxdose'] = RxDose
             elif (dp.GetSOPClassUID() == 'rtdose'):
-                self.patient['dvh'] = dp.GetDVHs()
+                self.patient['dvhs'] = dp.GetDVHs()
             wx.CallAfter(progressFunc, n, len(filearray), 'Importing patient. Please wait...')
         # if the min/max/mean dose was not present, calculate it and save it for each structure
-        for key, dvh in self.patient['dvh'].iteritems():
+        for key, dvh in self.patient['dvhs'].iteritems():
             if (dvh['min'] == -1):
                 dvh['min'] = dvhdoses.get_dvh_min(dvh['data'], RxDose)
             if (dvh['max'] == -1):

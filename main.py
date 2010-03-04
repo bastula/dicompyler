@@ -12,9 +12,11 @@ import os
 import wx
 from wx.xrc import *
 import wx.lib.dialogs, webbrowser
+from wx.lib.pubsub import Publisher as pub
 from model import *
 import guiutil, util
-import dicomgui, dvh, guidvh
+import dicomgui, dvhdata
+from baseplugins import dvh
 
 class MainFrame(wx.Frame):
     def __init__(self, parent, id, title, res):
@@ -37,10 +39,9 @@ class MainFrame(wx.Frame):
 
         # Load the main panel for the program
         self.panelGeneral = self.res.LoadPanel(self, 'panelGeneral')
-        self.guiDVH = guidvh.guiDVH(self)
-        self.res.AttachUnknownControl('panelDVH', self.guiDVH.panelDVH, self)
 
         # Initialize the General panel controls
+        self.notebook = XRCCTRL(self, 'notebook')
         self.lblPlanName = XRCCTRL(self, 'lblPlanName')
         self.lblRxDose = XRCCTRL(self, 'lblRxDose')
         self.lblPatientName = XRCCTRL(self, 'lblPatientName')
@@ -53,20 +54,6 @@ class MainFrame(wx.Frame):
         self.lblStructureMeanDose = XRCCTRL(self, 'lblStructureMeanDose')
         self.lbStructures = XRCCTRL(self, 'lbStructures')
         self.lbStructures.SetFocus()
-
-        # Initialize the Constraint selector controls
-        self.radioVolume = XRCCTRL(self, 'radioVolume')
-        self.radioDose = XRCCTRL(self, 'radioDose')
-        self.radioDosecc = XRCCTRL(self, 'radioDosecc')
-        self.txtConstraint = XRCCTRL(self, 'txtConstraint')
-        self.sliderConstraint = XRCCTRL(self, 'sliderConstraint')
-        self.lblConstraintUnits = XRCCTRL(self, 'lblConstraintUnits')
-        self.lblConstraintPercent = XRCCTRL(self, 'lblConstraintPercent')
-
-        # Initialize the Constraint selector labels
-        self.lblConstraintType = XRCCTRL(self, 'lblConstraintType')
-        self.lblConstraintTypeUnits = XRCCTRL(self, 'lblConstraintTypeUnits')
-        self.lblConstraintResultUnits = XRCCTRL(self, 'lblConstraintResultUnits')
 
         # Setup the layout for the frame
         mainGrid = wx.BoxSizer(wx.VERTICAL)
@@ -110,17 +97,9 @@ class MainFrame(wx.Frame):
 
         # Bind ui events to the proper methods
         wx.EVT_LISTBOX(self, XRCID('lbStructures'), self.OnStructureSelect)
-        wx.EVT_RADIOBUTTON(self, XRCID('radioVolume'), self.OnToggleConstraints)
-        wx.EVT_RADIOBUTTON(self, XRCID('radioDose'), self.OnToggleConstraints)
-        wx.EVT_RADIOBUTTON(self, XRCID('radioDosecc'), self.OnToggleConstraints)
-        wx.EVT_SPINCTRL(self, XRCID('txtConstraint'), self.OnChangeConstraint)
-        wx.EVT_COMMAND_SCROLL_THUMBTRACK(self, XRCID('sliderConstraint'), self.OnChangeConstraint)
-        wx.EVT_COMMAND_SCROLL_CHANGED(self, XRCID('sliderConstraint'), self.OnChangeConstraint)
 
         # Initialize variables
         self.structures = {}
-        self.dvhs = {}
-        self.dvhid = 1
 
         self.SetSizer(mainGrid)
         self.Layout()
@@ -140,7 +119,11 @@ class MainFrame(wx.Frame):
         if not os.path.isfile(dbpath):
             create_all()
 
-        self.EnableConstraints(False)
+        # Load the base plugins
+        self.pluginDVH = dvh.pluginLoader(self.notebook)
+
+        # Initialize the notebook tabs
+        self.notebook.AddPage(self.pluginDVH, 'DVH')
 
     def OnOpenPatient(self, evt):
         """Load and show the Dicom RT Importer dialog box."""
@@ -148,13 +131,12 @@ class MainFrame(wx.Frame):
         patient = dicomgui.ImportDicom(self)
         if not (patient == None):
             self.structures = patient['structures']
-            self.dvhs = patient['dvh']
+            self.dvhs = patient['dvhs']
             self.PopulateDemographics(patient)
             self.PopulatePlan(patient['plan'])
             self.PopulateStructures()
             self.currConstraintId = None
-            # show an empty plot when (re)loading a patient
-            self.guiDVH.Replot()
+            pub.sendMessage('patient.updated', patient)
 
     def PopulateStructures(self):
         """Populate the structure list."""
@@ -201,8 +183,10 @@ class MainFrame(wx.Frame):
         # make sure that the volume has been calculated for each structure
         # before setting it
         if not self.structures[id].has_key('volume'):
-            self.structures[id]['volume'] = dvh.CalculateVolume(self.structures[id])
+            self.structures[id]['volume'] = dvhdata.CalculateVolume(self.structures[id])
         self.lblStructureVolume.SetLabel(str(self.structures[id]['volume'])[0:7])
+        pub.sendMessage('structures.selected',
+            {'id':id, 'volume':self.structures[id]['volume']})
 
         # make sure that the dvh has been calculated for each structure
         # before setting it
@@ -210,116 +194,10 @@ class MainFrame(wx.Frame):
             self.lblStructureMinDose.SetLabel("%.3f" % self.dvhs[id]['min'])
             self.lblStructureMaxDose.SetLabel("%.3f" % self.dvhs[id]['max'])
             self.lblStructureMeanDose.SetLabel("%.3f" % self.dvhs[id]['mean'])
-            self.EnableConstraints(True)
-            # Create an instance of the dvh class so we can access the functions
-            self.dvh = dvh.DVH(self.dvhs[id])
-            # 'Toggle' the radio box to refresh the dose data
-            self.OnToggleConstraints(None)
         else:
             self.lblStructureMinDose.SetLabel('-')
             self.lblStructureMaxDose.SetLabel('-')
             self.lblStructureMeanDose.SetLabel('-')
-            self.EnableConstraints(False)
-            # Make an empty plot on the DVH
-            self.guiDVH.Replot(None, {id:self.structures[id]})
-
-    def EnableConstraints(self, value):
-        """Enable or disable the constraint selector."""
-
-        self.radioVolume.Enable(value)
-        self.radioDose.Enable(value)
-        self.radioDosecc.Enable(value)
-        self.txtConstraint.Enable(value)
-        self.sliderConstraint.Enable(value)
-        if not value:
-            self.lblConstraintUnits.SetLabel('-            ')
-            self.lblConstraintPercent.SetLabel('-            ')
-
-    def OnToggleConstraints(self, evt):
-        """Switch between different constraint modes."""
-
-        # Check if the function was called via an event or not
-        if not (evt == None):
-            label = evt.GetEventObject().GetLabel()
-        else:
-            if self.radioVolume.GetValue():
-                label = 'Volume Constraint (V__)'
-            elif self.radioDose.GetValue():
-                label = 'Dose Constraint (D__)'
-            elif self.radioDosecc.GetValue():
-                label = 'Dose Constraint (D__cc)'
-
-        constraintrange = 0
-        if (label == 'Volume Constraint (V__)'):
-            self.lblConstraintType.SetLabel('   Dose:')
-            self.lblConstraintTypeUnits.SetLabel('%  ')
-            self.lblConstraintResultUnits.SetLabel(u'cm³')
-            rxDose = float(self.lblRxDose.GetLabel())
-            dvhdata = len(self.dvhs[self.dvhid]['data'])
-            constraintrange = int(dvhdata*100/rxDose)
-            # never go over the max dose as data does not exist
-            if (constraintrange > int(self.dvhs[self.dvhid]['max'])):
-                constraintrange = int(self.dvhs[self.dvhid]['max'])
-        elif (label == 'Dose Constraint (D__)'):
-            self.lblConstraintType.SetLabel('Volume:')
-            self.lblConstraintTypeUnits.SetLabel(u'%  ')
-            self.lblConstraintResultUnits.SetLabel(u'cGy')
-            constraintrange = 100
-        elif (label == 'Dose Constraint (D__cc)'):
-            self.lblConstraintType.SetLabel('Volume:')
-            self.lblConstraintTypeUnits.SetLabel(u'cm³')
-            self.lblConstraintResultUnits.SetLabel(u'cGy')
-            constraintrange = int(self.structures[self.dvhid]['volume'])
-
-        self.sliderConstraint.SetRange(0, constraintrange)
-        self.sliderConstraint.SetValue(constraintrange)
-        self.txtConstraint.SetRange(0, constraintrange)
-        self.txtConstraint.SetValue(constraintrange)
-
-        self.OnChangeConstraint(None)
-
-    def OnChangeConstraint(self, evt):
-        """Update the results when the constraint value changes."""
-
-        # Check if the function was called via an event or not
-        if not (evt == None):
-            slidervalue = evt.GetInt()
-        else:
-            slidervalue = self.sliderConstraint.GetValue()
-
-        self.txtConstraint.SetValue(slidervalue)
-        self.sliderConstraint.SetValue(slidervalue)
-        rxDose = float(self.lblRxDose.GetLabel())
-        id = self.dvhid
-
-        if self.radioVolume.GetValue():
-            absDose = rxDose * slidervalue / 100
-            volume = self.structures[self.dvhid]['volume']
-            cc = self.dvh.GetVolumeConstraintCC(absDose, volume)
-            constraint = self.dvh.GetVolumeConstraint(absDose)
-
-            self.lblConstraintUnits.SetLabel("%.3f" % cc)
-            self.lblConstraintPercent.SetLabel("%.3f" % constraint)
-            self.guiDVH.Replot({id:self.dvh.dvh}, {id:self.structures[id]},
-                ([absDose], [constraint]))
-
-        elif self.radioDose.GetValue():
-            dose = self.dvh.GetDoseConstraint(slidervalue)
-
-            self.lblConstraintUnits.SetLabel("%.3f" % dose)
-            self.lblConstraintPercent.SetLabel("%.3f" % (dose*100/rxDose))
-            self.guiDVH.Replot({id:self.dvh.dvh}, {id:self.structures[id]},
-                ([dose], [slidervalue]))
-
-        elif self.radioDosecc.GetValue():
-            volumepercent = slidervalue*100/self.structures[self.dvhid]['volume']
-
-            dose = self.dvh.GetDoseConstraint(volumepercent)
-
-            self.lblConstraintUnits.SetLabel("%.3f" % dose)
-            self.lblConstraintPercent.SetLabel("%.3f" % (dose*100/rxDose))
-            self.guiDVH.Replot({id:self.dvh.dvh}, {id:self.structures[id]},
-                ([dose], [volumepercent]))
 
     def OnAbout(self, evt):
         # First we create and fill the info object

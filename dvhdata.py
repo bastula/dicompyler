@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: ISO-8859-1 -*-
-# dvh.py
+# dvhdata.py
 """Class and functions related to dose volume histogram (DVH) data."""
 # Copyright (c) 2009 Aditya Panchal
 # This file is part of dicompyler, relased under a BSD license.
@@ -15,7 +15,7 @@ class DVH:
     """Processes the dose volume histogram from DICOM DVH data."""
 
     def __init__(self, dvh):
-
+        """Take a dvh numpy array and convert it to cGy."""
         self.dvh = dvh['data'] * 100 / dvh['data'][0]
 
         # Instruct numpy to print the full extent of the array
@@ -85,62 +85,3 @@ def CalculateVolume(structure):
     volume = sVolume/1000
 
     return volume
-
-if __name__=='__main__':
-
-    import os, sys
-    import dicomparser, dvh
-
-    usage = "usage: dvh -d [directory] \
-                \n       dicomparser -f [file ...]"
-
-    if (len(sys.argv) > 1):
-        if (len(sys.argv) == 2):
-            print usage
-        # if only one argument is provided, assume it is a directory
-        elif (sys.argv[1] == '-d'):
-            if os.path.isdir(sys.argv[2]):
-                for item in os.listdir(sys.argv[2]):
-                    dcmfile = os.path.join(sys.argv[2], item)
-                    if os.path.isfile(dcmfile):
-                        try:
-                            dp = dicomparser.DicomParser(dcmfile)
-                        except (KeyError, IOError):
-                            pass
-                            print item + " is not a valid DICOM file."
-                        else:
-                            if (dp.GetSOPClassUID() == 'rtss'):
-                                structures = dp.GetStructures()
-                            elif (dp.GetSOPClassUID() == 'rtdose'):
-                                dvhs = dp.GetDVHs()
-                                advh = dvh.DVH(dvhs[4])
-                                print advh.GetVolumeConstraint(30.03)
-                                print advh.GetVolumeConstraint(31.1)
-                                print advh.GetVolumeConstraint(30.05)
-                                for item in dvhs[4]['data']:
-                                    print item
-                            else:
-                                print item + " is a " \
-                                + dp.ds.MediaStorageSOPClassUID.name + " file."
-                    else:
-                        print item + " is a directory."
-            else:
-                print "Not a valid directory."
-        # if more than one argument is provided, assume it a file
-        elif (sys.argv[1] == '-f'):
-            if os.path.isfile(sys.argv[2]):
-                dp = dicomparser.DicomParser(os.path.abspath(sys.argv[2]))
-                if (dp.GetSOPClassUID() == 'rtss'):
-                    structures = dp.GetStructures()
-                elif (dp.GetSOPClassUID() == 'rtdose'):
-                    dvhs = dp.GetDVHs()
-                    advh = dvh.DVH(dvhs[4])
-                    print advh
-                    print advh.GetVolumeConstraint(1300)
-                else:
-                    print item + " is a " \
-                    + dp.ds.MediaStorageSOPClassUID.name + " file."
-            else:
-                print "Not a valid file."
-    else:
-         print usage
