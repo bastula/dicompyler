@@ -2,7 +2,7 @@
 # -*- coding: ISO-8859-1 -*-
 # dicomparser.py
 """Class that parses and returns formatted DICOM RT data."""
-# Copyright (c) 2009 Aditya Panchal
+# Copyright (c) 2009-2010 Aditya Panchal
 # Copyright (c) 2009 Roy Keyes
 # This file is part of dicompyler, relased under a BSD license.
 #    See the file license.txt included with this distribution, also
@@ -13,7 +13,7 @@ import numpy as np
 import dicom
 
 class DicomParser:
-    """Parses DICOM RT Structure Set or Dose files."""
+    """Parses DICOM / DICOM RT files."""
 
     def __init__(self, filename):
 
@@ -40,6 +40,8 @@ class DicomParser:
             return 'rtss'
         elif (self.ds.SOPClassUID == '1.2.840.10008.5.1.4.1.1.481.5'):
             return 'rtplan'
+        elif (self.ds.SOPClassUID == '1.2.840.10008.5.1.4.1.1.2'):
+            return 'ct'
         else:
             return None
 
@@ -47,6 +49,44 @@ class DicomParser:
         """Determine the SOP Class UID of the current file."""
 
         return self.ds.SOPInstanceUID
+
+    def GetStudyInfo(self):
+        """Return the study information of the current file."""
+
+        study = {}
+        if 'StudyDescription' in self.ds:
+            desc=self.ds.StudyDescription
+        else:
+            desc='No description'
+        study['description'] = desc
+        study['id'] = self.ds.StudyInstanceUID
+        
+        return study
+
+    def GetSeriesInfo(self):
+        """Return the series information of the current file."""
+
+        series = {}
+        if 'SeriesDescription' in self.ds:
+            desc=self.ds.SeriesDescription
+        else:
+            desc='No description'
+        series['description'] = desc
+        series['id'] = self.ds.SeriesInstanceUID
+        series['study'] = self.ds.StudyInstanceUID
+        
+        return series
+    
+    def GetReferencedSeries(self):
+        """Return the SOP Class UID of the referenced series."""
+
+        if "ReferencedFrameofReferences" in self.ds:
+            if "RTReferencedStudies" in self.ds.ReferencedFrameofReferences[0]:
+                if "RTReferencedSeries" in self.ds.ReferencedFrameofReferences[0].RTReferencedStudies[0]:
+                    if "SeriesInstanceUID" in self.ds.ReferencedFrameofReferences[0].RTReferencedStudies[0].RTReferencedSeries[0]:
+                        return self.ds.ReferencedFrameofReferences[0].RTReferencedStudies[0].RTReferencedSeries[0].SeriesInstanceUID
+        else:
+            return ''
 
     def GetReferencedStructureSet(self):
         """Return the SOP Class UID of the referenced structure set."""
@@ -100,7 +140,6 @@ class DicomParser:
 
         # Determine whether this is RT Structure Set file
         if not (self.GetSOPClassUID() == 'rtss'):
-            print "Given file is not a valid RT Structure Set."
             return structures
 
         # Locate the name and number of each ROI

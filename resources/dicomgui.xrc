@@ -51,7 +51,7 @@
           </object>
           <object class="sizeritem">
             <object class="wxTreeCtrl" name="tcPatients">
-              <size>425,300</size>
+              <size>455,300</size>
               <style>wxTR_HAS_BUTTONS|wxTR_LINES_AT_ROOT|wxTR_SINGLE</style>
             </object>
             <option>1</option>

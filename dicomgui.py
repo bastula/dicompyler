@@ -2,7 +2,7 @@
 # -*- coding: ISO-8859-1 -*-
 # dicomgui.py
 """Class that imports and returns DICOM data via a wxPython GUI dialog."""
-# Copyright (c) 2009 Aditya Panchal
+# Copyright (c) 2009-2010 Aditya Panchal
 # Copyright (c) 2009 Roy Keyes
 # This file is part of dicompyler, relased under a BSD license.
 #    See the file license.txt included with this distribution, also
@@ -17,7 +17,7 @@ from model import *
 import dicomparser, dvhdoses, guiutil, util
 
 def ImportDicom(parent):
-    """Prepare to show the dialog that will Import DICOM RT files."""
+    """Prepare to show the dialog that will Import DICOM and DICOM RT files."""
 
     # Load the XRC file for our gui resources
     res = XmlResource(util.GetResourcePath('dicomgui.xrc'))
@@ -196,32 +196,64 @@ class DicomImporterDialog(wx.Dialog):
                         if not patients.has_key(h):
                             patients[h] = {}
                             patients[h]['demographics'] = patient
+                            if not patients[h].has_key('studies'):
+                                patients[h]['studies'] = {}
+                                patients[h]['series'] = {}
                             wx.CallAfter(foundFunc, patient)
-                        if (dp.GetSOPClassUID() == 'rtss'):
+                        # Create each Study but don't create one for RT Dose
+                        # since some vendors use incorrect StudyInstanceUIDs
+                        if not (dp.GetSOPClassUID() == 'rtdose'):
+                            stinfo = dp.GetStudyInfo()
+                            if not patients[h]['studies'].has_key(stinfo['id']):
+                                patients[h]['studies'][stinfo['id']] = stinfo
+                        # Create each Series of images
+                        if (dp.GetSOPClassUID() == 'ct'):
+                            seinfo = dp.GetSeriesInfo()
+                            seinfo['numimages'] = 0
+                            seinfo['modality'] = dp.ds.SOPClassUID.name
+                            if not patients[h]['series'].has_key(seinfo['id']):
+                                patients[h]['series'][seinfo['id']] = seinfo
+                            if not patients[h].has_key('images'):
+                                patients[h]['images'] = {}
+                            image = {}
+                            image['id'] = dp.GetSOPInstanceUID()
+                            image['filename'] = files[n]
+                            image['slicelocation'] = dp.ds.SliceLocation
+                            image['imagenumber'] = dp.ds.InstanceNumber
+                            image['series'] = seinfo['id']
+                            patients[h]['series'][seinfo['id']]['numimages'] = \
+                                patients[h]['series'][seinfo['id']]['numimages'] + 1 
+                            patients[h]['images'][image['id']] = image
+                        # Create each RT Structure Set
+                        elif (dp.GetSOPClassUID() == 'rtss'):
                             if not patients[h].has_key('structures'):
-                                patients[h]['structures'] = []
+                                patients[h]['structures'] = {}
                             structure = dp.GetStructureInfo()
                             structure['id'] = dp.GetSOPInstanceUID()
                             structure['filename'] = files[n]
-                            patients[h]['structures'].append(structure)
+                            structure['series'] = dp.GetReferencedSeries()
+                            patients[h]['structures'][structure['id']] = structure
+                        # Create each RT Plan
                         elif (dp.GetSOPClassUID() == 'rtplan'):
                             if not patients[h].has_key('plans'):
-                                patients[h]['plans'] = []
+                                patients[h]['plans'] = {}
                             plan = dp.GetPlan()
                             plan['id'] = dp.GetSOPInstanceUID()
                             plan['filename'] = files[n]
                             plan['rtss'] = dp.GetReferencedStructureSet()
-                            patients[h]['plans'].append(plan)
+                            patients[h]['plans'][plan['id']] = plan
+                        # Create each RT Dose
                         elif (dp.GetSOPClassUID() == 'rtdose'):
                             if not patients[h].has_key('doses'):
-                                patients[h]['doses'] = []
+                                patients[h]['doses'] = {}
                             dose = {}
                             dose['id'] = dp.GetSOPInstanceUID()
                             dose['filename'] = files[n]
                             dose['hasdvh'] = dp.HasDVHs()
                             dose['rtss'] = dp.GetReferencedStructureSet()
                             dose['rtplan'] = dp.GetReferencedRTPlan()
-                            patients[h]['doses'].append(dose)
+                            patients[h]['doses'][dose['id']] = dose
+                        # Otherwise it is a currently unsupported file
                         else:
                             print files[n] + " is a " \
                             + dp.ds.SOPClassUID.name \
@@ -290,6 +322,14 @@ class DicomImporterDialog(wx.Dialog):
                 wx.BITMAP_TYPE_PNG))
         iList.Add(
             wx.Bitmap(
+                util.GetResourcePath('book.png'),
+                wx.BITMAP_TYPE_PNG))
+        iList.Add(
+            wx.Bitmap(
+                util.GetResourcePath('table_multiple.png'),
+                wx.BITMAP_TYPE_PNG))
+        iList.Add(
+            wx.Bitmap(
                 util.GetResourcePath('pencil.png'),
                 wx.BITMAP_TYPE_PNG))
         iList.Add(
@@ -299,6 +339,10 @@ class DicomImporterDialog(wx.Dialog):
         iList.Add(
             wx.Bitmap(
                 util.GetResourcePath('chart_curve.png'),
+                wx.BITMAP_TYPE_PNG))
+        iList.Add(
+            wx.Bitmap(
+                util.GetResourcePath('pencil_error.png'),
                 wx.BITMAP_TYPE_PNG))
         iList.Add(
             wx.Bitmap(
@@ -337,47 +381,120 @@ class DicomImporterDialog(wx.Dialog):
         # Now add the specific item to the tree
         for key, patient in self.patients.iteritems():
             patient.update(patients[key])
+            if patient.has_key('studies'):
+                for studyid, study in patient['studies'].iteritems():
+                    name = 'Study: ' + study['description']
+                    study['treeid'] = self.tcPatients.AppendItem(patient['treeid'], name, 2)
+            if patient.has_key('series'):
+                for seriesid, series in patient['series'].iteritems():
+                    if patient.has_key('studies'):
+                        for studyid, study in patient['studies'].iteritems():
+                            if (studyid == series['study']):
+                                modality = series['modality'].partition(' Image Storage')[0]
+                                name = 'Series: ' + series['description'] + \
+                                    ' (' + modality + ', '
+                                if (series['numimages'] == 1):
+                                    numimages = str(series['numimages']) + ' image)'
+                                else:
+                                    numimages = str(series['numimages']) + ' images)'
+                                name = name + numimages
+                                series['treeid'] = self.tcPatients.AppendItem(study['treeid'], name, 3)
             if patient.has_key('structures'):
-                for structure in patient['structures']:
-                    name = 'RT Structure Set: ' + structure['label']
-                    structure['treeid'] = self.tcPatients.AppendItem(patient['treeid'], name, 2)
+                for structureid, structure in patient['structures'].iteritems():
+                    if patient.has_key('series'):
+                        foundseries = False
+                        name = 'RT Structure Set: ' + structure['label']
+                        for seriesid, series in patient['series'].iteritems():
+                            foundseries = False
+                            if (seriesid == structure['series']):
+                                structure['treeid'] = self.tcPatients.AppendItem(series['treeid'], name, 4)
+                                foundseries = True
+                        # If no series were found, add the rtss to the study
+                        if not foundseries:
+                            structure['treeid'] = self.tcPatients.AppendItem(study['treeid'], name, 4)
             if patient.has_key('plans'):
-                for plan in patient['plans']:
-                    for structure in patient['structures']:
-                        if (structure['id'] == plan['rtss']):
-                            name = 'RT Plan: ' + plan['label'] + ' (' + plan['name'] + ')'
-                            plan['treeid'] = self.tcPatients.AppendItem(structure['treeid'], name, 3)
-                            self.tcPatients.SetPyData(plan['treeid'], [plan['rxdose']])
+                for planid, plan in patient['plans'].iteritems():
+                    foundstructure = False
+                    name = 'RT Plan: ' + plan['label'] + ' (' + plan['name'] + ')'
+                    if patient.has_key('structures'):
+                        for structureid, structure in patient['structures'].iteritems():
+                            foundstructure = False
+                            if (structureid == plan['rtss']):
+                                plan['treeid'] = self.tcPatients.AppendItem(structure['treeid'], name, 5)
+                                self.tcPatients.SetPyData(plan['treeid'], [plan['rxdose']])
+                                foundstructure = True
+                    # If no structures were found, add the plan to the study instead
+                    if not foundstructure:
+                        badstructure = self.tcPatients.AppendItem(
+                            study['treeid'], "RT Structure Set not found", 7)
+                        plan['treeid'] = self.tcPatients.AppendItem(badstructure, name, 5)
+                        self.tcPatients.SetItemTextColour(badstructure, wx.RED)
+                        self.tcPatients.SetPyData(plan['treeid'], [plan['rxdose']])
             if patient.has_key('doses'):
-                for dose in patient['doses']:
-                    for structure in patient['structures']:
-                        for plan in patient['plans']:
-                            if (plan['id'] == dose['rtplan']):
+                for doseid, dose in patient['doses'].iteritems():
+                    foundplan = False
+                    if patient.has_key('plans'):
+                        for planid, plan in patient['plans'].iteritems():
+                            foundplan = False
+                            if (planid == dose['rtplan']):
+                                foundplan = True
                                 if dose['hasdvh']:
                                     name = 'RT Dose with DVH'
-                                    dose['treeid'] = self.tcPatients.AppendItem(plan['treeid'], name, 4)
-                                    self.tcPatients.SetItemBold(dose['treeid'], True)
-                                    filearray = [structure['filename'], plan['filename'], dose['filename']]
-                                    self.tcPatients.SetPyData(dose['treeid'], filearray)
-                                    self.tcPatients.SelectItem(dose['treeid'])
+                                    dose['treeid'] = self.tcPatients.AppendItem(plan['treeid'], name, 6)
+                                    if patient.has_key('structures'):
+                                        for structureid, structure in patient['structures'].iteritems():
+                                            if (structureid == dose['rtss']):
+                                                filearray = [structure['filename'], plan['filename'], dose['filename']]
+                                                self.tcPatients.SetItemBold(dose['treeid'], True)
+                                                self.tcPatients.SetPyData(dose['treeid'], filearray)
+                                                self.tcPatients.SelectItem(dose['treeid'])
                                 else:
                                     name = 'RT Dose without DVH (Not usable)'
-                                    dose['treeid'] = self.tcPatients.AppendItem(plan['treeid'], name, 6)
+                                    dose['treeid'] = self.tcPatients.AppendItem(plan['treeid'], name, 9)
                                     self.tcPatients.SetItemTextColour(dose['treeid'], wx.RED)
+                    # If no plans were found, add the dose to the structure/study instead
+                    if not foundplan:
+                        if dose['hasdvh']:
+                            name = 'RT Dose with DVH'
+                        else:
+                            name = 'RT Dose without DVH (Not usable)'
+                        foundstructure = False
+                        if patient.has_key('structures'):
+                            for structureid, structure in patient['structures'].iteritems():
+                                foundstructure = False
+                                if (structureid == dose['rtss']):
+                                    foundstructure = True
+                                    badplan = self.tcPatients.AppendItem(
+                                        structure['treeid'], "RT Plan not found", 8)
+                                    dose['treeid'] = self.tcPatients.AppendItem(badplan, name, 5)
+                                    self.tcPatients.SetItemTextColour(badplan, wx.RED)
+                        if not foundstructure:
+                            badstructure = self.tcPatients.AppendItem(
+                                patient['treeid'], "RT Structure Set not found", 7)
+                            self.tcPatients.SetItemTextColour(badstructure, wx.RED)
+                            badplan = self.tcPatients.AppendItem(
+                                    badstructure, "RT Plan not found", 8)
+                            dose['treeid'] = self.tcPatients.AppendItem(badplan, name, 5)
+                            self.tcPatients.SetItemTextColour(badplan, wx.RED)
+                        if not dose['hasdvh']:
+                            self.tcPatients.SetItemTextColour(dose['treeid'], wx.RED)
+            # No RT Dose files were found
             else:
-                for structure in patient['structures']:
-                    if patient.has_key('plans'):
-                        for plan in patient['plans']:
+                if patient.has_key('structures'):
+                    for structureid, structure in patient['structures'].iteritems():
+                        if patient.has_key('plans'):
+                            for planid, plan in patient['plans'].iteritems():
+                                name = 'RT Dose not found'
+                                baddose = self.tcPatients.AppendItem(plan['treeid'], name, 9)
+                                self.tcPatients.SetItemTextColour(baddose, wx.RED)
+                        # No RT Plan nor RT Dose files were found
+                        else:
+                            name = 'RT Plan not found'
+                            badplan = self.tcPatients.AppendItem(structure['treeid'], name, 8)
+                            self.tcPatients.SetItemTextColour(badplan, wx.RED)
                             name = 'RT Dose not found'
-                            baddose = self.tcPatients.AppendItem(plan['treeid'], name, 6)
+                            baddose = self.tcPatients.AppendItem(badplan, name, 9)
                             self.tcPatients.SetItemTextColour(baddose, wx.RED)
-                    else:
-                        name = 'RT Plan not found'
-                        badplan = self.tcPatients.AppendItem(structure['treeid'], name, 5)
-                        self.tcPatients.SetItemTextColour(badplan, wx.RED)
-                        name = 'RT Dose not found'
-                        baddose = self.tcPatients.AppendItem(badplan, name, 6)
-                        self.tcPatients.SetItemTextColour(baddose, wx.RED)
 
             self.btnSelect.SetFocus()
             self.tcPatients.ExpandAll()
