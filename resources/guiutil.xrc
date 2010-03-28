@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<resource>
+  <object class="wxDialog" name="ProgressDialog" subclass="guiutil.ProgressDialog">
+    <object class="wxBoxSizer">
+      <orient>wxVERTICAL</orient>
+      <object class="sizeritem">
+        <object class="wxFlexGridSizer">
+          <object class="sizeritem">
+            <object class="wxBoxSizer">
+              <object class="sizeritem">
+                <object class="wxStaticText" name="lblProgressLabel">
+                  <label>Progress: </label>
+                </object>
+                <flag>wxALIGN_CENTRE</flag>
+              </object>
+              <object class="sizeritem">
+                <object class="wxStaticText" name="lblProgress">
+                  <label>n/a                               </label>
+                </object>
+                <option>1</option>
+                <flag>wxALIGN_CENTRE</flag>
+              </object>
+              <orient>wxHORIZONTAL</orient>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+          </object>
+          <object class="spacer">
+            <size>5,0</size>
+          </object>
+          <object class="sizeritem">
+            <object class="wxGauge" name="gaugeProgress">
+              <size>100,15</size>
+              <range>100</range>
+              <value>75</value>
+              <style>wxGA_HORIZONTAL|wxGA_SMOOTH</style>
+            </object>
+            <flag>wxLEFT|wxRIGHT|wxEXPAND|wxALIGN_CENTRE</flag>
+          </object>
+          <object class="sizeritem">
+            <object class="wxBoxSizer">
+              <object class="spacer">
+                <size>5,0</size>
+              </object>
+              <object class="sizeritem">
+                <object class="wxStaticText" name="lblProgressPercent">
+                  <label>100</label>
+                  <style>wxALIGN_RIGHT</style>
+                </object>
+                <flag>wxALIGN_CENTRE</flag>
+              </object>
+              <object class="sizeritem">
+                <object class="wxStaticText" name="lblProgressPercentSym">
+                  <label>%</label>
+                </object>
+                <flag>wxALIGN_CENTRE</flag>
+              </object>
+              <orient>wxHORIZONTAL</orient>
+            </object>
+          </object>
+          <cols>2</cols>
+          <rows>2</rows>
+          <vgap>10</vgap>
+          <hgap>6</hgap>
+          <growablerows>1</growablerows>
+        </object>
+        <option>1</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+        <border>10</border>
+      </object>
+    </object>
+    <title>Loading patient data...</title>
+    <centered>1</centered>
+    <style>wxCAPTION|wxSTAY_ON_TOP|wxDIALOG_MODAL</style>
+  </object>
+</resource>
