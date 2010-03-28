@@ -71,3 +71,47 @@ def get_icon():
         icon = wx.Icon(util.GetResourcePath('dicompyler_icon11_16.png'), wx.BITMAP_TYPE_PNG)
 
     return icon
+
+def get_progress_dialog(parent):
+    """Function to load the progress dialog."""
+
+    # Load the XRC file for our gui resources
+    res = XmlResource(util.GetResourcePath('guiutil.xrc'))
+
+    dialogProgress = res.LoadDialog(parent, 'ProgressDialog')
+    dialogProgress.Init(res)
+
+    return dialogProgress
+
+class ProgressDialog(wx.Dialog):
+    """Dialog to show progress for certain long-running events."""
+
+    def __init__(self):
+        pre = wx.PreDialog()
+        # the Create step is done by XRC.
+        self.PostCreate(pre)
+    
+    def Init(self, res, title=None):
+        """Method called after the dialog has been initialized."""
+
+        # Initialize controls
+        self.lblProgressLabel = XRCCTRL(self, 'lblProgressLabel')
+        self.lblProgress = XRCCTRL(self, 'lblProgress')
+        self.gaugeProgress = XRCCTRL(self, 'gaugeProgress')
+        self.lblProgressPercent = XRCCTRL(self, 'lblProgressPercent')
+
+    def OnUpdateProgress(self, num, length, message):
+        """Update the process interface elements."""
+
+        if not length:
+            percentDone = 0
+        else:
+            percentDone = int(100 * (num+1) / length)
+
+        self.gaugeProgress.SetValue(percentDone)
+        self.lblProgressPercent.SetLabel(str(percentDone))
+        self.lblProgress.SetLabel(message)
+
+        # End the dialog since we are done with the import process
+        if (message == 'Importing patient complete.'):
+            self.EndModal(wx.ID_OK)
