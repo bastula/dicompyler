@@ -8,14 +8,15 @@
 #    See the file license.txt included with this distribution, also
 #    available at http://code.google.com/p/dicompyler/
 
-import os
+import os, threading
 import wx
 from wx.xrc import *
 import wx.lib.dialogs, webbrowser
 from wx.lib.pubsub import Publisher as pub
 from model import *
 import guiutil, util
-import dicomgui, dvhdata
+import dicomgui, dvhdata, dvhdoses
+from dicomparser import DicomParser as dp
 from baseplugins import dvh
 
 class MainFrame(wx.Frame):
@@ -125,18 +126,66 @@ class MainFrame(wx.Frame):
         # Initialize the notebook tabs
         self.notebook.AddPage(self.pluginDVH, 'DVH')
 
+        # Set up pubsub
+        pub.subscribe(self.OnLoadPatientData, 'patient.updated.raw_data')
+
     def OnOpenPatient(self, evt):
         """Load and show the Dicom RT Importer dialog box."""
 
-        patient = dicomgui.ImportDicom(self)
-        if not (patient == None):
-            self.structures = patient['structures']
-            self.dvhs = patient['dvhs']
-            self.PopulateDemographics(patient)
-            self.PopulatePlan(patient['plan'])
-            self.PopulateStructures()
-            self.currConstraintId = None
-            pub.sendMessage('patient.updated', patient)
+        self.ptdata = dicomgui.ImportDicom(self)
+        if not (self.ptdata == None):
+            pub.sendMessage('patient.updated.raw_data', self.ptdata)
+
+    def OnLoadPatientData(self, msg):
+        """Update and load the patient data."""
+
+        ptdata = msg.data
+        dlgProgress = guiutil.get_progress_dialog(self)
+        self.t=threading.Thread(target=self.LoadPatientDataThread,
+            args=(self, ptdata, dlgProgress.OnUpdateProgress,
+            self.OnUpdatePatientData))
+        self.t.start()
+        dlgProgress.ShowModal()
+
+    def LoadPatientDataThread(self, parent, ptdata, progressFunc, updateFunc):
+        """Thread to load the patient data."""
+
+        # Call the progress function to update the gui
+        wx.CallAfter(progressFunc, 0, 0, 'Importing patient data...')
+        if ptdata.has_key('rtplan'):
+            wx.CallAfter(progressFunc, 0, 4, 'Importing RT Structure Set...')
+            patient = dp(ptdata['rtplan']).GetDemographics()
+            patient['structures'] = dp(ptdata['rtss']).GetStructures()
+        if ptdata.has_key('rtplan'):
+            patient['plan'] = dp(ptdata['rtplan']).GetPlan()
+            patient['plan']['rxdose'] = ptdata['rxdose']
+        if ptdata.has_key('rtdose'):
+            wx.CallAfter(progressFunc, 1, 4, 'Importing RT Dose...')
+            patient['dvhs'] = dp(ptdata['rtdose']).GetDVHs()
+        # if the min/max/mean dose was not present, calculate it and save it for each structure
+        wx.CallAfter(progressFunc, 2, 4, 'Processing DVH data...')
+        for key, dvh in patient['dvhs'].iteritems():
+            if (dvh['min'] == -1):
+                dvh['min'] = dvhdoses.get_dvh_min(dvh['data'], ptdata['rxdose'])
+            if (dvh['max'] == -1):
+                dvh['max'] = dvhdoses.get_dvh_max(dvh['data'], ptdata['rxdose'])
+            if (dvh['mean'] == -1):
+                dvh['mean'] = dvhdoses.get_dvh_mean(dvh['data'], ptdata['rxdose'])
+        wx.CallAfter(progressFunc, 98, 100, 'Importing patient complete.')
+        wx.CallAfter(updateFunc, patient)
+
+    def OnUpdatePatientData(self, patient):
+        """Update the patient data in the main program interface."""
+        
+        self.structures = patient['structures']
+        self.dvhs = patient['dvhs']
+        self.PopulateDemographics(patient)
+        self.PopulatePlan(patient['plan'])
+        self.PopulateStructures()
+        self.currConstraintId = None
+        
+        # publish the parsed data
+        pub.sendMessage('patient.updated.parsed_data', patient)
 
     def PopulateStructures(self):
         """Populate the structure list."""

@@ -186,7 +186,7 @@ class DicomImporterDialog(wx.Dialog):
                 if (os.path.isfile(dcmfile)):
                     try:
                         print 'Reading:', files[n]
-                        dp = dicomparser.DicomParser(dcmfile)
+                        dp = dicomparser.DicomParser(filename=dcmfile)
                     except (AttributeError, EOFError, IOError, KeyError):
                         pass
                         print files[n] + " is not a valid DICOM file."
@@ -536,25 +536,17 @@ class DicomImporterDialog(wx.Dialog):
                 wx.CallAfter(progressFunc, 98, 100, 'Importing patient cancelled.')
                 return
             dcmfile = str(os.path.join(self.path, filearray[n]))
-            dp = dicomparser.DicomParser(dcmfile)
+            dp = dicomparser.DicomParser(filename=dcmfile)
             if (n == 0):
                 self.patient = dp.GetDemographics()
             if (dp.GetSOPClassUID() == 'rtss'):
-                self.patient['structures'] = dp.GetStructures()
+                self.patient['rtss'] = dp.ds
             elif (dp.GetSOPClassUID() == 'rtplan'):
-                self.patient['plan'] = dp.GetPlan()
-                self.patient['plan']['rxdose'] = RxDose
+                self.patient['rtplan'] = dp.ds
+                self.patient['rxdose'] = RxDose
             elif (dp.GetSOPClassUID() == 'rtdose'):
-                self.patient['dvhs'] = dp.GetDVHs()
+                self.patient['rtdose'] = dp.ds
             wx.CallAfter(progressFunc, n, len(filearray), 'Importing patient. Please wait...')
-        # if the min/max/mean dose was not present, calculate it and save it for each structure
-        for key, dvh in self.patient['dvhs'].iteritems():
-            if (dvh['min'] == -1):
-                dvh['min'] = dvhdoses.get_dvh_min(dvh['data'], RxDose)
-            if (dvh['max'] == -1):
-                dvh['max'] = dvhdoses.get_dvh_max(dvh['data'], RxDose)
-            if (dvh['mean'] == -1):
-                dvh['mean'] = dvhdoses.get_dvh_mean(dvh['data'], RxDose)
         wx.CallAfter(progressFunc, 98, 100, 'Importing patient complete.')
 
     def GetPatient(self):

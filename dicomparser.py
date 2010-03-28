@@ -15,19 +15,24 @@ import dicom
 class DicomParser:
     """Parses DICOM / DICOM RT files."""
 
-    def __init__(self, filename):
+    def __init__(self, dataset=None, filename=None):
 
-        try:
-            self.ds = dicom.read_file(filename, defer_size=100)
-        except (EOFError, IOError):
-            # Raise the error for the calling method to handle
-            raise
+        if dataset:
+            self.ds = dataset
+        elif filename:
+            try:
+                self.ds = dicom.read_file(filename, defer_size=100)
+            except (EOFError, IOError):
+                # Raise the error for the calling method to handle
+                raise
+            else:
+                # Sometimes DICOM files may not have headers, but they should always
+                # have a SOPClassUID to declare what type of file it is. If the
+                # file doesn't have a SOPClassUID, then it probably isn't DICOM.
+                if not "SOPClassUID" in self.ds:
+                    raise AttributeError
         else:
-            # Sometimes DICOM files may not have headers, but they should always
-            # have a SOPClassUID to declare what type of file it is. If the
-            # file doesn't have a SOPClassUID, then it probably isn't DICOM.
-            if not "SOPClassUID" in self.ds:
-                raise AttributeError
+            raise AttributeError
 
 ######################## SOP Class and Instance Methods ########################
 

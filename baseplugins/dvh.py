@@ -74,7 +74,7 @@ class pluginDVH(wx.Panel):
         self.EnableConstraints(False)
 
         # Set up pubsub
-        pub.subscribe(self.OnUpdatePatient, 'patient.updated')
+        pub.subscribe(self.OnUpdatePatient, 'patient.updated.parsed_data')
         pub.subscribe(self.OnStructureSelect, 'structures.selected')
 
     def OnUpdatePatient(self, msg):
