@@ -17,7 +17,7 @@ from model import *
 import guiutil, util
 import dicomgui, dvhdata, dvhdoses
 from dicomparser import DicomParser as dp
-from baseplugins import dvh
+import plugin
 
 class MainFrame(wx.Frame):
     def __init__(self, parent, id, title, res):
@@ -85,6 +85,7 @@ class MainFrame(wx.Frame):
         # Bind menu events to the proper methods
         wx.EVT_MENU(self, XRCID('menuOpen'), self.OnOpenPatient)
         wx.EVT_MENU(self, XRCID('menuExit'), self.OnClose)
+        wx.EVT_MENU(self, XRCID('menuPluginManager'), self.OnPluginManager)
         wx.EVT_MENU(self, XRCID('menuAbout'), self.OnAbout)
         wx.EVT_MENU(self, XRCID('menuHomepage'), self.OnHomepage)
         wx.EVT_MENU(self, XRCID('menuLicense'), self.OnLicense)
@@ -120,11 +121,20 @@ class MainFrame(wx.Frame):
         if not os.path.isfile(dbpath):
             create_all()
 
-        # Load the base plugins
-        self.pluginDVH = dvh.pluginLoader(self.notebook)
+        # Load plugins
+        self.plugins = plugin.import_plugins()
 
-        # Initialize the notebook tabs
-        self.notebook.AddPage(self.pluginDVH, 'DVH')
+        # Set up the plugins for each plugin entry point of dicompyler
+        for p in self.plugins:
+            props = p.pluginProperties()
+            # Only load plugin versions that are qualified
+            if (props['plugin_version'] == 1):
+                # Load the main panel plugins
+                if (props['plugin_type'] == 'main'):
+                    # Initialize the notebook tabs
+                    self.notebook.AddPage(
+                        p.pluginLoader(self.notebook), 
+                        props['name'])
 
         # Set up pubsub
         pub.subscribe(self.OnLoadPatientData, 'patient.updated.raw_data')
@@ -247,6 +257,11 @@ class MainFrame(wx.Frame):
             self.lblStructureMinDose.SetLabel('-')
             self.lblStructureMaxDose.SetLabel('-')
             self.lblStructureMeanDose.SetLabel('-')
+
+    def OnPluginManager(self, evt):
+        """Load and show the Dicom RT Importer dialog box."""
+
+        self.pm = plugin.PluginManager(self, self.plugins)
 
     def OnAbout(self, evt):
         # First we create and fill the info object

@@ -18,6 +18,21 @@ import wxmpl
 import numpy as np
 import dvhdata, guidvh
 
+def pluginProperties():
+    """Properties of the plugin."""
+
+    props = {}
+    props['name'] = 'DVH'
+    props['description'] = "Display and evaluate dose volume histogram (DVH) data"
+    props['author'] = 'Aditya Panchal'
+    props['version'] = 0.1
+    props['plugin_type'] = 'main'
+    props['plugin_version'] = 1
+    props['min_dicom'] = ['rtss', 'rtdose', 'rtplan']
+    props['recommended_dicom'] = ['rtss', 'rtdose', 'rtplan']
+
+    return props
+
 def pluginLoader(parent):
     """Function to load the plugin."""
 
