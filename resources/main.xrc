@@ -261,6 +261,12 @@
         <accel>Alt+F4</accel>
       </object>
     </object>
+    <object class="wxMenu" name="menuTools">
+      <object class="wxMenuItem" name="menuPluginManager">
+        <label>&amp;Plugin Manager...</label>
+      </object>
+      <label>&amp;Tools</label>
+    </object>
     <object class="wxMenu">
       <label>&amp;Help</label>
       <object class="wxMenuItem" name="menuHomepage">
