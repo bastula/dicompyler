@@ -22,13 +22,18 @@ def import_plugins():
     for file in os.listdir(bppath):
         module = file.split('.')[0]
         if module not in modules:
-            if not (module == "__init__"):
+            if not ((module == "__init__") or (module == "")):
+                # only try to import the module once
                 modules.append(module)
-                f, filename, description = imp.find_module(module, [bppath])                
                 try:
+                    f, filename, description = imp.find_module(module, [bppath])
+                except (ImportError):
+                    # Not able to find module so pass
+                    pass
+                else:
+                    # Import the module if no exception occurred
                     plugins.append(imp.load_module(module, f, filename, description))
                     print 'Plugin:', module, 'loaded'
-                finally:
                     f.close()
     return plugins
 
