@@ -35,7 +35,7 @@ def pluginLoader(parent):
     """Function to load the plugin."""
 
     # Load the XRC file for our gui resources
-    res = XmlResource(util.GetBasePluginsPath('treeview4.xrc'))
+    res = XmlResource(util.GetBasePluginsPath('treeview.xrc'))
 
     panelTreeView = res.LoadPanel(parent, 'pluginTreeView')
     panelTreeView.Init(res)
