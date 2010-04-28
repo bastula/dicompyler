@@ -538,7 +538,7 @@ class DicomImporterDialog(wx.Dialog):
             dcmfile = str(os.path.join(self.path, filearray[n]))
             dp = dicomparser.DicomParser(filename=dcmfile)
             if (n == 0):
-                self.patient = dp.GetDemographics()
+                self.patient = {}
             if (dp.GetSOPClassUID() == 'rtss'):
                 self.patient['rtss'] = dp.ds
             elif (dp.GetSOPClassUID() == 'rtplan'):

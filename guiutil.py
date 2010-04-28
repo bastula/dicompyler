@@ -72,14 +72,14 @@ def get_icon():
 
     return icon
 
-def get_progress_dialog(parent):
+def get_progress_dialog(parent, title=""):
     """Function to load the progress dialog."""
 
     # Load the XRC file for our gui resources
     res = XmlResource(util.GetResourcePath('guiutil.xrc'))
 
     dialogProgress = res.LoadDialog(parent, 'ProgressDialog')
-    dialogProgress.Init(res)
+    dialogProgress.Init(res, title)
 
     return dialogProgress
 
@@ -113,5 +113,5 @@ class ProgressDialog(wx.Dialog):
         self.lblProgress.SetLabel(message)
 
         # End the dialog since we are done with the import process
-        if (message == 'Importing patient complete.'):
+        if (message == 'Done'):
             self.EndModal(wx.ID_OK)
