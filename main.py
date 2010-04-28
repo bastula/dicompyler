@@ -181,7 +181,7 @@ class MainFrame(wx.Frame):
                 dvh['max'] = dvhdoses.get_dvh_max(dvh['data'], ptdata['rxdose'])
             if (dvh['mean'] == -1):
                 dvh['mean'] = dvhdoses.get_dvh_mean(dvh['data'], ptdata['rxdose'])
-        wx.CallAfter(progressFunc, 98, 100, 'Importing patient complete.')
+        wx.CallAfter(progressFunc, 98, 100, 'Done')
         wx.CallAfter(updateFunc, patient)
 
     def OnUpdatePatientData(self, patient):
