@@ -2,20 +2,20 @@
 <resource>
   <object class="wxPanel" name="pluginTreeView" subclass="baseplugins.treeview.pluginTreeView">
     <object class="wxBoxSizer">
-      <object class="spacer">
-        <size>5,5</size>
-      </object>
       <object class="sizeritem">
         <object class="wxBoxSizer">
+          <object class="spacer">
+            <size>5,5</size>
+          </object>
           <object class="sizeritem">
             <object class="wxBoxSizer">
               <orient>wxHORIZONTAL</orient>
               <object class="sizeritem">
                 <object class="wxChoice" name="choiceDICOM">
-                  <size>200,20</size>
                   <content>
-                    <item></item>
+                    <item>-                                          </item>
                   </content>
+                  <selection>0</selection>
                   <enabled>0</enabled>
                 </object>
                 <flag>wxALIGN_CENTRE</flag>
@@ -27,6 +27,9 @@
         <option>0</option>
         <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
         <border>1</border>
+      </object>
+      <object class="spacer">
+        <size>5,5</size>
       </object>
       <object class="sizeritem">
         <object class="wxStaticBoxSizer">
