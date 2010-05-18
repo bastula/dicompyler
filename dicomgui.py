@@ -445,6 +445,11 @@ class DicomImporterDialog(wx.Dialog):
                                         for structureid, structure in patient['structures'].iteritems():
                                             if (structureid == dose['rtss']):
                                                 filearray = [structure['filename'], plan['filename'], dose['filename']]
+                                                # Add the respective images to the filearray if they exist
+                                                if patient.has_key('images'):
+                                                    for imageid, image in patient['images'].iteritems():
+                                                        if (image['series'] == structure['series']):
+                                                            filearray.append(image['filename'])
                                                 self.tcPatients.SetItemBold(dose['treeid'], True)
                                                 self.tcPatients.SetPyData(dose['treeid'], filearray)
                                                 self.tcPatients.SelectItem(dose['treeid'])
@@ -539,7 +544,11 @@ class DicomImporterDialog(wx.Dialog):
             dp = dicomparser.DicomParser(filename=dcmfile)
             if (n == 0):
                 self.patient = {}
-            if (dp.GetSOPClassUID() == 'rtss'):
+            if (dp.GetSOPClassUID() == 'ct'):
+                if not self.patient.has_key('images'):
+                    self.patient['images'] = []
+                self.patient['images'].append(dp.ds)
+            elif (dp.GetSOPClassUID() == 'rtss'):
                 self.patient['rtss'] = dp.ds
             elif (dp.GetSOPClassUID() == 'rtplan'):
                 self.patient['rtplan'] = dp.ds

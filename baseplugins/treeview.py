@@ -81,8 +81,21 @@ class pluginTreeView(wx.Panel):
         # Iterate through the message and enumerate the DICOM datasets
         for k, v in msg.data.iteritems():
             if isinstance(v, dicom.dataset.FileDataset):
-                i = self.choiceDICOM.Append(v.SOPClassUID.name)
+                i = self.choiceDICOM.Append(v.SOPClassUID.name.split(' Storage')[0])
                 self.choiceDICOM.SetClientData(i, v)
+            if (k == 'images'):
+                images = []
+                # Sort the images based on Instance Number
+                for num in range(1, len(v)+1):
+                    for imagenum, image in enumerate(v):
+                        if (num == image.InstanceNumber):
+                            images.append(image)
+                # Add the images to the choicebox
+                for image in images:
+                    i = self.choiceDICOM.Append(
+                        image.SOPClassUID.name.split(' Storage')[0] + \
+                        ' Slice ' + str(image.InstanceNumber))
+                    self.choiceDICOM.SetClientData(i, image)
 
     def OnLoadTree(self, event):
         """Update and load the DICOM tree."""
@@ -111,6 +124,7 @@ class pluginTreeView(wx.Panel):
         self.t.start()
         # Show the progress dialog
         dlgProgress.ShowModal()
+        self.tlcTreeView.SetFocus()
         self.tlcTreeView.Expand(self.root)
 
     def RecurseTreeThread(self, ds, parent, addItemFunc, progressFunc, length):
