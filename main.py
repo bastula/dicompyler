@@ -172,6 +172,10 @@ class MainFrame(wx.Frame):
         if ptdata.has_key('rtdose'):
             wx.CallAfter(progressFunc, 1, 4, 'Importing RT Dose...')
             patient['dvhs'] = dp(ptdata['rtdose']).GetDVHs()
+        if ptdata.has_key('images'):
+            patient['images'] = []
+            for image in ptdata['images']:
+                patient['images'].append(dp(image))
         # if the min/max/mean dose was not present, calculate it and save it for each structure
         wx.CallAfter(progressFunc, 2, 4, 'Processing DVH data...')
         for key, dvh in patient['dvhs'].iteritems():

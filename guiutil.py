@@ -72,6 +72,20 @@ def get_icon():
 
     return icon
 
+def convert_pil_to_wx(pil, alpha=True):
+    """ Convert a PIL Image into a wx.Image.
+        Code taken from Dave Witten's imViewer-Simple.py in pydicom contrib."""
+    if alpha:
+        image = apply(wx.EmptyImage, pil.size)
+        image.SetData(pil.convert("RGB").tostring())
+        image.SetAlphaData(pil.convert("RGBA").tostring()[3::4])
+    else:
+        image = wx.EmptyImage(pil.size[0], pil.size[1])
+        new_image = pil.convert('RGB')
+        data = new_image.tostring()
+        image.SetData(data)
+    return image
+
 def get_progress_dialog(parent, title=""):
     """Function to load the progress dialog."""
 
