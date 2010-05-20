@@ -83,15 +83,9 @@ class pluginTreeView(wx.Panel):
             if isinstance(v, dicom.dataset.FileDataset):
                 i = self.choiceDICOM.Append(v.SOPClassUID.name.split(' Storage')[0])
                 self.choiceDICOM.SetClientData(i, v)
+            # Add the images to the choicebox
             if (k == 'images'):
-                images = []
-                # Sort the images based on Instance Number
-                for num in range(1, len(v)+1):
-                    for imagenum, image in enumerate(v):
-                        if (num == image.InstanceNumber):
-                            images.append(image)
-                # Add the images to the choicebox
-                for image in images:
+                for image in v:
                     i = self.choiceDICOM.Append(
                         image.SOPClassUID.name.split(' Storage')[0] + \
                         ' Slice ' + str(image.InstanceNumber))

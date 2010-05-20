@@ -11,6 +11,7 @@
 from decimal import Decimal
 import numpy as np
 import dicom
+from PIL import Image
 
 class DicomParser:
     """Parses DICOM / DICOM RT files."""
@@ -124,6 +125,39 @@ class DicomParser:
             patient['dob'] = 'None found'
 
         return patient
+
+################################ Image Methods #################################
+
+    def GetImageData(self, window = None, level = None):
+        """Return the image data from a DICOM file."""
+
+        data = {}
+
+        data['position'] = self.ds.ImagePositionPatient
+        data['orientation'] = self.ds.ImageOrientationPatient
+        data['pixelspacing'] = self.ds.PixelSpacing
+        data['rows'] = self.ds.Rows
+        data['columns'] = self.ds.Columns
+
+        return data
+
+    def GetImage(self, window = None, level = None):
+        """Return the image from a DICOM image storage file."""
+
+        if ((window == None) and (level == None)):
+            window = self.ds.WindowWidth
+            level = self.ds.WindowCenter
+        image = self.GetLUTValue(self.ds.pixel_array, window, level)
+
+        return Image.fromarray(image).convert('L')
+
+    def GetLUTValue(self, data, window, level):
+        """Apply the RGB Look-Up Table for the given data and window/level value."""
+
+        return np.piecewise(data,
+            [data <= (level - 0.5 - (window-1)/2),
+                data > (level - 0.5 + (window-1)/2)],
+                [0, 255, lambda data: ((data - (level - 0.5))/(window-1) + 0.5)*(255-0)])
 
 ########################### RT Structure Set Methods ###########################
 
