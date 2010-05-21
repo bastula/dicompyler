@@ -63,12 +63,14 @@ class plugin2DView(wx.Panel):
     def OnUpdatePatient(self, msg):
         """Update and load the patient data."""
 
-        self.images = msg.data['images']
+        if msg.data.has_key('images'):
+            self.images = msg.data['images']
         self.SetBackgroundColour(wx.Colour(0, 0, 0))
         # Set the first image to the middle of the series
         self.imagenum = len(self.images)/2
         # Set the focus to this panel so we can capture key events
         self.SetFocus()
+        self.Refresh()
 
     def OnPaint(self, evt):
         """Update the panel when it needs to be refreshed."""
