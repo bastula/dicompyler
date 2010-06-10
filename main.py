@@ -49,12 +49,23 @@ class MainFrame(wx.Frame):
         self.lblPatientID = XRCCTRL(self, 'lblPatientID')
         self.lblPatientGender = XRCCTRL(self, 'lblPatientGender')
         self.lblPatientDOB = XRCCTRL(self, 'lblPatientDOB')
+        self.choiceStructure = XRCCTRL(self, 'choiceStructure')
         self.lblStructureVolume = XRCCTRL(self, 'lblStructureVolume')
         self.lblStructureMinDose = XRCCTRL(self, 'lblStructureMinDose')
         self.lblStructureMaxDose = XRCCTRL(self, 'lblStructureMaxDose')
         self.lblStructureMeanDose = XRCCTRL(self, 'lblStructureMeanDose')
-        self.lbStructures = XRCCTRL(self, 'lbStructures')
-        self.lbStructures.SetFocus()
+        self.cclbStructures = guiutil.ColorCheckListBox(self)
+        res.AttachUnknownControl('cclbStructures', self.cclbStructures, self)
+
+        # Modify the control and font size on Mac
+        controls = [self.choiceStructure]
+
+        if guiutil.IsMac():
+            font = wx.SystemSettings.GetFont(wx.SYS_DEFAULT_GUI_FONT)
+            font.SetPointSize(10)
+            for control in controls:
+                control.SetWindowVariant(wx.WINDOW_VARIANT_SMALL)
+                control.SetFont(font)
 
         # Setup the layout for the frame
         mainGrid = wx.BoxSizer(wx.VERTICAL)
@@ -98,7 +109,7 @@ class MainFrame(wx.Frame):
         wx.EVT_TOOL(self, XRCID('toolOpen'), self.OnOpenPatient)
 
         # Bind ui events to the proper methods
-        wx.EVT_LISTBOX(self, XRCID('lbStructures'), self.OnStructureSelect)
+        wx.EVT_CHOICE(self, XRCID('choiceStructure'), self.OnStructureSelect)
 
         # Initialize variables
         self.structures = {}
@@ -138,6 +149,8 @@ class MainFrame(wx.Frame):
 
         # Set up pubsub
         pub.subscribe(self.OnLoadPatientData, 'patient.updated.raw_data')
+        pub.subscribe(self.OnStructureCheck, 'colorcheckbox.checked')
+        pub.subscribe(self.OnStructureUncheck, 'colorcheckbox.unchecked')
 
     def OnOpenPatient(self, evt):
         """Load and show the Dicom RT Importer dialog box."""
@@ -204,21 +217,18 @@ class MainFrame(wx.Frame):
     def PopulateStructures(self):
         """Populate the structure list."""
 
-        self.lbStructures.Clear()
+        self.cclbStructures.Clear()
 
-        structureList = []
-        structureIDList = []
+        self.structureList = {}
         for id, structure in self.structures.iteritems():
             # Only append structures, don't include applicators
             if not(structure['name'].startswith('Applicator')):
-                structureList.append(structure['name'])
-                structureIDList.append(id)
-
-        guiutil.SetItemsList(self.lbStructures, structureList, structureIDList)
-
-        # Select the first item in the list (if it exists)
-        if len(structureList):
-            self.lbStructures.SetSelection(wx.NOT_FOUND)
+                self.cclbStructures.Append(structure['name'], structure, structure['color'],
+                    refresh=False)
+        # Refresh the structure list manually since we didn't want it to refresh
+        # after adding each structure
+        self.cclbStructures.Layout()
+        self.choiceStructure.Clear()
 
     def PopulateDemographics(self, demographics):
         """Populate the patient demographics."""
@@ -237,20 +247,80 @@ class MainFrame(wx.Frame):
             self.lblPlanName.SetLabel(plan['label'])
         self.lblRxDose.SetLabel(str(plan['rxdose']))
 
-    def OnStructureSelect(self, evt):
-        """Load the properties of the currently selected structure."""
+    def OnStructureCheck(self, msg):
+        """Load the properties of the currently checked structures."""
 
-        id = evt.GetClientData()
-        self.dvhid = id
+        structure = msg.data
 
-        # make sure that the volume has been calculated for each structure
+        # Get the structure number
+        id = structure['data']['id']
+        structure['data']['color'] = structure['color'].Get()
+
+        # Make sure that the volume has been calculated for each structure
         # before setting it
         if not self.structures[id].has_key('volume'):
             self.structures[id]['volume'] = dvhdata.CalculateVolume(self.structures[id])
-        self.lblStructureVolume.SetLabel(str(self.structures[id]['volume'])[0:7])
-        pub.sendMessage('structures.selected',
-            {'id':id, 'volume':self.structures[id]['volume']})
+            structure['data']['volume'] = self.structures[id]['volume']
+        self.structureList[id] = structure['data']
 
+        # Populate the structure choice box with the checked structures
+        self.choiceStructure.Enable()
+        i = self.choiceStructure.Append(structure['data']['name'])
+        self.choiceStructure.SetClientData(i, id)
+        # Select the first structure
+        self.OnStructureSelect()
+
+        pub.sendMessage('structures.checked', self.structureList)
+
+    def OnStructureUncheck(self, msg):
+        """Remove the unchecked structures."""
+
+        structure = msg.data
+
+        # Get the structure number
+        id = structure['data']['id']
+
+        # Remove the structure fromt the structure list
+        if self.structureList.has_key(id):
+            del self.structureList[id]
+
+        # Remove the structure from the structure choice box
+        for n in range(self.choiceStructure.GetCount()):
+            if (id == self.choiceStructure.GetClientData(n)):
+                # Save if the currently selected item's position
+                currSelection = self.choiceStructure.GetSelection()
+                self.choiceStructure.Delete(n)
+                break
+
+        # If the currently selected item will be deleted,
+        # select the last item instead
+        if (n == currSelection):
+            if (self.choiceStructure.GetCount() >= 1):
+                self.OnStructureSelect()
+        # Disable the control if it is the last item
+        if (self.choiceStructure.GetCount() == 0):
+            self.choiceStructure.Enable(False)
+            self.OnStructureUnselect()
+
+        pub.sendMessage('structures.checked', self.structureList)
+
+    def OnStructureSelect(self, evt=None):
+        """Load the properties of the currently selected structure."""
+
+        if (evt == None):
+            self.choiceStructure.SetSelection(0)
+            choiceItem = 0
+        else:
+            choiceItem = evt.GetInt()
+        # Load the structure id chosen from the choice control
+        id = self.choiceStructure.GetClientData(choiceItem)
+
+        if not self.structures[id].has_key('volume'):
+            self.structures[id]['volume'] = dvhdata.CalculateVolume(self.structures[id])
+
+        pub.sendMessage('structure.selected', {'id':id})
+
+        self.lblStructureVolume.SetLabel(str(self.structures[id]['volume'])[0:7])
         # make sure that the dvh has been calculated for each structure
         # before setting it
         if self.dvhs.has_key(id):
@@ -258,9 +328,17 @@ class MainFrame(wx.Frame):
             self.lblStructureMaxDose.SetLabel("%.3f" % self.dvhs[id]['max'])
             self.lblStructureMeanDose.SetLabel("%.3f" % self.dvhs[id]['mean'])
         else:
-            self.lblStructureMinDose.SetLabel('-')
-            self.lblStructureMaxDose.SetLabel('-')
-            self.lblStructureMeanDose.SetLabel('-')
+            self.OnStructureUnselect()
+
+    def OnStructureUnselect(self):
+        """Clear the properties of the selected structure."""
+
+        pub.sendMessage('structures.selected', {'id':None})
+
+        self.lblStructureVolume.SetLabel('-')
+        self.lblStructureMinDose.SetLabel('-')
+        self.lblStructureMaxDose.SetLabel('-')
+        self.lblStructureMeanDose.SetLabel('-')
 
     def OnPluginManager(self, evt):
         """Load and show the Dicom RT Importer dialog box."""

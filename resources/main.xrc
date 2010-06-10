@@ -61,7 +61,7 @@
           <object class="sizeritem">
             <object class="wxStaticBoxSizer">
               <object class="sizeritem">
-                <object class="wxListBox" name="lbStructures"/>
+                <object class="unknown" name="cclbStructures"/>
                 <option>1</option>
                 <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
               </object>
@@ -73,6 +73,20 @@
           </object>
           <object class="sizeritem">
             <object class="wxStaticBoxSizer">
+              <object class="sizeritem">
+                <object class="wxChoice" name="choiceStructure">
+                  <content>
+                    <item>-</item>
+                  </content>
+                  <selection>1</selection>
+                  <enabled>0</enabled>
+                </object>
+                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                <ratio>0</ratio>
+              </object>
+              <object class="spacer">
+                <size>0, 5</size>
+              </object>
               <object class="sizeritem">
                 <object class="wxFlexGridSizer">
                   <object class="sizeritem">
@@ -150,7 +164,7 @@
                 <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
               </object>
               <label>Structure Information</label>
-              <orient>wxHORIZONTAL</orient>
+              <orient>wxVERTICAL</orient>
             </object>
             <flag>wxLEFT|wxRIGHT|wxEXPAND|wxALIGN_CENTRE</flag>
           </object>
