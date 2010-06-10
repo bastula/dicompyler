@@ -13,7 +13,7 @@
 import wx
 from wx.xrc import XmlResource, XRCCTRL, XRCID
 from wx.lib.pubsub import Publisher as pub
-import util
+import guiutil, util
 import wxmpl
 import numpy as np
 import dvhdata, guidvh
@@ -25,7 +25,7 @@ def pluginProperties():
     props['name'] = 'DVH'
     props['description'] = "Display and evaluate dose volume histogram (DVH) data"
     props['author'] = 'Aditya Panchal'
-    props['version'] = 0.1
+    props['version'] = 0.2
     props['plugin_type'] = 'main'
     props['plugin_version'] = 1
     props['min_dicom'] = ['rtss', 'rtdose', 'rtplan']
@@ -81,16 +81,20 @@ class pluginDVH(wx.Panel):
         wx.EVT_COMMAND_SCROLL_CHANGED(self, XRCID('sliderConstraint'), self.OnChangeConstraint)
 
         # Initialize variables
-        self.structures = {}
-        self.dvhs = {}
-        self.plan = {}
-        self.structureid = 1
+        self.structures = {} # structures from initial DICOM data
+        self.checkedstructures = {} # structures that need to be shown
+        self.dvhs = {} # raw dvhs from initial DICOM data
+        self.dvhdata = {} # dict of dvh constraint functions
+        self.dvharray = {} # dict of dvh data processed from dvhdata
+        self.plan = {} # used for rx dose
+        self.structureid = 1 # used to indicate current constraint structure
 
         self.EnableConstraints(False)
 
         # Set up pubsub
         pub.subscribe(self.OnUpdatePatient, 'patient.updated.parsed_data')
-        pub.subscribe(self.OnStructureSelect, 'structures.selected')
+        pub.subscribe(self.OnStructureCheck, 'structures.checked')
+        pub.subscribe(self.OnStructureSelect, 'structure.selected')
 
     def OnUpdatePatient(self, msg):
         """Update and load the patient data."""
@@ -101,30 +105,40 @@ class pluginDVH(wx.Panel):
         # show an empty plot when (re)loading a patient
         self.guiDVH.Replot()
 
-    def OnStructureSelect(self, msg):
-        """When the structure changes, update the interface and plot."""
+    def OnStructureCheck(self, msg):
+        """When a structure changes, update the interface and plot."""
 
-        self.structureid = msg.data['id']
-        # id is shorthand for structure id so we don't have long lines of code
-        id = self.structureid
-
-        # make sure that the volume has been calculated for each structure
+        # Make sure that the volume has been calculated for each structure
         # before setting it
-        if not self.structures[id].has_key('volume'):
-            self.structures[id]['volume'] = msg.data['volume']
+        self.checkedstructures = msg.data
+        for id, structure in self.checkedstructures.iteritems():
+            if not self.structures[id].has_key('volume'):
+                self.structures[id]['volume'] = structure['volume']
 
-        # make sure that the dvh has been calculated for each structure
-        # before setting it
-        if self.dvhs.has_key(id):
-            self.EnableConstraints(True)
-            # Create an instance of the dvhdata class to can access its functions
-            self.dvh = dvhdata.DVH(self.dvhs[id])
-            # 'Toggle' the radio box to refresh the dose data
-            self.OnToggleConstraints(None)
-        else:
+            # make sure that the dvh has been calculated for each structure
+            # before setting it
+            if self.dvhs.has_key(id):
+                self.EnableConstraints(True)
+                # Create an instance of the dvhdata class to can access its functions
+                self.dvhdata[id] = dvhdata.DVH(self.dvhs[id])
+                # Create an instance of the dvh arrays so that guidvh can plot it
+                self.dvharray[id] = dvhdata.DVH(self.dvhs[id]).dvh
+                # 'Toggle' the radio box to refresh the dose data
+                self.OnToggleConstraints(None)
+        if not len(self.checkedstructures):
             self.EnableConstraints(False)
             # Make an empty plot on the DVH
-            self.guiDVH.Replot(None, {id:self.structures[id]})
+            self.guiDVH.Replot(None, None)
+
+    def OnStructureSelect(self, msg):
+        """Load the constraints for the currently selected structure."""
+
+        if (msg.data['id'] == None):
+            self.EnableConstraints(False)
+        else:
+            self.structureid = msg.data['id']
+            if self.dvhdata.has_key(self.structureid):
+                self.OnToggleConstraints(None)
 
     def EnableConstraints(self, value):
         """Enable or disable the constraint selector."""
@@ -198,28 +212,28 @@ class pluginDVH(wx.Panel):
         if self.radioVolume.GetValue():
             absDose = rxDose * slidervalue / 100
             volume = self.structures[self.structureid]['volume']
-            cc = self.dvh.GetVolumeConstraintCC(absDose, volume)
-            constraint = self.dvh.GetVolumeConstraint(absDose)
+            cc = self.dvhdata[id].GetVolumeConstraintCC(absDose, volume)
+            constraint = self.dvhdata[id].GetVolumeConstraint(absDose)
 
             self.lblConstraintUnits.SetLabel("%.3f" % cc)
             self.lblConstraintPercent.SetLabel("%.3f" % constraint)
-            self.guiDVH.Replot({id:self.dvh.dvh}, {id:self.structures[id]},
-                ([absDose], [constraint]))
+            self.guiDVH.Replot(self.dvharray, self.checkedstructures,
+                ([absDose], [constraint]), id)
 
         elif self.radioDose.GetValue():
-            dose = self.dvh.GetDoseConstraint(slidervalue)
+            dose = self.dvhdata[id].GetDoseConstraint(slidervalue)
 
             self.lblConstraintUnits.SetLabel("%.3f" % dose)
             self.lblConstraintPercent.SetLabel("%.3f" % (dose*100/rxDose))
-            self.guiDVH.Replot({id:self.dvh.dvh}, {id:self.structures[id]},
-                ([dose], [slidervalue]))
+            self.guiDVH.Replot(self.dvharray, self.checkedstructures,
+                ([dose], [slidervalue]), id)
 
         elif self.radioDosecc.GetValue():
             volumepercent = slidervalue*100/self.structures[self.structureid]['volume']
 
-            dose = self.dvh.GetDoseConstraint(volumepercent)
+            dose = self.dvhdata[id].GetDoseConstraint(volumepercent)
 
             self.lblConstraintUnits.SetLabel("%.3f" % dose)
             self.lblConstraintPercent.SetLabel("%.3f" % (dose*100/rxDose))
-            self.guiDVH.Replot({id:self.dvh.dvh}, {id:self.structures[id]},
-                ([dose], [volumepercent]))
+            self.guiDVH.Replot(self.dvharray, self.checkedstructures,
+                ([dose], [volumepercent]), id)

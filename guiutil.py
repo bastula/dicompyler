@@ -9,7 +9,8 @@
 
 import util
 import wx
-from wx.xrc import *
+from wx.xrc import XmlResource, XRCCTRL, XRCID
+from wx.lib.pubsub import Publisher as pub
 
 def IsMSWindows():
     """Are we running on Windows?
@@ -129,3 +130,104 @@ class ProgressDialog(wx.Dialog):
         # End the dialog since we are done with the import process
         if (message == 'Done'):
             self.EndModal(wx.ID_OK)
+
+class ColorCheckListBox(wx.Panel):
+    """Control similar to a wx.CheckListBox with additional color indication."""
+
+    def __init__(self, parent, items=[]):
+        wx.Panel.__init__(self, parent, -1, style=wx.SUNKEN_BORDER)
+
+        # Initialize variables
+        self.items = items
+
+        # Setup the layout for the frame
+        self.grid = wx.BoxSizer(wx.VERTICAL)
+
+        # Setup the panel background color and layout the controls
+        self.SetBackgroundColour(wx.WHITE)
+        self.SetSizer(self.grid)
+        self.Layout()
+
+    def Append(self, item, data=None, color=None, refresh=True):
+        """Add an item to the control."""
+
+        ccb = ColorCheckBox(self, item, data, color)
+        self.items.append(ccb)
+        self.grid.Add(ccb, 0, flag=wx.ALIGN_LEFT, border=4)
+        self.grid.Add((0,3), 0)
+        if refresh:
+            self.Layout()
+
+    def Clear(self):
+        """Removes all items from the control."""
+
+        self.items = []
+        self.grid.Clear(deleteWindows=True)
+        self.grid.Add((0,3), 0)
+        self.Layout()
+
+class ColorCheckBox(wx.Panel):
+    """Control with a checkbox and a color indicator."""
+
+    def __init__(self, parent, item, data=None, color=None):
+        wx.Panel.__init__(self, parent, -1)
+
+        # Initialize variables
+        self.item = item
+        self.data = data
+
+        # Initialize the controls
+        self.colorbox = ColorBox(self, color)
+        self.checkbox = wx.CheckBox(self, -1, item)
+
+        # Setup the layout for the frame
+        grid = wx.BoxSizer(wx.HORIZONTAL)
+        grid.Add((3,0), 0)
+        grid.Add(self.colorbox, 0, flag=wx.ALIGN_CENTRE)
+        grid.Add((5,0), 0)
+        grid.Add(self.checkbox, 1, flag=wx.EXPAND|wx.ALL|wx.ALIGN_CENTRE)
+
+        # Decrease the font size on Mac
+        if IsMac():
+            font = wx.SystemSettings.GetFont(wx.SYS_DEFAULT_GUI_FONT)
+            font.SetPointSize(10)
+            self.checkbox.SetWindowVariant(wx.WINDOW_VARIANT_SMALL)
+            self.checkbox.SetFont(font)
+
+        # Setup the panel background color and layout the controls
+        self.SetBackgroundColour(wx.WHITE)
+        self.SetSizer(grid)
+        self.Layout()
+
+        # Bind ui events to the proper methods
+        self.Bind(wx.EVT_CHECKBOX, self.OnCheck)
+
+    def OnCheck(self, evt):
+        """Send a message via pubsub if the checkbox has been checked."""
+
+        message = {'item':self.item, 'data':self.data,
+                'color':self.colorbox.GetBackgroundColour()}
+        if evt.IsChecked():
+            pub.sendMessage('colorcheckbox.checked', message)
+        else:
+            pub.sendMessage('colorcheckbox.unchecked', message)
+
+class ColorBox(wx.Window):
+    """Control that shows and stores a color."""
+
+    def __init__(self, parent, color=None):
+        wx.Window.__init__(self, parent, -1)
+        self.SetMinSize((16,16))
+        if not (color == None):
+            col = []
+            for val in color:
+                col.append(int(val))
+            self.SetBackgroundColour(tuple(col))
+
+        # Bind ui events to the proper methods
+        self.Bind(wx.EVT_SET_FOCUS, self.OnFocus)
+
+    def OnFocus(self, evt):
+        """Ignore the focus event via keyboard."""
+
+        self.Navigate()

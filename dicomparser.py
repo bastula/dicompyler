@@ -186,6 +186,7 @@ class DicomParser:
             for item in self.ds.StructureSetROIs:
                 data = {}
                 number = item.ROINumber
+                data['id'] = number
                 data['name'] = item.ROIName
                 print 'Found ROI #' + str(number) + ': '  + data['name']
                 structures[number] = data
