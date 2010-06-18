@@ -159,6 +159,32 @@ class DicomParser:
                 data > (level - 0.5 + (window-1)/2)],
                 [0, 255, lambda data: ((data - (level - 0.5))/(window-1) + 0.5)*(255-0)])
 
+    def GetPatientToPixelLUT(self):
+        """Get the image transformation matrix from the DICOM standard Part 3
+            Section C.7.6.2.1.1"""
+
+        di = self.ds.PixelSpacing[0]
+        dj = self.ds.PixelSpacing[1]
+        orientation = self.ds.ImageOrientationPatient
+        position = self.ds.ImagePositionPatient
+
+        m = np.matrix(
+            [[orientation[0]*di, orientation[3]*dj, 0, position[0]],
+            [orientation[1]*di, orientation[4]*dj, 0, position[1]],
+            [orientation[2]*di, orientation[5]*dj, 0, position[2]],
+            [0, 0, 0, 1]])
+
+        x = []
+        y = []
+        for i in range(0, self.ds.Columns):
+            imat = m * np.matrix([[i], [0], [0], [1]])
+            x.append(float(imat[0]))
+        for j in range(0, self.ds.Rows):
+            jmat = m * np.matrix([[0], [j], [0], [1]])
+            y.append(float(jmat[1]))
+
+        return (x, y)
+
 ########################### RT Structure Set Methods ###########################
 
     def GetStructureInfo(self):
@@ -216,15 +242,11 @@ class DicomParser:
                             plane['UID'] = contour.ContourImages[0].ReferencedSOPInstanceUID
 
                         # Add each plane to the planes dictionary of the current ROI
-                        # only if the geometric type is closed planar
                         if plane.has_key('geometricType'):
-                            if (plane['geometricType'] == u"CLOSED_PLANAR"):
-                                z = Decimal(str(plane['contourData'][0]['z']))
-                                planes[z] = plane
-                            else:
-                                print 'ROI # ' + str(number) + \
-                                ': CLOSED_PLANAR contour type expected, but found ' + \
-                                                plane['geometricType'] + ' instead.'
+                            z = Decimal(str(plane['contourData'][0]['z']))
+                            if not planes.has_key(z):
+                                planes[z] = []
+                            planes[z].append(plane)
 
                 # Calculate the plane thickness for the current ROI
                 structures[number]['thickness'] = self.CalculatePlaneThickness(planes)
