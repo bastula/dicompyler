@@ -11,6 +11,7 @@
 import wx
 from wx.xrc import XmlResource, XRCCTRL, XRCID
 from wx.lib.pubsub import Publisher as pub
+from decimal import Decimal
 import guiutil, util
 
 def pluginProperties():
@@ -56,9 +57,11 @@ class plugin2DView(wx.Panel):
 
         # Initialize variables
         self.images = []
+        self.structures = {}
 
         # Set up pubsub
         pub.subscribe(self.OnUpdatePatient, 'patient.updated.parsed_data')
+        pub.subscribe(self.OnStructureCheck, 'structures.checked')
 
     def OnUpdatePatient(self, msg):
         """Update and load the patient data."""
@@ -68,9 +71,62 @@ class plugin2DView(wx.Panel):
         self.SetBackgroundColour(wx.Colour(0, 0, 0))
         # Set the first image to the middle of the series
         self.imagenum = len(self.images)/2
+        # Get the Patient to Pixel LUT
+        self.patpixlut = self.images[self.imagenum-1].GetPatientToPixelLUT()
         # Set the focus to this panel so we can capture key events
         self.SetFocus()
         self.Refresh()
+
+    def OnStructureCheck(self, msg):
+        """When the structure list changes, update the panel."""
+
+        self.structures = msg.data
+        self.Refresh()
+
+    def DrawStructure(self, structure, gc, position):
+        """Draw the given structure on the panel."""
+
+        # Draw the structure only if the structure has contours
+        # on the current image position
+        if structure['planes'].has_key(position):
+            # Set the color of the contour
+            color = wx.Colour(structure['color'][0], structure['color'][1],
+                structure['color'][2], 128)
+            gc.SetBrush(wx.Brush(color))
+            gc.SetPen(wx.Pen(tuple(structure['color'])))
+            for contour in structure['planes'][position]:
+                if (contour['geometricType'] == u"CLOSED_PLANAR"):
+                    # Create the path for the contour
+                    path = gc.CreatePath()
+                    # Convert the structure data to pixel data
+                    pixeldata = self.GetContourPixelData(contour)
+
+                    # Move the origin to the first point of the contour
+                    point = pixeldata[0]
+                    path.MoveToPoint(point['x'], point['y'])
+
+                    # Add each contour point to the path
+                    for point in pixeldata:
+                        path.AddLineToPoint(point['x'], point['y'])
+                # Draw the path
+                gc.DrawPath(path)
+
+    def GetContourPixelData(self, contour):
+        """Convert structure data into pixel data using the patient to pixel LUT."""
+
+        pixeldata = []
+        # For each point in the structure data
+        # look up the value in the LUT and find the corresponding pixel pair
+        for p, point in enumerate(contour['contourData']):
+            for xv, xval in enumerate(self.patpixlut[0]):
+                if (xval > point['x']):
+                    break
+            for yv, yval in enumerate(self.patpixlut[1]):
+                if (yval > point['y']):
+                    break
+            pixeldata.append({'x':xv, 'y':yv})
+
+        return pixeldata
 
     def OnPaint(self, evt):
         """Update the panel when it needs to be refreshed."""
@@ -111,6 +167,9 @@ class plugin2DView(wx.Panel):
             impos = "Position: " + str(z) + " mm"
             gc.DrawText(impos, 10+(bwidth-width)/2, bheight)
 
+            # Draw the structures if present
+            for id, structure in self.structures.iteritems():
+                self.DrawStructure(structure, gc, Decimal(z))
 
     def OnKeyDown(self, evt):
         """Change the image when the user presses the appropriate keys."""

@@ -259,7 +259,13 @@ class MainFrame(wx.Frame):
         # Make sure that the volume has been calculated for each structure
         # before setting it
         if not self.structures[id].has_key('volume'):
-            self.structures[id]['volume'] = dvhdata.CalculateVolume(self.structures[id])
+            # Use the volume units if they are absolute volume
+            if self.dvhs.has_key(id):
+                if (self.dvhs[id]['volumeunits'] ==  'CM3'):
+                    self.structures[id]['volume'] = self.dvhs[id]['data'][0]
+            # Otherwise calculate the volume
+            else:
+                self.structures[id]['volume'] = dvhdata.CalculateVolume(self.structures[id])
             structure['data']['volume'] = self.structures[id]['volume']
         self.structureList[id] = structure['data']
 
@@ -314,9 +320,6 @@ class MainFrame(wx.Frame):
             choiceItem = evt.GetInt()
         # Load the structure id chosen from the choice control
         id = self.choiceStructure.GetClientData(choiceItem)
-
-        if not self.structures[id].has_key('volume'):
-            self.structures[id]['volume'] = dvhdata.CalculateVolume(self.structures[id])
 
         pub.sendMessage('structure.selected', {'id':id})
 
