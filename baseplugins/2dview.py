@@ -53,6 +53,7 @@ class plugin2DView(wx.Panel):
 
         # Bind ui events to the proper methods
         self.Bind(wx.EVT_PAINT, self.OnPaint)
+        self.Bind(wx.EVT_SIZE, self.OnSize)
         self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
 
         # Initialize variables
@@ -62,12 +63,15 @@ class plugin2DView(wx.Panel):
         # Set up pubsub
         pub.subscribe(self.OnUpdatePatient, 'patient.updated.parsed_data')
         pub.subscribe(self.OnStructureCheck, 'structures.checked')
+        pub.subscribe(self.OnKeyDown, 'main.key_down')
 
     def OnUpdatePatient(self, msg):
         """Update and load the patient data."""
 
         if msg.data.has_key('images'):
             self.images = msg.data['images']
+        else:
+            self.images = []
         self.SetBackgroundColour(wx.Colour(0, 0, 0))
         # Set the first image to the middle of the series
         self.imagenum = len(self.images)/2
@@ -81,6 +85,7 @@ class plugin2DView(wx.Panel):
         """When the structure list changes, update the panel."""
 
         self.structures = msg.data
+        self.SetFocus()
         self.Refresh()
 
     def DrawStructure(self, structure, gc, position):
@@ -131,8 +136,15 @@ class plugin2DView(wx.Panel):
     def OnPaint(self, evt):
         """Update the panel when it needs to be refreshed."""
 
-        dc = wx.PaintDC(self)
-        width, height = dc.GetSize()
+        # Special case for Windows to account for flickering
+        # if and only if images are loaded
+        if (guiutil.IsMSWindows() and len(self.images)):
+            dc = wx.BufferedPaintDC(self)
+            self.SetBackgroundStyle(wx.BG_STYLE_CUSTOM)
+        else:
+            dc = wx.PaintDC(self)
+
+        width, height = self.GetClientSize()
         try:
             gc = wx.GraphicsContext.Create(dc)
         except NotImplementedError:
@@ -143,14 +155,30 @@ class plugin2DView(wx.Panel):
 
         # If we have images loaded, process and show the image
         if len(self.images):
+            # Redraw the background on Windows
+            if guiutil.IsMSWindows():
+                gc.SetBrush(wx.Brush(wx.Colour(0, 0, 0)))
+                gc.SetPen(wx.Pen(wx.Colour(0, 0, 0)))
+                gc.DrawRectangle(0, 0, width, height)
+
             image = guiutil.convert_pil_to_wx(
                 self.images[self.imagenum-1].GetImage())
             bmp = wx.BitmapFromImage(image)
             bwidth, bheight = bmp.GetSize()
+
             # Center the image
             gc.Translate((width-bwidth)/2, (height-bheight)/2)
             gc.DrawBitmap(bmp,
                 0, 0, bwidth, bheight)
+
+            # Draw the structures if present
+            imdata = self.images[self.imagenum-1].GetImageData()
+            z = '%.2f' % imdata['position'][2]
+            for id, structure in self.structures.iteritems():
+                self.DrawStructure(structure, gc, Decimal(z))
+
+            # Reset the origin for the text elements
+            gc.Translate(-(width-bwidth)/2, -(height-bheight)/2)
 
             # Prepare the font for drawing the information text
             font = wx.SystemSettings.GetFont(wx.SYS_DEFAULT_GUI_FONT)
@@ -160,31 +188,41 @@ class plugin2DView(wx.Panel):
 
             # Draw the information text
             imtext = "Image: " + str(self.imagenum) + "/" + str(len(self.images))
-            gc.DrawText(imtext, 10+(bwidth-width)/2, -10)
-
-            imdata = self.images[self.imagenum-1].GetImageData()
-            z = '%.2f' % imdata['position'][2]
+            gc.DrawText(imtext, 10, 7)
             impos = "Position: " + str(z) + " mm"
-            gc.DrawText(impos, 10+(bwidth-width)/2, bheight)
+            gc.DrawText(impos, 10, height-17)
 
-            # Draw the structures if present
-            for id, structure in self.structures.iteritems():
-                self.DrawStructure(structure, gc, Decimal(z))
+    def OnSize(self, evt):
+        """Refresh the view when the size of the panel changes."""
+
+        self.Refresh()
+        evt.Skip()
 
     def OnKeyDown(self, evt):
         """Change the image when the user presses the appropriate keys."""
 
-        keyname = evt.GetKeyCode()
-        prevkey = [wx.WXK_UP, wx.WXK_PAGEUP]
-        nextkey = [wx.WXK_DOWN, wx.WXK_PAGEDOWN]
-        if (keyname in prevkey):
-            if (self.imagenum > 1):
-                self.imagenum -= 1
-        if (keyname in nextkey):
-            if (self.imagenum < len(self.images)):
-                self.imagenum += 1
-        if (keyname == wx.WXK_HOME):
-            self.imagenum = 1
-        if (keyname == wx.WXK_END):
-            self.imagenum = len(self.images)
-        self.Refresh()
+        # Needed to work around a bug in Windows. See main.py for more details.
+        if guiutil.IsMSWindows():
+            try:
+                evt = evt.data
+            except AttributeError:
+                keyname = evt.GetKeyCode()
+
+        if len(self.images):
+            keyname = evt.GetKeyCode()
+            prevkey = [wx.WXK_UP, wx.WXK_PAGEUP]
+            nextkey = [wx.WXK_DOWN, wx.WXK_PAGEDOWN]
+            if (keyname in prevkey):
+                if (self.imagenum > 1):
+                    self.imagenum -= 1
+                    self.Refresh()
+            if (keyname in nextkey):
+                if (self.imagenum < len(self.images)):
+                    self.imagenum += 1
+                    self.Refresh()
+            if (keyname == wx.WXK_HOME):
+                self.imagenum = 1
+                self.Refresh()
+            if (keyname == wx.WXK_END):
+                self.imagenum = len(self.images)
+                self.Refresh()
