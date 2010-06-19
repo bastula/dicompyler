@@ -107,9 +107,8 @@ class MainFrame(wx.Frame):
 
         # Bind interface events to the proper methods
         wx.EVT_TOOL(self, XRCID('toolOpen'), self.OnOpenPatient)
-
-        # Bind ui events to the proper methods
         wx.EVT_CHOICE(self, XRCID('choiceStructure'), self.OnStructureSelect)
+        self.notebook.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
 
         # Initialize variables
         self.structures = {}
@@ -342,6 +341,14 @@ class MainFrame(wx.Frame):
         self.lblStructureMinDose.SetLabel('-')
         self.lblStructureMaxDose.SetLabel('-')
         self.lblStructureMeanDose.SetLabel('-')
+
+    def OnKeyDown(self, evt):
+        """Capture the keypress when the notebook tab is focused.
+            Currently this is used to workaround a bug in Windows since the
+            notebook tab instead of the panel receives focus."""
+
+        if guiutil.IsMSWindows():
+            pub.sendMessage('main.key_down', evt)
 
     def OnPluginManager(self, evt):
         """Load and show the Dicom RT Importer dialog box."""
