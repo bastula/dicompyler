@@ -243,7 +243,7 @@ class DicomParser:
 
                         # Add each plane to the planes dictionary of the current ROI
                         if plane.has_key('geometricType'):
-                            z = Decimal(str(plane['contourData'][0]['z']))
+                            z = Decimal(str(plane['contourData'][0][2]))
                             if not planes.has_key(z):
                                 planes[z] = []
                             planes[z].append(plane)
@@ -259,21 +259,7 @@ class DicomParser:
     def GetContourPoints(self, array):
         """Parses an array of xyz points and returns a array of point dictionaries."""
 
-        contourData = []
-        point = {}
-
-        for n in range(0, len(array)):
-            x = y = z = 0
-            if (n % 3 == 0):
-                point['x'] = float(array[n])
-            if (n % 3 == 1):
-                point['y'] = float(array[n])
-            if (n % 3 == 2):
-                point['z'] = float(array[n])
-                contourData.append(point.copy())
-                point = {}
-
-        return contourData
+        return zip(*[iter(array)]*3)
 
     def CalculatePlaneThickness(self, planesDict):
         """Calculates the plane thickness for each structure."""
@@ -339,6 +325,30 @@ class DicomParser:
                 self.dvhs[item.DVHReferencedROIs[0].ReferencedROINumber] = dvhitem
 
         return self.dvhs
+
+    def GetDoseGrid(self, slicenumber = 0):
+        """Return the dose grid for the given slice number."""
+
+        sn = len(self.ds.pixel_array) - slicenumber
+        return self.ds.pixel_array[sn].tolist()
+
+    def GetIsodoseGrid(self, slicenumber = 0, level = 100):
+        """Return the dose grid for the given slice number and isodose level."""
+
+        sn = len(self.ds.pixel_array) - slicenumber
+        isodose = (self.ds.pixel_array[sn] >= level).nonzero()
+        return zip(isodose[1].tolist(), isodose[0].tolist())
+
+    def GetDoseData(self):
+        """Return the dose data from a DICOM RT Dose file."""
+
+        data = self.GetImageData()
+        data['doseunits'] = self.ds.DoseUnits
+        data['dosetype'] = self.ds.DoseType
+        data['dosesummationtype'] = self.ds.DoseSummationType
+        data['dosegridscaling'] = self.ds.DoseGridScaling
+
+        return data
 
 ############################### RT Plan Methods ###############################
 

@@ -134,11 +134,11 @@ class ProgressDialog(wx.Dialog):
 class ColorCheckListBox(wx.Panel):
     """Control similar to a wx.CheckListBox with additional color indication."""
 
-    def __init__(self, parent, items=[]):
+    def __init__(self, parent, pubsubname=''):
         wx.Panel.__init__(self, parent, -1, style=wx.SUNKEN_BORDER)
 
         # Initialize variables
-        self.items = items
+        self.pubsubname = pubsubname
 
         # Setup the layout for the frame
         self.grid = wx.BoxSizer(wx.VERTICAL)
@@ -148,10 +148,12 @@ class ColorCheckListBox(wx.Panel):
         self.SetSizer(self.grid)
         self.Layout()
 
+        self.Clear()
+
     def Append(self, item, data=None, color=None, refresh=True):
         """Add an item to the control."""
 
-        ccb = ColorCheckBox(self, item, data, color)
+        ccb = ColorCheckBox(self, item, data, color, self.pubsubname)
         self.items.append(ccb)
         self.grid.Add(ccb, 0, flag=wx.ALIGN_LEFT, border=4)
         self.grid.Add((0,3), 0)
@@ -169,12 +171,13 @@ class ColorCheckListBox(wx.Panel):
 class ColorCheckBox(wx.Panel):
     """Control with a checkbox and a color indicator."""
 
-    def __init__(self, parent, item, data=None, color=None):
+    def __init__(self, parent, item, data=None, color=None, pubsubname=''):
         wx.Panel.__init__(self, parent, -1)
 
         # Initialize variables
         self.item = item
         self.data = data
+        self.pubsubname = pubsubname
 
         # Initialize the controls
         self.colorbox = ColorBox(self, color)
@@ -208,9 +211,9 @@ class ColorCheckBox(wx.Panel):
         message = {'item':self.item, 'data':self.data,
                 'color':self.colorbox.GetBackgroundColour()}
         if evt.IsChecked():
-            pub.sendMessage('colorcheckbox.checked', message)
+            pub.sendMessage('colorcheckbox.checked.' + self.pubsubname, message)
         else:
-            pub.sendMessage('colorcheckbox.unchecked', message)
+            pub.sendMessage('colorcheckbox.unchecked.' + self.pubsubname, message)
 
 class ColorBox(wx.Window):
     """Control that shows and stores a color."""

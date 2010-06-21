@@ -59,14 +59,13 @@
             <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
           </object>
           <object class="sizeritem">
-            <object class="wxStaticBoxSizer">
+            <object class="wxBoxSizer">
+              <orient>wxVERTICAL</orient>
               <object class="sizeritem">
-                <object class="unknown" name="cclbStructures"/>
+                <object class="wxNotebook" name="notebookTools"/>
                 <option>1</option>
                 <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
               </object>
-              <label>Structures</label>
-              <orient>wxVERTICAL</orient>
             </object>
             <option>3</option>
             <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>

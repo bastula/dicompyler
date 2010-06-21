@@ -43,6 +43,7 @@ class MainFrame(wx.Frame):
 
         # Initialize the General panel controls
         self.notebook = XRCCTRL(self, 'notebook')
+        self.notebookTools = XRCCTRL(self, 'notebookTools')
         self.lblPlanName = XRCCTRL(self, 'lblPlanName')
         self.lblRxDose = XRCCTRL(self, 'lblRxDose')
         self.lblPatientName = XRCCTRL(self, 'lblPatientName')
@@ -54,11 +55,11 @@ class MainFrame(wx.Frame):
         self.lblStructureMinDose = XRCCTRL(self, 'lblStructureMinDose')
         self.lblStructureMaxDose = XRCCTRL(self, 'lblStructureMaxDose')
         self.lblStructureMeanDose = XRCCTRL(self, 'lblStructureMeanDose')
-        self.cclbStructures = guiutil.ColorCheckListBox(self)
-        res.AttachUnknownControl('cclbStructures', self.cclbStructures, self)
+        self.cclbStructures = guiutil.ColorCheckListBox(self.notebookTools, 'structure')
+        self.cclbIsodoses = guiutil.ColorCheckListBox(self.notebookTools, 'isodose')
 
         # Modify the control and font size on Mac
-        controls = [self.choiceStructure]
+        controls = [self.notebookTools, self.choiceStructure]
 
         if guiutil.IsMac():
             font = wx.SystemSettings.GetFont(wx.SYS_DEFAULT_GUI_FONT)
@@ -131,6 +132,10 @@ class MainFrame(wx.Frame):
         if not os.path.isfile(dbpath):
             create_all()
 
+        # Initialize the tools notebook
+        self.notebookTools.AddPage(self.cclbStructures, 'Structures')
+        self.notebookTools.AddPage(self.cclbIsodoses, 'Isodoses')
+
         # Load plugins
         self.plugins = plugin.import_plugins()
 
@@ -148,8 +153,12 @@ class MainFrame(wx.Frame):
 
         # Set up pubsub
         pub.subscribe(self.OnLoadPatientData, 'patient.updated.raw_data')
-        pub.subscribe(self.OnStructureCheck, 'colorcheckbox.checked')
-        pub.subscribe(self.OnStructureUncheck, 'colorcheckbox.unchecked')
+        pub.subscribe(self.OnStructureCheck, 'colorcheckbox.checked.structure')
+        pub.subscribe(self.OnStructureUncheck, 'colorcheckbox.unchecked.structure')
+        pub.subscribe(self.OnIsodoseCheck, 'colorcheckbox.checked.isodose')
+        pub.subscribe(self.OnIsodoseUncheck, 'colorcheckbox.unchecked.isodose')
+
+########################### Patient Loading Functions ##########################
 
     def OnOpenPatient(self, evt):
         """Load and show the Dicom RT Importer dialog box."""
@@ -184,6 +193,7 @@ class MainFrame(wx.Frame):
         if ptdata.has_key('rtdose'):
             wx.CallAfter(progressFunc, 1, 4, 'Importing RT Dose...')
             patient['dvhs'] = dp(ptdata['rtdose']).GetDVHs()
+            patient['dose'] = dp(ptdata['rtdose'])
         if ptdata.has_key('images'):
             patient['images'] = []
             for image in ptdata['images']:
@@ -208,6 +218,7 @@ class MainFrame(wx.Frame):
         self.PopulateDemographics(patient)
         self.PopulatePlan(patient['plan'])
         self.PopulateStructures()
+        self.PopulateIsodoses(patient.has_key('images'))
         self.currConstraintId = None
         
         # publish the parsed data
@@ -229,6 +240,25 @@ class MainFrame(wx.Frame):
         self.cclbStructures.Layout()
         self.choiceStructure.Clear()
 
+    def PopulateIsodoses(self, has_images=True):
+        """Populate the isodose list."""
+
+        self.cclbIsodoses.Clear()
+
+        self.isodoseList={}
+        if has_images:
+            self.isodoses = [{'level':102, 'color':wx.Colour(170, 0, 0)},
+                {'level':100, 'color':wx.Colour(238, 69, 0)}, {'level':98, 'color':wx.Colour(255, 165, 0)},
+                {'level':95, 'color':wx.Colour(255, 255, 0)}, {'level':90, 'color':wx.Colour(0, 255, 0)},
+                {'level':80, 'color':wx.Colour(0, 139, 0)}, {'level':70, 'color':wx.Colour(0, 255, 255)},
+                {'level':50, 'color':wx.Colour(0, 0, 255)}, {'level':30, 'color':wx.Colour(0, 0, 128)}]
+            for isodose in self.isodoses:
+                self.cclbIsodoses.Append(str(isodose['level'])+' %', isodose, isodose['color'],
+                    refresh=False)
+        # Refresh the isodose list manually since we didn't want it to refresh
+        # after adding each isodose
+        self.cclbIsodoses.Layout()
+
     def PopulateDemographics(self, demographics):
         """Populate the patient demographics."""
 
@@ -245,6 +275,8 @@ class MainFrame(wx.Frame):
         elif len(plan['label']):
             self.lblPlanName.SetLabel(plan['label'])
         self.lblRxDose.SetLabel(str(plan['rxdose']))
+
+############################## Structure Functions #############################
 
     def OnStructureCheck(self, msg):
         """Load the properties of the currently checked structures."""
@@ -285,7 +317,7 @@ class MainFrame(wx.Frame):
         # Get the structure number
         id = structure['data']['id']
 
-        # Remove the structure fromt the structure list
+        # Remove the structure from the structure list
         if self.structureList.has_key(id):
             del self.structureList[id]
 
@@ -341,6 +373,30 @@ class MainFrame(wx.Frame):
         self.lblStructureMinDose.SetLabel('-')
         self.lblStructureMaxDose.SetLabel('-')
         self.lblStructureMeanDose.SetLabel('-')
+
+############################### Isodose Functions ##############################
+
+    def OnIsodoseCheck(self, msg):
+        """Load the properties of the currently checked isodoses."""
+
+        isodose = msg.data
+        self.isodoseList[isodose['data']['level']] = isodose
+
+        pub.sendMessage('isodoses.checked', self.isodoseList)
+
+    def OnIsodoseUncheck(self, msg):
+        """Remove the unchecked isodoses."""
+
+        isodose = msg.data
+        id = isodose['data']['level']
+
+        # Remove the isodose from the isodose list
+        if self.isodoseList.has_key(id):
+            del self.isodoseList[id]
+
+        pub.sendMessage('isodoses.checked', self.isodoseList)
+
+################################ Other Functions ###############################
 
     def OnKeyDown(self, evt):
         """Capture the keypress when the notebook tab is focused.

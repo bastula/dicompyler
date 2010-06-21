@@ -63,6 +63,7 @@ class plugin2DView(wx.Panel):
         # Set up pubsub
         pub.subscribe(self.OnUpdatePatient, 'patient.updated.parsed_data')
         pub.subscribe(self.OnStructureCheck, 'structures.checked')
+        pub.subscribe(self.OnIsodoseCheck, 'isodoses.checked')
         pub.subscribe(self.OnKeyDown, 'main.key_down')
 
     def OnUpdatePatient(self, msg):
@@ -70,13 +71,28 @@ class plugin2DView(wx.Panel):
 
         if msg.data.has_key('images'):
             self.images = msg.data['images']
+            # Set the first image to the middle of the series
+            self.imagenum = len(self.images)/2
+            self.structurepixlut = self.images[self.imagenum-1].GetPatientToPixelLUT()
+            # Dose display depends on whether we have images loaded or not
+            if msg.data.has_key('dose'):
+                self.isodoses = {}
+                self.dose = msg.data['dose']
+                self.dosedata = self.dose.GetDoseData()
+                # First get the dose grid LUT
+                doselut = self.dose.GetPatientToPixelLUT()
+                # Then convert dose grid LUT into an image pixel LUT
+                self.dosepixlut = self.GetDoseGridPixelData(self.structurepixlut, doselut)
+            else:
+                self.dose = []
+            if msg.data.has_key('plan'):
+                self.rxdose = msg.data['plan']['rxdose']
+            else:
+                self.rxdose = 0
         else:
             self.images = []
+
         self.SetBackgroundColour(wx.Colour(0, 0, 0))
-        # Set the first image to the middle of the series
-        self.imagenum = len(self.images)/2
-        # Get the Patient to Pixel LUT
-        self.patpixlut = self.images[self.imagenum-1].GetPatientToPixelLUT()
         # Set the focus to this panel so we can capture key events
         self.SetFocus()
         self.Refresh()
@@ -85,6 +101,13 @@ class plugin2DView(wx.Panel):
         """When the structure list changes, update the panel."""
 
         self.structures = msg.data
+        self.SetFocus()
+        self.Refresh()
+
+    def OnIsodoseCheck(self, msg):
+        """When the isodose list changes, update the panel."""
+
+        self.isodoses = msg.data
         self.SetFocus()
         self.Refresh()
 
@@ -104,34 +127,107 @@ class plugin2DView(wx.Panel):
                     # Create the path for the contour
                     path = gc.CreatePath()
                     # Convert the structure data to pixel data
-                    pixeldata = self.GetContourPixelData(contour)
+                    pixeldata = self.GetContourPixelData(
+                        self.structurepixlut, contour['contourData'])
 
                     # Move the origin to the first point of the contour
                     point = pixeldata[0]
-                    path.MoveToPoint(point['x'], point['y'])
+                    path.MoveToPoint(point[0], point[1])
 
                     # Add each contour point to the path
                     for point in pixeldata:
-                        path.AddLineToPoint(point['x'], point['y'])
+                        path.AddLineToPoint(point[0], point[1])
                 # Draw the path
                 gc.DrawPath(path)
 
-    def GetContourPixelData(self, contour):
+    def DrawIsodose(self, isodose, gc, imagenum):
+        """Draw the given structure on the panel."""
+
+        # Calculate the isodose level according to rx dose and dose grid scaling
+        level = isodose['data']['level'] * self.rxdose / (self.dosedata['dosegridscaling'] * 10000)
+        # Get the isodose contour data for this slice and isodose level
+        contour = self.dose.GetIsodoseGrid(imagenum, level)
+
+        if len(contour):
+            # Set the color of the isodose line
+            color = wx.Colour(isodose['color'][0], isodose['color'][1],
+                isodose['color'][2], 64)
+            gc.SetBrush(wx.Brush(color))
+            gc.SetPen(wx.Pen(tuple(isodose['color'])))
+
+            # Create the path for the isodose line
+            path = gc.CreatePath()
+
+            # Move the origin to the first point of the isodose line
+            point = contour[0]
+            path.MoveToPoint(
+                self.dosepixlut[0][point[0]], self.dosepixlut[1][point[1]])
+
+            # Create two arrays of points: left side (down) and right side (up)
+            prevpt = (self.dosepixlut[0][point[0]], self.dosepixlut[1][point[1]])
+            down = [(self.dosepixlut[0][point[0]], self.dosepixlut[1][point[1]])]
+            up = []
+            for index, point in enumerate(contour):
+                pt = (self.dosepixlut[0][point[0]], self.dosepixlut[1][point[1]])
+                # If the point is on a new line,
+                # add the point to down and add the prev point to up
+                if (self.dosepixlut[1][point[1]] > prevpt[1]):
+                    down.append(pt)
+                    up.append(prevpt)
+                # If this is the very last point, add it to up
+                if ((index-1) == len(contour)):
+                    up.append(pt)
+                # Save the point for comparsion to the next point
+                prevpt = pt
+
+            # Add each contour point to the path, first drawing the left side,
+            # going down, then drawing the right side going up
+            for point in down:
+                path.AddLineToPoint(point[0], point[1])
+            for point in reversed(up):
+                path.AddLineToPoint(point[0], point[1])
+            # Draw a line back to the original starting point
+            path.AddLineToPoint(
+                self.dosepixlut[0][contour[0][0]], self.dosepixlut[1][contour[0][1]])
+            # Draw the path
+            gc.DrawPath(path)
+
+    def GetContourPixelData(self, pixlut, contour):
         """Convert structure data into pixel data using the patient to pixel LUT."""
 
         pixeldata = []
         # For each point in the structure data
         # look up the value in the LUT and find the corresponding pixel pair
-        for p, point in enumerate(contour['contourData']):
-            for xv, xval in enumerate(self.patpixlut[0]):
-                if (xval > point['x']):
+        for p, point in enumerate(contour):
+            for xv, xval in enumerate(pixlut[0]):
+                if (xval > point[0]):
                     break
-            for yv, yval in enumerate(self.patpixlut[1]):
-                if (yval > point['y']):
+            for yv, yval in enumerate(pixlut[1]):
+                if (yval > point[1]):
                     break
-            pixeldata.append({'x':xv, 'y':yv})
+            pixeldata.append((xv, yv))
 
         return pixeldata
+
+    def GetDoseGridPixelData(self, pixlut, doselut):
+        """Convert dosegrid data into pixel data using the dose to pixel LUT."""
+
+        dosedata = []
+        x = []
+        y = []
+        # For each point in the dose data
+        # look up the value in the LUT and find the corresponding pixel pair
+        for p, point in enumerate(doselut[0]):
+            for xv, xval in enumerate(pixlut[0]):
+                if (abs(xval - point) < 1):
+                    x.append(xv)
+                    break
+        for p, point in enumerate(doselut[1]):
+            for yv, yval in enumerate(pixlut[1]):
+                if (abs(yval - point) < 1):
+                    y.append(yv)
+                    break
+        return (x, y)
 
     def OnPaint(self, evt):
         """Update the panel when it needs to be refreshed."""
@@ -176,6 +272,10 @@ class plugin2DView(wx.Panel):
             z = '%.2f' % imdata['position'][2]
             for id, structure in self.structures.iteritems():
                 self.DrawStructure(structure, gc, Decimal(z))
+
+            # Draw the isodoses if present
+            for id, isodose in iter(sorted(self.isodoses.iteritems())):
+                self.DrawIsodose(isodose, gc, self.imagenum)
 
             # Reset the origin for the text elements
             gc.Translate(-(width-bwidth)/2, -(height-bheight)/2)
