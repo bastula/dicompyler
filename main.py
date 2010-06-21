@@ -218,8 +218,7 @@ class MainFrame(wx.Frame):
         self.PopulateDemographics(patient)
         self.PopulatePlan(patient['plan'])
         self.PopulateStructures()
-        self.PopulateIsodoses(patient.has_key('images'))
-        self.currConstraintId = None
+        self.PopulateIsodoses(patient.has_key('images'), patient['plan'], patient['dose'])
         
         # publish the parsed data
         pub.sendMessage('patient.updated.parsed_data', patient)
@@ -240,20 +239,27 @@ class MainFrame(wx.Frame):
         self.cclbStructures.Layout()
         self.choiceStructure.Clear()
 
-    def PopulateIsodoses(self, has_images=True):
+    def PopulateIsodoses(self, has_images, plan, dose):
         """Populate the isodose list."""
 
         self.cclbIsodoses.Clear()
 
         self.isodoseList={}
         if has_images:
-            self.isodoses = [{'level':102, 'color':wx.Colour(170, 0, 0)},
+            dosedata = dose.GetDoseData()
+            dosemax = int(dosedata['dosemax'] * dosedata['dosegridscaling'] * 10000 / plan['rxdose'])
+            self.isodoses = [{'level':dosemax, 'color':wx.Colour(120, 0, 0), 'name':'Max'},
+                {'level':102, 'color':wx.Colour(170, 0, 0)},
                 {'level':100, 'color':wx.Colour(238, 69, 0)}, {'level':98, 'color':wx.Colour(255, 165, 0)},
                 {'level':95, 'color':wx.Colour(255, 255, 0)}, {'level':90, 'color':wx.Colour(0, 255, 0)},
                 {'level':80, 'color':wx.Colour(0, 139, 0)}, {'level':70, 'color':wx.Colour(0, 255, 255)},
                 {'level':50, 'color':wx.Colour(0, 0, 255)}, {'level':30, 'color':wx.Colour(0, 0, 128)}]
             for isodose in self.isodoses:
-                self.cclbIsodoses.Append(str(isodose['level'])+' %', isodose, isodose['color'],
+                # Calculate the absolute dose value
+                name = ' / ' + str(isodose['level'] * plan['rxdose'] / 100) + ' cGy'
+                if isodose.has_key('name'):
+                    name = name + ' [' + isodose['name'] + ']'
+                self.cclbIsodoses.Append(str(isodose['level'])+' %'+name, isodose, isodose['color'],
                     refresh=False)
         # Refresh the isodose list manually since we didn't want it to refresh
         # after adding each isodose
