@@ -120,7 +120,11 @@ class plugin2DView(wx.Panel):
             # Set the color of the contour
             color = wx.Colour(structure['color'][0], structure['color'][1],
                 structure['color'][2], 128)
-            gc.SetBrush(wx.Brush(color))
+            # Set fill (brush) color, transparent for external contour
+            if (('RTROIType' in structure) and (structure['RTROIType'].lower() == 'external')):
+                gc.SetBrush(wx.Brush(color, style=wx.TRANSPARENT))
+            else:
+                gc.SetBrush(wx.Brush(color))
             gc.SetPen(wx.Pen(tuple(structure['color'])))
             for contour in structure['planes'][position]:
                 if (contour['geometricType'] == u"CLOSED_PLANAR"):

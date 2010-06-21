@@ -217,6 +217,12 @@ class DicomParser:
                 print 'Found ROI #' + str(number) + ': '  + data['name']
                 structures[number] = data
 
+        # Determine the type of each structure (PTV, organ, external, etc)
+        if self.ds.has_key('RTROIObservations'):
+            for item in self.ds.RTROIObservations:
+                number = item.ReferencedROINumber
+                structures[number]['RTROIType'] = item.RTROIInterpretedType
+
         # The coordinate data of each ROI is stored within ROIContourSequence
         if self.ds.has_key('ROIContours'):
             for roi in self.ds.ROIContours:
