@@ -111,9 +111,6 @@ class MainFrame(wx.Frame):
         wx.EVT_CHOICE(self, XRCID('choiceStructure'), self.OnStructureSelect)
         self.notebook.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
 
-        # Initialize variables
-        self.structures = {}
-
         self.SetSizer(mainGrid)
         self.Layout()
 
@@ -139,18 +136,6 @@ class MainFrame(wx.Frame):
         # Load plugins
         self.plugins = plugin.import_plugins()
 
-        # Set up the plugins for each plugin entry point of dicompyler
-        for p in self.plugins:
-            props = p.pluginProperties()
-            # Only load plugin versions that are qualified
-            if (props['plugin_version'] == 1):
-                # Load the main panel plugins
-                if (props['plugin_type'] == 'main'):
-                    # Initialize the notebook tabs
-                    self.notebook.AddPage(
-                        p.pluginLoader(self.notebook), 
-                        props['name'])
-
         # Set up pubsub
         pub.subscribe(self.OnLoadPatientData, 'patient.updated.raw_data')
         pub.subscribe(self.OnStructureCheck, 'colorcheckbox.checked.structure')
@@ -165,60 +150,117 @@ class MainFrame(wx.Frame):
 
         self.ptdata = dicomgui.ImportDicom(self)
         if not (self.ptdata == None):
+            # Set up the plugins for each plugin entry point of dicompyler
+            self.notebook.DeleteAllPages()
+            for p in self.plugins:
+                props = p.pluginProperties()
+                # Only load plugin versions that are qualified
+                if (props['plugin_version'] == 1):
+                    # Load the main panel plugins
+                    if (props['plugin_type'] == 'main'):
+                        # Check whether the plugin can view the loaded DICOM data
+                        addToNotebook = False
+                        if len(props['min_dicom']):
+                            for key in props['min_dicom']:
+                                if (key == 'rxdose'):
+                                    pass
+                                elif key in self.ptdata.keys():
+                                    addToNotebook = True
+                                else:
+                                    addToNotebook = False
+                                    break
+                        # Plugin can view all DICOM data so always load it
+                        else:
+                            addToNotebook = True
+                        # Initialize the notebook tabs
+                        if addToNotebook:
+                            self.notebook.AddPage(
+                                p.pluginLoader(self.notebook),
+                                props['name'])
             pub.sendMessage('patient.updated.raw_data', self.ptdata)
 
     def OnLoadPatientData(self, msg):
         """Update and load the patient data."""
 
         ptdata = msg.data
-        dlgProgress = guiutil.get_progress_dialog(self)
+        dlgProgress = guiutil.get_progress_dialog(self, "Loading Patient Data...")
         self.t=threading.Thread(target=self.LoadPatientDataThread,
             args=(self, ptdata, dlgProgress.OnUpdateProgress,
             self.OnUpdatePatientData))
         self.t.start()
         dlgProgress.ShowModal()
+        dlgProgress.Destroy()
 
     def LoadPatientDataThread(self, parent, ptdata, progressFunc, updateFunc):
         """Thread to load the patient data."""
 
         # Call the progress function to update the gui
-        wx.CallAfter(progressFunc, 0, 0, 'Importing patient data...')
-        if ptdata.has_key('rtplan'):
-            wx.CallAfter(progressFunc, 0, 4, 'Importing RT Structure Set...')
-            patient = dp(ptdata['rtplan']).GetDemographics()
+        wx.CallAfter(progressFunc, 0, 0, 'Processing patient data...')
+        patient = {}
+        if ptdata.has_key('rtss'):
+            wx.CallAfter(progressFunc, 0, 5, 'Processing RT Structure Set...')
+            if not patient.has_key('id'):
+                patient = dp(ptdata['rtss']).GetDemographics()
             patient['structures'] = dp(ptdata['rtss']).GetStructures()
         if ptdata.has_key('rtplan'):
+            wx.CallAfter(progressFunc, 1, 5, 'Processing RT Plan...')
+            if not patient.has_key('id'):
+                patient = dp(ptdata['rtplan']).GetDemographics()
             patient['plan'] = dp(ptdata['rtplan']).GetPlan()
-            patient['plan']['rxdose'] = ptdata['rxdose']
         if ptdata.has_key('rtdose'):
-            wx.CallAfter(progressFunc, 1, 4, 'Importing RT Dose...')
+            wx.CallAfter(progressFunc, 2, 5, 'Processing RT Dose...')
+            if not patient.has_key('id'):
+                patient = dp(ptdata['rtdose']).GetDemographics()
             patient['dvhs'] = dp(ptdata['rtdose']).GetDVHs()
             patient['dose'] = dp(ptdata['rtdose'])
         if ptdata.has_key('images'):
+            wx.CallAfter(progressFunc, 3, 5, 'Processing Images...')
+            if not patient.has_key('id'):
+                patient = dp(ptdata['images'][0]).GetDemographics()
             patient['images'] = []
             for image in ptdata['images']:
                 patient['images'].append(dp(image))
+        if ptdata.has_key('rxdose'):
+            if not patient.has_key('plan'):
+                patient['plan'] = {}
+            patient['plan']['rxdose'] = ptdata['rxdose']
         # if the min/max/mean dose was not present, calculate it and save it for each structure
-        wx.CallAfter(progressFunc, 2, 4, 'Processing DVH data...')
-        for key, dvh in patient['dvhs'].iteritems():
-            if (dvh['min'] == -1):
-                dvh['min'] = dvhdoses.get_dvh_min(dvh['data'], ptdata['rxdose'])
-            if (dvh['max'] == -1):
-                dvh['max'] = dvhdoses.get_dvh_max(dvh['data'], ptdata['rxdose'])
-            if (dvh['mean'] == -1):
-                dvh['mean'] = dvhdoses.get_dvh_mean(dvh['data'], ptdata['rxdose'])
+        wx.CallAfter(progressFunc, 4, 5, 'Processing DVH data...')
+        if patient.has_key('dvhs'):
+            for key, dvh in patient['dvhs'].iteritems():
+                if (dvh['min'] == -1):
+                    dvh['min'] = dvhdoses.get_dvh_min(dvh['data'], ptdata['rxdose'])
+                if (dvh['max'] == -1):
+                    dvh['max'] = dvhdoses.get_dvh_max(dvh['data'], ptdata['rxdose'])
+                if (dvh['mean'] == -1):
+                    dvh['mean'] = dvhdoses.get_dvh_mean(dvh['data'], ptdata['rxdose'])
         wx.CallAfter(progressFunc, 98, 100, 'Done')
         wx.CallAfter(updateFunc, patient)
 
     def OnUpdatePatientData(self, patient):
         """Update the patient data in the main program interface."""
-        
-        self.structures = patient['structures']
-        self.dvhs = patient['dvhs']
+
         self.PopulateDemographics(patient)
-        self.PopulatePlan(patient['plan'])
+
+        self.structures = {}
+        if patient.has_key('structures'):
+            self.structures = patient['structures']
         self.PopulateStructures()
-        self.PopulateIsodoses(patient.has_key('images'), patient['plan'], patient['dose'])
+
+        if patient.has_key('plan'):
+            self.PopulatePlan(patient['plan'])
+        else:
+            self.PopulatePlan({})
+
+        if (patient.has_key('dose') and patient.has_key('plan')):
+            self.PopulateIsodoses(patient.has_key('images'), patient['plan'], patient['dose'])
+        else:
+            self.PopulateIsodoses(patient.has_key('images'), {}, {})
+
+        if patient.has_key('dvhs'):
+            self.dvhs = patient['dvhs']
+        else:
+            self.dvhs = {}
         
         # publish the parsed data
         pub.sendMessage('patient.updated.parsed_data', patient)
@@ -245,7 +287,7 @@ class MainFrame(wx.Frame):
         self.cclbIsodoses.Clear()
 
         self.isodoseList={}
-        if has_images:
+        if (has_images and len(plan)):
             dosedata = dose.GetDoseData()
             dosemax = int(dosedata['dosemax'] * dosedata['dosegridscaling'] * 10000 / plan['rxdose'])
             self.isodoses = [{'level':dosemax, 'color':wx.Colour(120, 0, 0), 'name':'Max'},
@@ -276,11 +318,16 @@ class MainFrame(wx.Frame):
     def PopulatePlan(self, plan):
         """Populate the patient's plan information."""
 
-        if len(plan['name']):
-            self.lblPlanName.SetLabel(plan['name'])
-        elif len(plan['label']):
-            self.lblPlanName.SetLabel(plan['label'])
-        self.lblRxDose.SetLabel(str(plan['rxdose']))
+        if (len(plan) and not plan['rxdose'] == 1):
+            if plan.has_key('name'):
+                if len(plan['name']):
+                    self.lblPlanName.SetLabel(plan['name'])
+                elif len(plan['label']):
+                    self.lblPlanName.SetLabel(plan['label'])
+            self.lblRxDose.SetLabel(str(plan['rxdose']))
+        else:
+            self.lblPlanName.SetLabel('-')
+            self.lblRxDose.SetLabel('-')
 
 ############################## Structure Functions #############################
 
@@ -368,7 +415,9 @@ class MainFrame(wx.Frame):
             self.lblStructureMaxDose.SetLabel("%.3f" % self.dvhs[id]['max'])
             self.lblStructureMeanDose.SetLabel("%.3f" % self.dvhs[id]['mean'])
         else:
-            self.OnStructureUnselect()
+            self.lblStructureMinDose.SetLabel('-')
+            self.lblStructureMaxDose.SetLabel('-')
+            self.lblStructureMeanDose.SetLabel('-')
 
     def OnStructureUnselect(self):
         """Clear the properties of the selected structure."""
@@ -455,6 +504,7 @@ class MainFrame(wx.Frame):
             dlg = wx.lib.dialogs.ScrolledMessageDialog(self, msg,
                 "dicompyler License", size=(650, 550))
         dlg.ShowModal()
+        dlg.Destroy()
 
     def OnClose(self, _):
         self.Close()

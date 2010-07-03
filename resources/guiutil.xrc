@@ -15,7 +15,7 @@
               </object>
               <object class="sizeritem">
                 <object class="wxStaticText" name="lblProgress">
-                  <label>n/a                               </label>
+                  <label>Loading data...                   </label>
                 </object>
                 <option>1</option>
                 <flag>wxALIGN_CENTRE</flag>
@@ -31,7 +31,7 @@
             <object class="wxGauge" name="gaugeProgress">
               <size>100,15</size>
               <range>100</range>
-              <value>75</value>
+              <value>0</value>
               <style>wxGA_HORIZONTAL|wxGA_SMOOTH</style>
             </object>
             <flag>wxLEFT|wxRIGHT|wxEXPAND|wxALIGN_CENTRE</flag>
@@ -68,7 +68,7 @@
         <border>10</border>
       </object>
     </object>
-    <title>Loading patient data...</title>
+    <title>Loading...</title>
     <centered>1</centered>
     <style>wxCAPTION|wxSTAY_ON_TOP|wxDIALOG_MODAL</style>
   </object>

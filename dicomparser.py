@@ -80,6 +80,7 @@ class DicomParser:
         series['description'] = desc
         series['id'] = self.ds.SeriesInstanceUID
         series['study'] = self.ds.StudyInstanceUID
+        series['referenceframe'] = self.ds.FrameofReferenceUID
         
         return series
     
@@ -91,6 +92,14 @@ class DicomParser:
                 if "RTReferencedSeries" in self.ds.ReferencedFrameofReferences[0].RTReferencedStudies[0]:
                     if "SeriesInstanceUID" in self.ds.ReferencedFrameofReferences[0].RTReferencedStudies[0].RTReferencedSeries[0]:
                         return self.ds.ReferencedFrameofReferences[0].RTReferencedStudies[0].RTReferencedSeries[0].SeriesInstanceUID
+        else:
+            return ''
+
+    def GetFrameofReferenceUID(self):
+        """Determine the Frame of Reference UID of the current file."""
+
+        if 'FrameofReferenceUID' in self.ds:
+            return self.ds.FrameofReferenceUID
         else:
             return ''
 

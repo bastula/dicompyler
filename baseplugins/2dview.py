@@ -24,8 +24,8 @@ def pluginProperties():
     props['version'] = 0.1
     props['plugin_type'] = 'main'
     props['plugin_version'] = 1
-    props['min_dicom'] = []
-    props['recommended_dicom'] = ['ct', 'rtss', 'rtdose']
+    props['min_dicom'] = ['images']
+    props['recommended_dicom'] = ['images', 'rtss', 'rtdose']
 
     return props
 
@@ -75,8 +75,8 @@ class plugin2DView(wx.Panel):
             self.imagenum = len(self.images)/2
             self.structurepixlut = self.images[self.imagenum-1].GetPatientToPixelLUT()
             # Dose display depends on whether we have images loaded or not
+            self.isodoses = {}
             if msg.data.has_key('dose'):
-                self.isodoses = {}
                 self.dose = msg.data['dose']
                 self.dosedata = self.dose.GetDoseData()
                 # First get the dose grid LUT

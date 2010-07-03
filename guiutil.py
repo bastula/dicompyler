@@ -87,7 +87,7 @@ def convert_pil_to_wx(pil, alpha=True):
         image.SetData(data)
     return image
 
-def get_progress_dialog(parent, title=""):
+def get_progress_dialog(parent, title="Loading..."):
     """Function to load the progress dialog."""
 
     # Load the XRC file for our gui resources
@@ -110,6 +110,7 @@ class ProgressDialog(wx.Dialog):
         """Method called after the dialog has been initialized."""
 
         # Initialize controls
+        self.SetTitle(title)
         self.lblProgressLabel = XRCCTRL(self, 'lblProgressLabel')
         self.lblProgress = XRCCTRL(self, 'lblProgress')
         self.gaugeProgress = XRCCTRL(self, 'gaugeProgress')

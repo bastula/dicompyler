@@ -26,7 +26,7 @@ def pluginProperties():
     props['version'] = 0.4
     props['plugin_type'] = 'main'
     props['plugin_version'] = 1
-    props['min_dicom'] = ['']
+    props['min_dicom'] = []
     props['recommended_dicom'] = ['rtss', 'rtdose', 'rtss', 'ct']
 
     return props
@@ -118,6 +118,7 @@ class pluginTreeView(wx.Panel):
         self.t.start()
         # Show the progress dialog
         dlgProgress.ShowModal()
+        dlgProgress.Destroy()
         self.tlcTreeView.SetFocus()
         self.tlcTreeView.Expand(self.root)
 
