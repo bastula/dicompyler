@@ -55,6 +55,7 @@ class DicomImporterDialog(wx.Dialog):
         self.txtDicomImport = XRCCTRL(self, 'txtDicomImport')
         self.btnDicomImport = XRCCTRL(self, 'btnDicomImport')
         self.lblDirections = XRCCTRL(self, 'lblDirections')
+        self.lblDirections2 = XRCCTRL(self, 'lblDirections2')
         self.lblProgressLabel = XRCCTRL(self, 'lblProgressLabel')
         self.lblProgress = XRCCTRL(self, 'lblProgress')
         self.gaugeProgress = XRCCTRL(self, 'gaugeProgress')
@@ -80,6 +81,7 @@ class DicomImporterDialog(wx.Dialog):
             self.txtDicomImport.SetFont(font)
             self.btnDicomImport.SetFont(font)
             self.lblDirections.SetFont(font)
+            self.lblDirections2.SetFont(font)
             self.lblProgressLabel.SetFont(font)
             self.lblProgress.SetFont(font)
             self.lblProgressPercent.SetFont(font)
@@ -88,7 +90,7 @@ class DicomImporterDialog(wx.Dialog):
             self.txtRxDose.SetFont(font)
             self.lblRxDoseUnits.SetFont(font)
         font.SetWeight(wx.FONTWEIGHT_BOLD)
-        self.lblDirections.SetFont(font)
+        self.lblDirections2.SetFont(font)
         self.lblRxDose.SetFont(font)
 
         # Initialize the patients tree control
@@ -153,7 +155,9 @@ class DicomImporterDialog(wx.Dialog):
         self.lblProgressPercent.Show(True)
         self.lblProgressPercentSym.Show(True)
         self.btnSelect.Enable(False)
-        self.EnableRxDose(False)
+        # Disable Rx dose controls except on GTK due to control placement oddities
+        if not guiutil.IsGtk():
+            self.EnableRxDose(False)
 
         self.t=threading.Thread(target=self.DirectorySearchThread,
             args=(self, self.path, self.SetThreadStatus, self.OnUpdateProgress,
