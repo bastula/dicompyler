@@ -35,12 +35,41 @@
         <object class="wxStaticBoxSizer">
           <object class="sizeritem">
             <object class="wxBoxSizer">
+              <object class="spacer">
+                <size>2,0</size>
+                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+              </object>
               <object class="sizeritem">
-                <object class="wxStaticText" name="lblDirections">
-                  <label>For best compatibility, select a patient that has a CT series, RT Structure Set, RT Plan and RT Dose with DVH:</label>
+                <object class="wxStaticBitmap" name="bmpDirections">
+                  <bitmap>accept.png</bitmap>
+                </object>
+                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                <minsize>16,16</minsize>
+              </object>
+              <object class="spacer">
+                <size>2,0</size>
+                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+              </object>
+              <object class="sizeritem">
+                <object class="wxBoxSizer">
+                  <object class="sizeritem">
+                    <object class="wxStaticText" name="lblDirections">
+                      <label> For best plugin compatibility, select a patient that has the following DICOM objects:</label>
+                    </object>
+                    <option>1</option>
+                    <flag>wxALIGN_LEFT</flag>
+                  </object>
+                  <object class="sizeritem">
+                    <object class="wxStaticText" name="lblDirections2">
+                      <label> - Image series, RT Structure Set, RT Plan and RT Dose with DVH:</label>
+                    </object>
+                    <option>1</option>
+                    <flag>wxALIGN_LEFT</flag>
+                  </object>
+                  <orient>wxVERTICAL</orient>
                 </object>
                 <option>1</option>
-                <flag>wxALIGN_CENTRE</flag>
+                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
               </object>
               <orient>wxHORIZONTAL</orient>
             </object>
@@ -52,7 +81,7 @@
           <object class="sizeritem">
             <object class="wxTreeCtrl" name="tcPatients">
               <size>455,300</size>
-              <style>wxTR_HAS_BUTTONS|wxTR_LINES_AT_ROOT|wxTR_SINGLE</style>
+              <style>wxSUNKEN_BORDER|wxTR_HAS_BUTTONS|wxTR_LINES_AT_ROOT|wxTR_SINGLE</style>
             </object>
             <option>1</option>
             <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
