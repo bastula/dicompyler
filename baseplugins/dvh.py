@@ -28,7 +28,7 @@ def pluginProperties():
     props['version'] = 0.2
     props['plugin_type'] = 'main'
     props['plugin_version'] = 1
-    props['min_dicom'] = ['rtss', 'rtdose', 'rtplan']
+    props['min_dicom'] = ['rtss', 'rtdose']
     props['recommended_dicom'] = ['rtss', 'rtdose', 'rtplan']
 
     return props

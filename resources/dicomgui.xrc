@@ -37,7 +37,7 @@
             <object class="wxBoxSizer">
               <object class="sizeritem">
                 <object class="wxStaticText" name="lblDirections">
-                  <label> Select a patient that has a valid RT Structure Set, Plan and Dose with DVH:</label>
+                  <label>For best compatibility, select a patient that has a CT series, RT Structure Set, RT Plan and RT Dose with DVH:</label>
                 </object>
                 <option>1</option>
                 <flag>wxALIGN_CENTRE</flag>

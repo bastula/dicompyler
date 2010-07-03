@@ -27,9 +27,14 @@ def ImportDicom(parent):
 
     # Show the dialog and return the result
     if (dlgDicomImporter.ShowModal() == wx.ID_OK):
-        return dlgDicomImporter.GetPatient()
+        value = dlgDicomImporter.GetPatient()
     else:
-        return None
+        value = None
+    # Block until the thread is done before destroying the dialog
+    dlgDicomImporter.t.join()
+    dlgDicomImporter.Destroy()
+
+    return value
 
 class DicomImporterDialog(wx.Dialog):
     """Import DICOM RT files and return a dictionary of data."""
@@ -152,7 +157,7 @@ class DicomImporterDialog(wx.Dialog):
 
         self.t=threading.Thread(target=self.DirectorySearchThread,
             args=(self, self.path, self.SetThreadStatus, self.OnUpdateProgress,
-            self.AddPatientTree, self.AddItemTree))
+            self.AddPatientTree, self.AddPatientDataTree))
         self.t.start()
 
     def SetThreadStatus(self):
@@ -221,6 +226,7 @@ class DicomImporterDialog(wx.Dialog):
                             image['slicelocation'] = dp.ds.SliceLocation
                             image['imagenumber'] = dp.ds.InstanceNumber
                             image['series'] = seinfo['id']
+                            image['referenceframe'] = dp.GetFrameofReferenceUID()
                             patients[h]['series'][seinfo['id']]['numimages'] = \
                                 patients[h]['series'][seinfo['id']]['numimages'] + 1 
                             patients[h]['images'][image['id']] = image
@@ -240,6 +246,8 @@ class DicomImporterDialog(wx.Dialog):
                             plan = dp.GetPlan()
                             plan['id'] = dp.GetSOPInstanceUID()
                             plan['filename'] = files[n]
+                            plan['series'] = dp.ds.SeriesInstanceUID
+                            plan['referenceframe'] = dp.GetFrameofReferenceUID()
                             plan['rtss'] = dp.GetReferencedStructureSet()
                             patients[h]['plans'][plan['id']] = plan
                         # Create each RT Dose
@@ -249,6 +257,7 @@ class DicomImporterDialog(wx.Dialog):
                             dose = {}
                             dose['id'] = dp.GetSOPInstanceUID()
                             dose['filename'] = files[n]
+                            dose['referenceframe'] = dp.GetFrameofReferenceUID()
                             dose['hasdvh'] = dp.HasDVHs()
                             dose['rtss'] = dp.GetReferencedStructureSet()
                             dose['rtplan'] = dp.GetReferencedRTPlan()
@@ -375,8 +384,8 @@ class DicomImporterDialog(wx.Dialog):
 
         self.tcPatients.ExpandAll()
 
-    def AddItemTree(self, patients):
-        """Add a new item to the tree control."""
+    def AddPatientDataTree(self, patients):
+        """Add the patient data to the tree control."""
 
         # Now add the specific item to the tree
         for key, patient in self.patients.iteritems():
@@ -385,6 +394,7 @@ class DicomImporterDialog(wx.Dialog):
                 for studyid, study in patient['studies'].iteritems():
                     name = 'Study: ' + study['description']
                     study['treeid'] = self.tcPatients.AppendItem(patient['treeid'], name, 2)
+            # Search for series and images
             if patient.has_key('series'):
                 for seriesid, series in patient['series'].iteritems():
                     if patient.has_key('studies'):
@@ -399,6 +409,8 @@ class DicomImporterDialog(wx.Dialog):
                                     numimages = str(series['numimages']) + ' images)'
                                 name = name + numimages
                                 series['treeid'] = self.tcPatients.AppendItem(study['treeid'], name, 3)
+                                self.EnableItemSelection(patient, series)
+            # Search for RT Structure Sets
             if patient.has_key('structures'):
                 for structureid, structure in patient['structures'].iteritems():
                     if patient.has_key('series'):
@@ -412,6 +424,9 @@ class DicomImporterDialog(wx.Dialog):
                         # If no series were found, add the rtss to the study
                         if not foundseries:
                             structure['treeid'] = self.tcPatients.AppendItem(study['treeid'], name, 4)
+                        filearray = [structure['filename']]
+                        self.EnableItemSelection(patient, structure, filearray)
+            # Search for RT Plans
             if patient.has_key('plans'):
                 for planid, plan in patient['plans'].iteritems():
                     foundstructure = False
@@ -421,15 +436,26 @@ class DicomImporterDialog(wx.Dialog):
                             foundstructure = False
                             if (structureid == plan['rtss']):
                                 plan['treeid'] = self.tcPatients.AppendItem(structure['treeid'], name, 5)
-                                self.tcPatients.SetPyData(plan['treeid'], [plan['rxdose']])
                                 foundstructure = True
-                    # If no structures were found, add the plan to the study instead
+                    # If no structures were found, add the plan to the study/series instead
                     if not foundstructure:
-                        badstructure = self.tcPatients.AppendItem(
-                            study['treeid'], "RT Structure Set not found", 7)
+                        # If there is an image series, add a fake rtss to it
+                        foundseries = False
+                        for seriesid, series in patient['series'].iteritems():
+                            foundseries = False
+                            if (series['referenceframe'] == plan['referenceframe']):
+                                badstructure = self.tcPatients.AppendItem(
+                                    series['treeid'], "RT Structure Set not found", 7)
+                                foundseries = True
+                        # If no series were found, add the rtss to the study
+                        if not foundseries:
+                            badstructure = self.tcPatients.AppendItem(
+                                patient['treeid'], "RT Structure Set not found", 7)
                         plan['treeid'] = self.tcPatients.AppendItem(badstructure, name, 5)
                         self.tcPatients.SetItemTextColour(badstructure, wx.RED)
-                        self.tcPatients.SetPyData(plan['treeid'], [plan['rxdose']])
+                    filearray = [plan['filename']]
+                    self.EnableItemSelection(patient, plan, filearray, plan['rxdose'])
+            # Search for RT Doses
             if patient.has_key('doses'):
                 for doseid, dose in patient['doses'].iteritems():
                     foundplan = False
@@ -441,18 +467,9 @@ class DicomImporterDialog(wx.Dialog):
                                 if dose['hasdvh']:
                                     name = 'RT Dose with DVH'
                                     dose['treeid'] = self.tcPatients.AppendItem(plan['treeid'], name, 6)
-                                    if patient.has_key('structures'):
-                                        for structureid, structure in patient['structures'].iteritems():
-                                            if (structureid == dose['rtss']):
-                                                filearray = [structure['filename'], plan['filename'], dose['filename']]
-                                                # Add the respective images to the filearray if they exist
-                                                if patient.has_key('images'):
-                                                    for imageid, image in patient['images'].iteritems():
-                                                        if (image['series'] == structure['series']):
-                                                            filearray.append(image['filename'])
-                                                self.tcPatients.SetItemBold(dose['treeid'], True)
-                                                self.tcPatients.SetPyData(dose['treeid'], filearray)
-                                                self.tcPatients.SelectItem(dose['treeid'])
+                                    filearray = [dose['filename']]
+                                    self.EnableItemSelection(patient, dose, filearray)
+                                    break
                                 else:
                                     name = 'RT Dose without DVH (Not usable)'
                                     dose['treeid'] = self.tcPatients.AppendItem(plan['treeid'], name, 9)
@@ -474,8 +491,18 @@ class DicomImporterDialog(wx.Dialog):
                                     dose['treeid'] = self.tcPatients.AppendItem(badplan, name, 5)
                                     self.tcPatients.SetItemTextColour(badplan, wx.RED)
                         if not foundstructure:
-                            badstructure = self.tcPatients.AppendItem(
-                                patient['treeid'], "RT Structure Set not found", 7)
+                            # If there is an image series, add a fake rtss to it
+                            foundseries = False
+                            for seriesid, series in patient['series'].iteritems():
+                                foundseries = False
+                                if (series['referenceframe'] == dose['referenceframe']):
+                                    badstructure = self.tcPatients.AppendItem(
+                                        series['treeid'], "RT Structure Set not found", 7)
+                                    foundseries = True
+                            # If no series were found, add the rtss to the study
+                            if not foundseries:
+                                badstructure = self.tcPatients.AppendItem(
+                                    patient['treeid'], "RT Structure Set not found", 7)
                             self.tcPatients.SetItemTextColour(badstructure, wx.RED)
                             badplan = self.tcPatients.AppendItem(
                                     badstructure, "RT Plan not found", 8)
@@ -483,6 +510,9 @@ class DicomImporterDialog(wx.Dialog):
                             self.tcPatients.SetItemTextColour(badplan, wx.RED)
                         if not dose['hasdvh']:
                             self.tcPatients.SetItemTextColour(dose['treeid'], wx.RED)
+                        else:
+                            filearray = [dose['filename']]
+                            self.EnableItemSelection(patient, dose, filearray)
             # No RT Dose files were found
             else:
                 if patient.has_key('structures'):
@@ -506,18 +536,73 @@ class DicomImporterDialog(wx.Dialog):
             self.lblProgress.SetLabel(
                 str(self.lblProgress.GetLabel()).replace(' Reading DICOM data...', ''))
 
+    def EnableItemSelection(self, patient, item, filearray = [], rxdose = None):
+        """Enable an item to be selected in the tree control."""
+
+        # Add the respective images to the filearray if they exist
+        if patient.has_key('images'):
+            for imageid, image in patient['images'].iteritems():
+                appendImage = False
+                # used for image series
+                if item.has_key('id'):
+                    if (item['id'] == image['series']):
+                        appendImage = True
+                # used for RT structure set
+                if item.has_key('series'):
+                    if (item['series'] == image['series']):
+                        appendImage = True
+                # used for RT plan / dose
+                if item.has_key('referenceframe'):
+                    if (item['referenceframe'] == image['referenceframe']):
+                        appendImage = True
+                if appendImage:
+                    filearray.append(image['filename'])
+        # Add the respective rtss files to the filearray if they exist
+        if patient.has_key('structures'):
+            for structureid, structure in patient['structures'].iteritems():
+                if item.has_key('rtss'):
+                    if (structureid == item['rtss']):
+                        filearray.append(structure['filename'])
+        # Add the respective rtplan files to the filearray if they exist
+        if patient.has_key('plans'):
+            for planid, plan in patient['plans'].iteritems():
+                if item.has_key('rtplan'):
+                    if (planid == item['rtplan']):
+                        filearray.append(plan['filename'])
+
+        if not rxdose:
+            self.tcPatients.SetPyData(item['treeid'], {'filearray':filearray})
+        else:
+            self.tcPatients.SetPyData(item['treeid'], {'filearray':filearray, 'rxdose':rxdose})
+        self.tcPatients.SetItemBold(item['treeid'], True)
+        self.tcPatients.SelectItem(item['treeid'])
+
     def OnSelectTreeItem(self, evt):
         """Update the interface when the selected item has changed."""
 
         item = evt.GetItem()
+        # Disable the rx dose message and select button by default
         self.EnableRxDose(False)
         self.btnSelect.Enable(False)
+        # If the item has data, check to see whether there is an rxdose
         if not (self.tcPatients.GetPyData(item) ==  None):
-            if (len(self.tcPatients.GetPyData(item)) > 1):
-                self.btnSelect.Enable()
+            data = self.tcPatients.GetPyData(item)
+            self.btnSelect.Enable()
+            rxdose = 0
+            if data.has_key('rxdose'):
+                rxdose = data['rxdose']
+            else:
                 parent = self.tcPatients.GetItemParent(item)
-                self.txtRxDose.SetValue(self.tcPatients.GetPyData(parent)[0])
-                if (self.tcPatients.GetPyData(parent) == [0]):
+                parentdata = self.tcPatients.GetPyData(parent)
+                if not (parentdata == None):
+                    if parentdata.has_key('rxdose'):
+                        rxdose = parentdata['rxdose']
+            # Show the rxdose text box if no rxdose was found
+            # and if it is an RT plan or RT dose file
+            self.txtRxDose.SetValue(rxdose)
+            if (rxdose == 0):
+                if (self.tcPatients.GetItemText(item).startswith('RT Plan') or
+                    self.tcPatients.GetItemText(parent).startswith('RT Plan')):
                     self.EnableRxDose(True)
 
     def EnableRxDose(self, value):
@@ -530,7 +615,7 @@ class DicomImporterDialog(wx.Dialog):
 
         # if set to hide, reset the rx dose
         if not value:
-            self.txtRxDose.SetValue(0.1)
+            self.txtRxDose.SetValue(1)
 
     def GetPatientData(self, path, filearray, RxDose, terminate, progressFunc):
         """Get the data of the selected patient from the DICOM importer dialog."""
@@ -544,6 +629,7 @@ class DicomImporterDialog(wx.Dialog):
             dp = dicomparser.DicomParser(filename=dcmfile)
             if (n == 0):
                 self.patient = {}
+                self.patient['rxdose'] = RxDose
             if (dp.GetSOPClassUID() == 'ct'):
                 if not self.patient.has_key('images'):
                     self.patient['images'] = []
@@ -552,7 +638,6 @@ class DicomImporterDialog(wx.Dialog):
                 self.patient['rtss'] = dp.ds
             elif (dp.GetSOPClassUID() == 'rtplan'):
                 self.patient['rtplan'] = dp.ds
-                self.patient['rxdose'] = RxDose
             elif (dp.GetSOPClassUID() == 'rtdose'):
                 self.patient['rtdose'] = dp.ds
             wx.CallAfter(progressFunc, n, len(filearray), 'Importing patient. Please wait...')
@@ -576,7 +661,7 @@ class DicomImporterDialog(wx.Dialog):
             is pressed."""
         item = self.tcPatients.GetSelection()
         if (threading.activeCount() == 1):
-            if self.tcPatients.GetPyData(item) :
+            if self.tcPatients.GetPyData(item):
                 # Since we have decided to use this location to import from,
                 # save the location back to the db for the next session,
                 # only if the path has not changed from the previous session
@@ -585,7 +670,7 @@ class DicomImporterDialog(wx.Dialog):
                     path.value=self.path
                     session.commit()
 
-                filearray = self.tcPatients.GetPyData(item)
+                filearray = self.tcPatients.GetPyData(item)['filearray']
                 self.btnSelect.Enable(False)
                 self.txtRxDose.Enable(False)
                 self.terminate = False
