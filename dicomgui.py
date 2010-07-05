@@ -142,6 +142,7 @@ class DicomImporterDialog(wx.Dialog):
             self.path = dlg.GetPath()
             self.txtDicomImport.SetValue(self.path)
 
+        dlg.Destroy()
         self.OnDirectorySearch()
 
     def OnDirectorySearch(self):

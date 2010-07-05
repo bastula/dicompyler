@@ -81,11 +81,6 @@ class MainFrame(wx.Frame):
         # Load the menu for the frame
         menuMain = self.res.LoadMenuBar('menuMain')
 
-        # Setup Help menu
-        menuAbout = XRCCTRL(self, 'menuAbout')
-        menuHomepage = XRCCTRL(self, 'menuHomepage')
-        menuLicense = XRCCTRL(self, 'menuLicense')
-
         # If we are running on Mac OS X, alter the menu location
         if guiutil.IsMac():
             wx.App_SetMacAboutMenuItemId(XRCID('menuAbout'))
@@ -93,6 +88,9 @@ class MainFrame(wx.Frame):
 
         # Set the menu as the default menu for this frame
         self.SetMenuBar(menuMain)
+
+        # Setup Plugins menu
+        self.menuPlugins = menuMain.FindItemById(XRCID('menuPluginManager')).GetMenu()
 
         # Bind menu events to the proper methods
         wx.EVT_MENU(self, XRCID('menuOpen'), self.OnOpenPatient)
@@ -133,8 +131,9 @@ class MainFrame(wx.Frame):
         self.notebookTools.AddPage(self.cclbStructures, 'Structures')
         self.notebookTools.AddPage(self.cclbIsodoses, 'Isodoses')
 
-        # Load plugins
+        # Load and initialize plugins
         self.plugins = plugin.import_plugins()
+        self.menuDict = {}
 
         # Set up pubsub
         pub.subscribe(self.OnLoadPatientData, 'patient.updated.raw_data')
@@ -150,33 +149,47 @@ class MainFrame(wx.Frame):
 
         self.ptdata = dicomgui.ImportDicom(self)
         if not (self.ptdata == None):
-            # Set up the plugins for each plugin entry point of dicompyler
+            # Delete the previous notebook pages
             self.notebook.DeleteAllPages()
-            for p in self.plugins:
+            # Delete the previous menus
+            if len(self.menuDict):
+                self.menuPlugins.Delete(wx.ID_SEPARATOR)
+                for menuid, menu in self.menuDict.iteritems():
+                    self.menuPlugins.Delete(menuid)
+                self.menuDict = {}
+            # Set up the plugins for each plugin entry point of dicompyler
+            for i, p in enumerate(self.plugins):
                 props = p.pluginProperties()
                 # Only load plugin versions that are qualified
                 if (props['plugin_version'] == 1):
-                    # Load the main panel plugins
-                    if (props['plugin_type'] == 'main'):
-                        # Check whether the plugin can view the loaded DICOM data
-                        addToNotebook = False
-                        if len(props['min_dicom']):
-                            for key in props['min_dicom']:
-                                if (key == 'rxdose'):
-                                    pass
-                                elif key in self.ptdata.keys():
-                                    addToNotebook = True
-                                else:
-                                    addToNotebook = False
-                                    break
-                        # Plugin can view all DICOM data so always load it
-                        else:
-                            addToNotebook = True
-                        # Initialize the notebook tabs
-                        if addToNotebook:
+                    # Check whether the plugin can view the loaded DICOM data
+                    add = False
+                    if len(props['min_dicom']):
+                        for key in props['min_dicom']:
+                            if (key == 'rxdose'):
+                                pass
+                            elif key in self.ptdata.keys():
+                                add = True
+                            else:
+                                add = False
+                                break
+                    # Plugin can view all DICOM data so always load it
+                    else:
+                        add = True
+                    # Initialize the plugin
+                    if add:
+                        # Load the main panel plugins
+                        if (props['plugin_type'] == 'main'):
                             self.notebook.AddPage(
                                 p.pluginLoader(self.notebook),
                                 props['name'])
+                        # Load the menu plugins
+                        if (props['plugin_type'] == 'menu'):
+                            if not len(self.menuDict):
+                                self.menuPlugins.AppendSeparator()
+                            self.menuDict[100+i] = self.menuPlugins.Append(100+i, props['name']+'...')
+                            plugin = p.plugin(self)
+                            wx.EVT_MENU(self, 100+i, plugin.pluginMenu)
             pub.sendMessage('patient.updated.raw_data', self.ptdata)
 
     def OnLoadPatientData(self, msg):
