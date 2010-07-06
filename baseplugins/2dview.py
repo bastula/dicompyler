@@ -59,6 +59,8 @@ class plugin2DView(wx.Panel):
         # Initialize variables
         self.images = []
         self.structures = {}
+        self.window = 0
+        self.level = 0
 
         # Set up pubsub
         pub.subscribe(self.OnUpdatePatient, 'patient.updated.parsed_data')
@@ -73,7 +75,21 @@ class plugin2DView(wx.Panel):
             self.images = msg.data['images']
             # Set the first image to the middle of the series
             self.imagenum = len(self.images)/2
-            self.structurepixlut = self.images[self.imagenum-1].GetPatientToPixelLUT()
+            image = self.images[self.imagenum-1]
+            self.structurepixlut = image.GetPatientToPixelLUT()
+            # Determine the default window and level of the series
+            if ('WindowWidth' in image.ds) and ('WindowCenter' in image.ds):
+                self.window = image.ds.WindowWidth
+                self.level = image.ds.WindowCenter
+            else:
+                wmax = 0
+                wmin = 0
+                if (image.ds.pixel_array.max() > wmax):
+                    wmax = image.ds.pixel_array.max()
+                if (image.ds.pixel_array.min() < wmin):
+                    wmin = image.ds.pixel_array.min()
+                self.window = int(abs(wmax) + abs(wmin))
+                self.level = int(self.window / 2 - abs(wmin))
             # Dose display depends on whether we have images loaded or not
             self.isodoses = {}
             if msg.data.has_key('dose'):
@@ -262,7 +278,7 @@ class plugin2DView(wx.Panel):
                 gc.DrawRectangle(0, 0, width, height)
 
             image = guiutil.convert_pil_to_wx(
-                self.images[self.imagenum-1].GetImage())
+                self.images[self.imagenum-1].GetImage(self.window, self.level))
             bmp = wx.BitmapFromImage(image)
             bwidth, bheight = bmp.GetSize()
 
