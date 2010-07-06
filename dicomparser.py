@@ -147,6 +147,8 @@ class DicomParser:
         data['pixelspacing'] = self.ds.PixelSpacing
         data['rows'] = self.ds.Rows
         data['columns'] = self.ds.Columns
+        if 'PatientPosition' in self.ds:
+            data['patientposition'] = self.ds.PatientPosition
 
         return data
 
