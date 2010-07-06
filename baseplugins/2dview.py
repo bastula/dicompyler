@@ -127,7 +127,7 @@ class plugin2DView(wx.Panel):
         self.SetFocus()
         self.Refresh()
 
-    def DrawStructure(self, structure, gc, position):
+    def DrawStructure(self, structure, gc, position, prone):
         """Draw the given structure on the panel."""
 
         # Draw the structure only if the structure has contours
@@ -148,7 +148,7 @@ class plugin2DView(wx.Panel):
                     path = gc.CreatePath()
                     # Convert the structure data to pixel data
                     pixeldata = self.GetContourPixelData(
-                        self.structurepixlut, contour['contourData'])
+                        self.structurepixlut, contour['contourData'], prone)
 
                     # Move the origin to the first point of the contour
                     point = pixeldata[0]
@@ -212,7 +212,7 @@ class plugin2DView(wx.Panel):
             # Draw the path
             gc.DrawPath(path)
 
-    def GetContourPixelData(self, pixlut, contour):
+    def GetContourPixelData(self, pixlut, contour, prone = False):
         """Convert structure data into pixel data using the patient to pixel LUT."""
 
         pixeldata = []
@@ -220,10 +220,14 @@ class plugin2DView(wx.Panel):
         # look up the value in the LUT and find the corresponding pixel pair
         for p, point in enumerate(contour):
             for xv, xval in enumerate(pixlut[0]):
-                if (xval > point[0]):
+                if (xval > point[0] and not prone):
+                    break
+                elif (xval < point[0] and prone):
                     break
             for yv, yval in enumerate(pixlut[1]):
-                if (yval > point[1]):
+                if (yval > point[1] and not prone):
+                    break
+                elif (yval < point[1] and prone):
                     break
             pixeldata.append((xv, yv))
 
@@ -290,8 +294,13 @@ class plugin2DView(wx.Panel):
             # Draw the structures if present
             imdata = self.images[self.imagenum-1].GetImageData()
             z = '%.2f' % imdata['position'][2]
+            # Determine whether the patient is prone or supine
+            if 'p' in imdata['patientposition'].lower():
+                prone = True
+            else:
+                prone = False
             for id, structure in self.structures.iteritems():
-                self.DrawStructure(structure, gc, Decimal(z))
+                self.DrawStructure(structure, gc, Decimal(z), prone)
 
             # Draw the isodoses if present
             for id, isodose in iter(sorted(self.isodoses.iteritems())):
