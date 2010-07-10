@@ -127,6 +127,10 @@ class MainFrame(wx.Frame):
         if not os.path.isfile(dbpath):
             create_all()
 
+        # Initialize the welcome notebook tab
+        panelWelcome = self.res.LoadPanel(self.notebook, 'panelWelcome')
+        self.notebook.AddPage(panelWelcome, 'Welcome')
+
         # Initialize the tools notebook
         self.notebookTools.AddPage(self.cclbStructures, 'Structures')
         self.notebookTools.AddPage(self.cclbIsodoses, 'Isodoses')
@@ -483,12 +487,12 @@ class MainFrame(wx.Frame):
         # First we create and fill the info object
         info = wx.AboutDialogInfo()
         info.Name = "dicompyler"
-        info.Version = "0.1"
+        info.Version = "0.2"
         info.Copyright = u"© 2009-2010 Aditya Panchal"
         credits = util.get_credits()
         info.Developers = credits['developers']
         info.Artists = credits['artists']
-        desc =  "Python application to view and modify DICOM and DICOM-RT files." + \
+        desc =  "A Python based radiation therapy research platform using the DICOM standard." + \
                 "\n\ndicompyler is released under a BSD license.\n" + \
                 "See the Help menu for license information."
         info.Description = desc
