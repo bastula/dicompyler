@@ -139,6 +139,8 @@ class pluginDVH(wx.Panel):
             self.structureid = msg.data['id']
             if self.dvhdata.has_key(self.structureid):
                 self.OnToggleConstraints(None)
+            else:
+                self.EnableConstraints(False)
 
     def EnableConstraints(self, value):
         """Enable or disable the constraint selector."""
@@ -154,6 +156,15 @@ class pluginDVH(wx.Panel):
 
     def OnToggleConstraints(self, evt):
         """Switch between different constraint modes."""
+
+        # Replot the remaining structures and disable the constraints
+        # if a structure that has no DVH calculated is selected
+        if not self.dvhs.has_key(self.structureid):
+            self.guiDVH.Replot(self.dvharray, self.checkedstructures)
+            self.EnableConstraints(False)
+            return
+        else:
+            self.EnableConstraints(True)
 
         # Check if the function was called via an event or not
         if not (evt == None):
