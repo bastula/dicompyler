@@ -141,6 +141,7 @@ class pluginDVH(wx.Panel):
                 self.OnToggleConstraints(None)
             else:
                 self.EnableConstraints(False)
+                self.guiDVH.Replot(self.dvharray, self.checkedstructures)
 
     def EnableConstraints(self, value):
         """Enable or disable the constraint selector."""
@@ -153,6 +154,7 @@ class pluginDVH(wx.Panel):
         if not value:
             self.lblConstraintUnits.SetLabel('-            ')
             self.lblConstraintPercent.SetLabel('-            ')
+            self.txtConstraint.SetValue(0)
 
     def OnToggleConstraints(self, evt):
         """Switch between different constraint modes."""
