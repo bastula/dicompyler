@@ -89,8 +89,6 @@ class pluginDVH(wx.Panel):
         self.plan = {} # used for rx dose
         self.structureid = 1 # used to indicate current constraint structure
 
-        self.EnableConstraints(False)
-
         # Set up pubsub
         pub.subscribe(self.OnUpdatePatient, 'patient.updated.parsed_data')
         pub.subscribe(self.OnStructureCheck, 'structures.checked')
@@ -104,6 +102,7 @@ class pluginDVH(wx.Panel):
         self.plan = msg.data['plan']
         # show an empty plot when (re)loading a patient
         self.guiDVH.Replot()
+        self.EnableConstraints(False)
 
     def OnStructureCheck(self, msg):
         """When a structure changes, update the interface and plot."""
@@ -155,6 +154,7 @@ class pluginDVH(wx.Panel):
             self.lblConstraintUnits.SetLabel('-            ')
             self.lblConstraintPercent.SetLabel('-            ')
             self.txtConstraint.SetValue(0)
+            self.sliderConstraint.SetValue(0)
 
     def OnToggleConstraints(self, evt):
         """Switch between different constraint modes."""
