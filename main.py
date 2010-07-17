@@ -297,6 +297,8 @@ class MainFrame(wx.Frame):
         # after adding each structure
         self.cclbStructures.Layout()
         self.choiceStructure.Clear()
+        self.choiceStructure.Enable(False)
+        self.OnStructureUnselect()
 
     def PopulateIsodoses(self, has_images, plan, dose):
         """Populate the isodose list."""
