@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <resource>
-  <object class="wxPanel" name="pluginDVH" subclass="baseplugins.dvh.pluginDVH">
+  <object class="wxPanel" name="pluginDVH" subclass="dvh.pluginDVH">
     <object class="wxBoxSizer">
       <object class="sizeritem">
         <object class="wxBoxSizer">
