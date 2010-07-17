@@ -12,6 +12,7 @@ import os, threading
 import wx
 from wx.xrc import *
 import wx.lib.dialogs, webbrowser
+from wx.lib.pubsub import setupv1
 from wx.lib.pubsub import Publisher as pub
 from model import *
 import guiutil, util
