@@ -476,15 +476,16 @@ class DicomImporterDialog(wx.Dialog):
                                     self.EnableItemSelection(patient, dose, filearray)
                                     break
                                 else:
-                                    name = 'RT Dose without DVH (Not usable)'
+                                    name = 'RT Dose without DVH or Differential DVH'
                                     dose['treeid'] = self.tcPatients.AppendItem(plan['treeid'], name, 9)
-                                    self.tcPatients.SetItemTextColour(dose['treeid'], wx.RED)
+                                    filearray = [dose['filename']]
+                                    self.EnableItemSelection(patient, dose, filearray)
                     # If no plans were found, add the dose to the structure/study instead
                     if not foundplan:
                         if dose['hasdvh']:
                             name = 'RT Dose with DVH'
                         else:
-                            name = 'RT Dose without DVH (Not usable)'
+                            name = 'RT Dose without DVH or Differential DVH'
                         foundstructure = False
                         if patient.has_key('structures'):
                             for structureid, structure in patient['structures'].iteritems():
@@ -513,9 +514,6 @@ class DicomImporterDialog(wx.Dialog):
                                     badstructure, "RT Plan not found", 8)
                             dose['treeid'] = self.tcPatients.AppendItem(badplan, name, 5)
                             self.tcPatients.SetItemTextColour(badplan, wx.RED)
-                        if not dose['hasdvh']:
-                            self.tcPatients.SetItemTextColour(dose['treeid'], wx.RED)
-                        else:
                             filearray = [dose['filename']]
                             self.EnableItemSelection(patient, dose, filearray)
             # No RT Dose files were found
@@ -568,13 +566,20 @@ class DicomImporterDialog(wx.Dialog):
                 if item.has_key('rtss'):
                     if (structureid == item['rtss']):
                         filearray.append(structure['filename'])
+                        break
+                # If no referenced rtss, but ref'd rtplan, check rtplan->rtss
+                if item.has_key('rtplan'):
+                    for planid, plan in patient['plans'].iteritems():
+                        if (planid == item['rtplan']):
+                            if plan.has_key('rtss'):
+                                if (structureid == plan['rtss']):
+                                    filearray.append(structure['filename'])
         # Add the respective rtplan files to the filearray if they exist
         if patient.has_key('plans'):
             for planid, plan in patient['plans'].iteritems():
                 if item.has_key('rtplan'):
                     if (planid == item['rtplan']):
                         filearray.append(plan['filename'])
-
         if not rxdose:
             self.tcPatients.SetPyData(item['treeid'], {'filearray':filearray})
         else:

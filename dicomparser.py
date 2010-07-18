@@ -307,7 +307,12 @@ class DicomParser:
     def HasDVHs(self):
         """Returns whether dose-volume histograms (DVHs) exist."""
 
-        return "DVHs" in self.ds
+        if not "DVHs" in self.ds:
+            return False
+        elif not (self.ds.DVHs[0].DVHType == 'CUMULATIVE'):
+            return False
+        else:
+            return True
 
     def GetDVHs(self):
         """Returns the dose-volume histograms (DVHs)."""
