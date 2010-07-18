@@ -16,17 +16,28 @@ import guiutil, util
 def import_plugins():
     """Find and import available plugins."""
 
-    bppath = util.GetBasePluginsPath('')
+    # Get the base plugin path
+    basepath = util.GetBasePluginsPath('')
+    # Get the user plugin path
+    datapath = guiutil.get_data_dir()
+    userpath = os.path.join(datapath, 'plugins')
+    # Get the list of possible plugins from both paths
+    possibleplugins = []
+    for i in os.listdir(userpath):
+        possibleplugins.append(i)
+    for i in os.listdir(basepath):
+        possibleplugins.append(i)
+
     modules = []
     plugins = []
-    for file in os.listdir(bppath):
+    for file in possibleplugins:
         module = file.split('.')[0]
         if module not in modules:
             if not ((module == "__init__") or (module == "")):
                 # only try to import the module once
                 modules.append(module)
                 try:
-                    f, filename, description = imp.find_module(module, [bppath])
+                    f, filename, description = imp.find_module(module, [userpath, basepath])
                 except (ImportError):
                     # Not able to find module so pass
                     pass
