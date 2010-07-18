@@ -12,7 +12,8 @@ import os, threading
 import wx
 from wx.xrc import *
 import wx.lib.dialogs, webbrowser
-from wx.lib.pubsub import setupv1
+# Uncomment line to setup pubsub for frozen targets on wxPython 2.8.11 and above
+# from wx.lib.pubsub import setupv1
 from wx.lib.pubsub import Publisher as pub
 from model import *
 import guiutil, util
@@ -137,6 +138,9 @@ class MainFrame(wx.Frame):
         self.notebookTools.AddPage(self.cclbIsodoses, 'Isodoses')
 
         # Load and initialize plugins
+        userpluginpath = os.path.join(datapath, 'plugins')
+        if not os.path.exists(userpluginpath):
+            os.mkdir(userpluginpath)
         self.plugins = plugin.import_plugins()
         self.menuDict = {}
 
