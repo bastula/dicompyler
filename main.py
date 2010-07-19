@@ -109,7 +109,11 @@ class MainFrame(wx.Frame):
         # Bind interface events to the proper methods
         wx.EVT_TOOL(self, XRCID('toolOpen'), self.OnOpenPatient)
         wx.EVT_CHOICE(self, XRCID('choiceStructure'), self.OnStructureSelect)
+        # Events to work around a focus bug in Windows
         self.notebook.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
+        self.notebook.Bind(wx.EVT_MOUSEWHEEL, self.OnMouseWheel)
+        self.notebookTools.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
+        self.notebookTools.Bind(wx.EVT_MOUSEWHEEL, self.OnMouseWheel)
 
         self.SetSizer(mainGrid)
         self.Layout()
@@ -484,6 +488,14 @@ class MainFrame(wx.Frame):
 
         if guiutil.IsMSWindows():
             pub.sendMessage('main.key_down', evt)
+
+    def OnMouseWheel(self, evt):
+        """Capture the mousewheel event when the notebook tab is focused.
+            Currently this is used to workaround a bug in Windows since the
+            notebook tab instead of the panel receives focus."""
+
+        if guiutil.IsMSWindows():
+            pub.sendMessage('main.mousewheel', evt)
 
     def OnPluginManager(self, evt):
         """Load and show the Dicom RT Importer dialog box."""

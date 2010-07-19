@@ -55,6 +55,7 @@ class plugin2DView(wx.Panel):
         self.Bind(wx.EVT_PAINT, self.OnPaint)
         self.Bind(wx.EVT_SIZE, self.OnSize)
         self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
+        self.Bind(wx.EVT_MOUSEWHEEL, self.OnMouseWheel)
 
         # Initialize variables
         self.images = []
@@ -67,6 +68,7 @@ class plugin2DView(wx.Panel):
         pub.subscribe(self.OnStructureCheck, 'structures.checked')
         pub.subscribe(self.OnIsodoseCheck, 'isodoses.checked')
         pub.subscribe(self.OnKeyDown, 'main.key_down')
+        pub.subscribe(self.OnMouseWheel, 'main.mousewheel')
 
     def OnUpdatePatient(self, msg):
         """Update and load the patient data."""
@@ -355,3 +357,27 @@ class plugin2DView(wx.Panel):
             if (keyname == wx.WXK_END):
                 self.imagenum = len(self.images)
                 self.Refresh()
+
+    def OnMouseWheel(self, evt):
+        """Change the image when the user scrolls the mouse wheel."""
+
+        # Needed to work around a bug in Windows. See main.py for more details.
+        if guiutil.IsMSWindows():
+            try:
+                evt = evt.data
+            except AttributeError:
+                delta = evt.GetWheelDelta()
+                rot = evt.GetWheelRotation()
+
+        if len(self.images):
+            delta = evt.GetWheelDelta()
+            rot = evt.GetWheelRotation()
+            rot = rot/delta
+            if (rot >= 1):
+                if (self.imagenum > 1):
+                    self.imagenum -= 1
+                    self.Refresh()
+            if (rot <= -1):
+                if (self.imagenum < len(self.images)):
+                    self.imagenum += 1
+                    self.Refresh()
