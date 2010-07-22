@@ -109,6 +109,7 @@ class MainFrame(wx.Frame):
         # Bind interface events to the proper methods
         wx.EVT_TOOL(self, XRCID('toolOpen'), self.OnOpenPatient)
         wx.EVT_CHOICE(self, XRCID('choiceStructure'), self.OnStructureSelect)
+        self.notebook.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.OnPageChanged)
         # Events to work around a focus bug in Windows
         self.notebook.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
         self.notebook.Bind(wx.EVT_MOUSEWHEEL, self.OnMouseWheel)
@@ -480,6 +481,23 @@ class MainFrame(wx.Frame):
         pub.sendMessage('isodoses.checked', self.isodoseList)
 
 ################################ Other Functions ###############################
+
+    def OnPageChanged(self, evt):
+        """Notify each notebook tab whether it has the focus or not."""
+
+        # Determine the new tab
+        new = evt.GetSelection()
+        page = self.notebook.GetPage(new)
+        # Notify the new tab that it has focus
+        if hasattr(page, 'OnFocus'):
+            page.OnFocus()
+        # For all other tabs, notify that they don't have focus anymore
+        for i in range(self.notebook.GetPageCount()):
+            if not (new == i):
+                otherpage = self.notebook.GetPage(i)
+                if hasattr(otherpage, 'OnUnfocus'):
+                    otherpage.OnUnfocus()
+        evt.Skip()
 
     def OnKeyDown(self, evt):
         """Capture the keypress when the notebook tab is focused.
