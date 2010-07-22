@@ -54,8 +54,6 @@ class plugin2DView(wx.Panel):
         # Bind ui events to the proper methods
         self.Bind(wx.EVT_PAINT, self.OnPaint)
         self.Bind(wx.EVT_SIZE, self.OnSize)
-        self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
-        self.Bind(wx.EVT_MOUSEWHEEL, self.OnMouseWheel)
 
         # Initialize variables
         self.images = []
@@ -67,8 +65,6 @@ class plugin2DView(wx.Panel):
         pub.subscribe(self.OnUpdatePatient, 'patient.updated.parsed_data')
         pub.subscribe(self.OnStructureCheck, 'structures.checked')
         pub.subscribe(self.OnIsodoseCheck, 'isodoses.checked')
-        pub.subscribe(self.OnKeyDown, 'main.key_down')
-        pub.subscribe(self.OnMouseWheel, 'main.mousewheel')
 
     def OnUpdatePatient(self, msg):
         """Update and load the patient data."""
@@ -114,6 +110,22 @@ class plugin2DView(wx.Panel):
         # Set the focus to this panel so we can capture key events
         self.SetFocus()
         self.Refresh()
+
+    def OnFocus(self):
+        """Bind to certain events when the plugin is focused."""
+
+        self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
+        self.Bind(wx.EVT_MOUSEWHEEL, self.OnMouseWheel)
+        pub.subscribe(self.OnKeyDown, 'main.key_down')
+        pub.subscribe(self.OnMouseWheel, 'main.mousewheel')
+
+    def OnUnfocus(self):
+        """Unbind to certain events when the plugin is unfocused."""
+
+        self.Unbind(wx.EVT_KEY_DOWN)
+        self.Unbind(wx.EVT_MOUSEWHEEL)
+        pub.unsubscribe(self.OnKeyDown)
+        pub.unsubscribe(self.OnMouseWheel)
 
     def OnStructureCheck(self, msg):
         """When the structure list changes, update the panel."""
