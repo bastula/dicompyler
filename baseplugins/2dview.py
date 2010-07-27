@@ -54,12 +54,26 @@ class plugin2DView(wx.Panel):
         # Bind ui events to the proper methods
         self.Bind(wx.EVT_PAINT, self.OnPaint)
         self.Bind(wx.EVT_SIZE, self.OnSize)
+        self.Bind(wx.EVT_WINDOW_DESTROY, self.OnDestroy)
 
         # Initialize variables
         self.images = []
         self.structures = {}
         self.window = 0
         self.level = 0
+        self.zoom = 1
+
+        # Setup toolbar controls
+        if guiutil.IsGtk():
+            import gtk
+            zoominbmp = wx.ArtProvider_GetBitmap(gtk.STOCK_ZOOM_IN, wx.ART_OTHER, (24, 24))
+            zoomoutbmp = wx.ArtProvider_GetBitmap(gtk.STOCK_ZOOM_OUT, wx.ART_OTHER, (24, 24))
+        else:
+            zoominbmp = wx.Bitmap(util.GetResourcePath('magnifier_zoom_in.png'))
+            zoomoutbmp = wx.Bitmap(util.GetResourcePath('magnifier_zoom_out.png'))
+        self.tools = []
+        self.tools.append({'label':"Zoom In", 'bmp':zoominbmp, 'shortHelp':"Zoom In", 'eventhandler':self.OnZoomIn})
+        self.tools.append({'label':"Zoom Out", 'bmp':zoomoutbmp, 'shortHelp':"Zoom Out", 'eventhandler':self.OnZoomOut})
 
         # Set up pubsub
         pub.subscribe(self.OnUpdatePatient, 'patient.updated.parsed_data')
@@ -114,6 +128,7 @@ class plugin2DView(wx.Panel):
     def OnFocus(self):
         """Bind to certain events when the plugin is focused."""
 
+        # Bind keyboard and mouse events
         self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
         self.Bind(wx.EVT_MOUSEWHEEL, self.OnMouseWheel)
         pub.subscribe(self.OnKeyDown, 'main.key_down')
@@ -122,10 +137,19 @@ class plugin2DView(wx.Panel):
     def OnUnfocus(self):
         """Unbind to certain events when the plugin is unfocused."""
 
+        # Unbind keyboard and mouse events
         self.Unbind(wx.EVT_KEY_DOWN)
         self.Unbind(wx.EVT_MOUSEWHEEL)
         pub.unsubscribe(self.OnKeyDown)
         pub.unsubscribe(self.OnMouseWheel)
+
+    def OnDestroy(self, evt):
+        """Unbind to all events before the plugin is destroyed."""
+
+        pub.unsubscribe(self.OnUpdatePatient)
+        pub.unsubscribe(self.OnStructureCheck)
+        pub.unsubscribe(self.OnIsodoseCheck)
+        self.OnUnfocus()
 
     def OnStructureCheck(self, msg):
         """When the structure list changes, update the panel."""
@@ -289,6 +313,11 @@ class plugin2DView(wx.Panel):
 
         # If we have images loaded, process and show the image
         if len(self.images):
+            # Save the original drawing state
+            gc.PushState()
+            # Scale the image by the zoom factor
+            gc.Scale(self.zoom, self.zoom)
+
             # Redraw the background on Windows
             if guiutil.IsMSWindows():
                 gc.SetBrush(wx.Brush(wx.Colour(0, 0, 0)))
@@ -301,9 +330,9 @@ class plugin2DView(wx.Panel):
             bwidth, bheight = bmp.GetSize()
 
             # Center the image
-            gc.Translate((width-bwidth)/2, (height-bheight)/2)
-            gc.DrawBitmap(bmp,
-                0, 0, bwidth, bheight)
+            gc.Translate((width-bwidth*self.zoom)/(2*self.zoom),
+                         (height-bheight*self.zoom)/(2*self.zoom))
+            gc.DrawBitmap(bmp, 0, 0, bwidth, bheight)
 
             # Draw the structures if present
             imdata = self.images[self.imagenum-1].GetImageData()
@@ -320,8 +349,8 @@ class plugin2DView(wx.Panel):
             for id, isodose in iter(sorted(self.isodoses.iteritems())):
                 self.DrawIsodose(isodose, gc, self.imagenum)
 
-            # Reset the origin for the text elements
-            gc.Translate(-(width-bwidth)/2, -(height-bheight)/2)
+            # Restore the translation and scaling
+            gc.PopState()
 
             # Prepare the font for drawing the information text
             font = wx.SystemSettings.GetFont(wx.SYS_DEFAULT_GUI_FONT)
@@ -331,15 +360,37 @@ class plugin2DView(wx.Panel):
 
             # Draw the information text
             imtext = "Image: " + str(self.imagenum) + "/" + str(len(self.images))
+            te = gc.GetFullTextExtent(imtext)
             gc.DrawText(imtext, 10, 7)
             impos = "Position: " + str(z) + " mm"
-            gc.DrawText(impos, 10, height-17)
+            gc.DrawText(impos, 10, 7+te[1]*1.1)
+            if ("%.3f" % self.zoom == "1.000"):
+                zoom = "1"
+            else:
+                zoom = "%.3f" % self.zoom
+            imzoom = "Zoom: " + zoom + ":1"
+            gc.DrawText(imzoom, 10, height-17)
+            imzoom = "Image Size: " + str(bheight) + "x" + str(bheight) + " px"
+            gc.DrawText(imzoom, 10, height-17-te[1]*1.1)
 
     def OnSize(self, evt):
         """Refresh the view when the size of the panel changes."""
 
         self.Refresh()
         evt.Skip()
+
+    def OnZoomIn(self, evt):
+        """Zoom the view in."""
+
+        self.zoom = self.zoom * 1.1
+        self.Refresh()
+
+    def OnZoomOut(self, evt):
+        """Zoom the view out."""
+
+        if (self.zoom > 1):
+            self.zoom = self.zoom / 1.1
+            self.Refresh()
 
     def OnKeyDown(self, evt):
         """Change the image when the user presses the appropriate keys."""
@@ -355,6 +406,8 @@ class plugin2DView(wx.Panel):
             keyname = evt.GetKeyCode()
             prevkey = [wx.WXK_UP, wx.WXK_PAGEUP]
             nextkey = [wx.WXK_DOWN, wx.WXK_PAGEDOWN]
+            zoominkey = [43, 61] # Keys: +, =
+            zoomoutkey = [45, 95] # Keys: -, _
             if (keyname in prevkey):
                 if (self.imagenum > 1):
                     self.imagenum -= 1
@@ -369,6 +422,10 @@ class plugin2DView(wx.Panel):
             if (keyname == wx.WXK_END):
                 self.imagenum = len(self.images)
                 self.Refresh()
+            if (keyname in zoominkey):
+                self.OnZoomIn(None)
+            if (keyname in zoomoutkey):
+                self.OnZoomOut(None)
 
     def OnMouseWheel(self, evt):
         """Change the image when the user scrolls the mouse wheel."""

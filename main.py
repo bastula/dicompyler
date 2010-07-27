@@ -105,9 +105,25 @@ class MainFrame(wx.Frame):
         # Load the toolbar for the frame
         toolbarMain = self.res.LoadToolBar(self, 'toolbarMain')
         self.SetToolBar(toolbarMain)
+        self.toolbar = self.GetToolBar()
+
+        # Setup main toolbar controls
+        if guiutil.IsGtk():
+            import gtk
+            folderbmp = wx.ArtProvider_GetBitmap(gtk.STOCK_OPEN, wx.ART_OTHER, (24, 24))
+        else:
+            folderbmp = wx.Bitmap(util.GetResourcePath('folder_user.png'))
+        self.maintools = [{'label':"Open Patient", 'bmp':folderbmp,
+                            'shortHelp':"Open Patient...",
+                            'eventhandler':self.OnOpenPatient}]
+        for m, tool in enumerate(self.maintools):
+            self.toolbar.AddLabelTool(
+                                    m+1, tool['label'], tool['bmp'],
+                                    shortHelp=tool['shortHelp'])
+            self.Bind(wx.EVT_TOOL, tool['eventhandler'], id=m+1)
+        self.toolbar.Realize()
 
         # Bind interface events to the proper methods
-        wx.EVT_TOOL(self, XRCID('toolOpen'), self.OnOpenPatient)
         wx.EVT_CHOICE(self, XRCID('choiceStructure'), self.OnStructureSelect)
         self.notebook.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.OnPageChanged)
         # Events to work around a focus bug in Windows
@@ -165,6 +181,11 @@ class MainFrame(wx.Frame):
         if not (self.ptdata == None):
             # Delete the previous notebook pages
             self.notebook.DeleteAllPages()
+            # Delete the previous toolbar items
+            for t in range(0, self.toolbar.GetToolsCount()):
+                # Only delete the plugin toolbar items
+                if (t >= len(self.maintools)):
+                    self.toolbar.DeleteToolByPos(len(self.maintools))
             # Delete the previous menus
             if len(self.menuDict):
                 self.menuPlugins.Delete(wx.ID_SEPARATOR)
@@ -491,12 +512,24 @@ class MainFrame(wx.Frame):
         # Notify the new tab that it has focus
         if hasattr(page, 'OnFocus'):
             page.OnFocus()
+        # If the tab has toolbar items, display them
+        if hasattr(page, 'tools'):
+            for t, tool in enumerate(page.tools):
+                self.toolbar.AddLabelTool(
+                            (new+1)*10+t, tool['label'],
+                            tool['bmp'], shortHelp=tool['shortHelp'])
+                self.Bind(wx.EVT_TOOL, tool['eventhandler'], id=(new+1)*10+t)
+            self.toolbar.Realize()
         # For all other tabs, notify that they don't have focus anymore
         for i in range(self.notebook.GetPageCount()):
             if not (new == i):
-                otherpage = self.notebook.GetPage(i)
-                if hasattr(otherpage, 'OnUnfocus'):
-                    otherpage.OnUnfocus()
+                page = self.notebook.GetPage(i)
+                if hasattr(page, 'OnUnfocus'):
+                    page.OnUnfocus()
+                # Delete all other toolbar items
+                if hasattr(page, 'tools'):
+                    for t, tool in enumerate(page.tools):
+                        self.toolbar.DeleteTool((i+1)*10+t)
         evt.Skip()
 
     def OnKeyDown(self, evt):
