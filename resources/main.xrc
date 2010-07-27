@@ -430,11 +430,6 @@
     </object>
   </object>
   <object class="wxToolBar" name="toolbarMain">
-    <object class="tool" name="toolOpen">
-      <bitmap stock_id="wxART_FOLDER_OPEN"/>
-      <tooltip>Open patient...</tooltip>
-      <label>Open Patient</label>
-    </object>
     <style>wxTB_FLAT|wxTB_DOCKABLE|wxTB_TEXT</style>
   </object>
 </resource>
