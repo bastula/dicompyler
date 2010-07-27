@@ -406,8 +406,8 @@ class plugin2DView(wx.Panel):
             keyname = evt.GetKeyCode()
             prevkey = [wx.WXK_UP, wx.WXK_PAGEUP]
             nextkey = [wx.WXK_DOWN, wx.WXK_PAGEDOWN]
-            zoominkey = [43, 61] # Keys: +, =
-            zoomoutkey = [45, 95] # Keys: -, _
+            zoominkey = [43, 61, 388] # Keys: +, =, Numpad add
+            zoomoutkey = [45, 95, 390] # Keys: -, _, Numpad subtract
             if (keyname in prevkey):
                 if (self.imagenum > 1):
                     self.imagenum -= 1
