@@ -657,7 +657,12 @@ class DicomImporterDialog(wx.Dialog):
             slicenums = []
             for image in self.patient['images']:
                 slicenums.append(image.SliceLocation)
-            sortedslicenums = sorted(slicenums)
+            # Sort images in descending order for feet first patients
+            if 'ff' in image.PatientPosition.lower():
+                sortedslicenums = sorted(slicenums)
+            # Sort images in ascending order for head first patients
+            else:
+                sortedslicenums = reversed(sorted(slicenums))
             for s, slice in enumerate(sortedslicenums):
                 for i, image in enumerate(self.patient['images']):
                     if (slice == image.SliceLocation):
