@@ -651,12 +651,17 @@ class DicomImporterDialog(wx.Dialog):
             elif (dp.GetSOPClassUID() == 'rtdose'):
                 self.patient['rtdose'] = dp.ds
             wx.CallAfter(progressFunc, n, len(filearray), 'Importing patient. Please wait...')
-        # Sort the images based on Instance Number
+        # Sort the images based on Slice Location
         if self.patient.has_key('images'):
             sortedimages = []
-            for num in range(1, len(self.patient['images'])+1):
-                for imagenum, image in enumerate(self.patient['images']):
-                    if (num == image.InstanceNumber):
+            slicenums = []
+            for image in self.patient['images']:
+                slicenums.append(image.SliceLocation)
+            sortedslicenums = sorted(slicenums)
+            for s, slice in enumerate(sortedslicenums):
+                for i, image in enumerate(self.patient['images']):
+                    if (slice == image.SliceLocation):
+                        image.InstanceNumber = s+1
                         sortedimages.append(image)
             self.patient['images'] = sortedimages
         wx.CallAfter(progressFunc, 98, 100, 'Importing patient complete.')
