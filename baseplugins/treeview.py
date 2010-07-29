@@ -60,6 +60,7 @@ class pluginTreeView(wx.Panel):
 
         # Bind interface events to the proper methods
         wx.EVT_CHOICE(self, XRCID('choiceDICOM'), self.OnLoadTree)
+        self.Bind(wx.EVT_WINDOW_DESTROY, self.OnDestroy)
 
         # Decrease the font size on Mac
         font = wx.SystemSettings.GetFont(wx.SYS_DEFAULT_GUI_FONT)
@@ -90,6 +91,11 @@ class pluginTreeView(wx.Panel):
                         image.SOPClassUID.name.split(' Storage')[0] + \
                         ' Slice ' + str(image.InstanceNumber))
                     self.choiceDICOM.SetClientData(i, image)
+
+    def OnDestroy(self, evt):
+        """Unbind to all events before the plugin is destroyed."""
+
+        pub.unsubscribe(self.OnUpdatePatient)
 
     def OnLoadTree(self, event):
         """Update and load the DICOM tree."""
