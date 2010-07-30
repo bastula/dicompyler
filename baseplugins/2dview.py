@@ -62,6 +62,8 @@ class plugin2DView(wx.Panel):
         self.window = 0
         self.level = 0
         self.zoom = 1
+        self.pan = [0, 0]
+        self.mousepos = (-10000, -10000)
 
         # Setup toolbar controls
         if guiutil.IsGtk():
@@ -131,6 +133,11 @@ class plugin2DView(wx.Panel):
         # Bind keyboard and mouse events
         self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
         self.Bind(wx.EVT_MOUSEWHEEL, self.OnMouseWheel)
+        self.Bind(wx.EVT_LEFT_DOWN, self.OnMouseDown)
+        self.Bind(wx.EVT_LEFT_UP, self.OnMouseUp)
+        self.Bind(wx.EVT_RIGHT_DOWN, self.OnMouseDown)
+        self.Bind(wx.EVT_RIGHT_UP, self.OnMouseUp)
+        self.Bind(wx.EVT_MOTION, self.OnMouseMotion)
         pub.subscribe(self.OnKeyDown, 'main.key_down')
         pub.subscribe(self.OnMouseWheel, 'main.mousewheel')
 
@@ -140,6 +147,11 @@ class plugin2DView(wx.Panel):
         # Unbind keyboard and mouse events
         self.Unbind(wx.EVT_KEY_DOWN)
         self.Unbind(wx.EVT_MOUSEWHEEL)
+        self.Unbind(wx.EVT_LEFT_DOWN)
+        self.Unbind(wx.EVT_LEFT_UP)
+        self.Unbind(wx.EVT_RIGHT_DOWN)
+        self.Unbind(wx.EVT_RIGHT_UP)
+        self.Unbind(wx.EVT_MOTION)
         pub.unsubscribe(self.OnKeyDown)
         pub.unsubscribe(self.OnMouseWheel)
 
@@ -331,8 +343,8 @@ class plugin2DView(wx.Panel):
             bwidth, bheight = bmp.GetSize()
 
             # Center the image
-            gc.Translate((width-bwidth*self.zoom)/(2*self.zoom),
-                         (height-bheight*self.zoom)/(2*self.zoom))
+            gc.Translate(self.pan[0]+(width-bwidth*self.zoom)/(2*self.zoom),
+                         self.pan[1]+(height-bheight*self.zoom)/(2*self.zoom))
             gc.DrawBitmap(bmp, 0, 0, bwidth, bheight)
 
             # Draw the structures if present
@@ -378,6 +390,12 @@ class plugin2DView(wx.Panel):
             gc.DrawText(imzoom, 10, height-17)
             imzoom = "Image Size: " + str(bheight) + "x" + str(bheight) + " px"
             gc.DrawText(imzoom, 10, height-17-te[1]*1.1)
+            imwinlevel = "W/L: " + str(self.window) + ' / ' + str(self.level)
+            te = gc.GetFullTextExtent(imwinlevel)
+            gc.DrawText(imwinlevel, width-te[0]-7, 7)
+            impatpos = "Patient Position: " + imdata['patientposition']
+            te = gc.GetFullTextExtent(impatpos)
+            gc.DrawText(impatpos, width-te[0]-7, height-17)
 
     def OnSize(self, evt):
         """Refresh the view when the size of the panel changes."""
@@ -456,3 +474,44 @@ class plugin2DView(wx.Panel):
                 if (self.imagenum < len(self.images)):
                     self.imagenum += 1
                     self.Refresh()
+
+    def OnMouseDown(self, evt):
+        """Get the initial position of the mouse when dragging."""
+
+        self.mousepos = evt.GetPosition()
+
+    def OnMouseUp(self, evt):
+        """Reset the cursor when the mouse is released."""
+
+        self.SetCursor(wx.StockCursor(wx.CURSOR_DEFAULT))
+
+    def OnMouseMotion(self, evt):
+        """Process mouse motion events and pass to the appropriate handler."""
+
+        if evt.LeftIsDown():
+            self.OnLeftIsDown(evt)
+            self.SetCursor(wx.StockCursor(wx.CURSOR_SIZING))
+        elif evt.RightIsDown():
+            self.OnRightIsDown(evt)
+            # Custom cursors with > 2 colors only works on Windows currently
+            if guiutil.IsMSWindows():
+                image = wx.Image(util.GetResourcePath('contrast_high.png'))
+                self.SetCursor(wx.CursorFromImage(image))
+
+    def OnLeftIsDown(self, evt):
+        """Change the image pan when the left mouse button is dragged."""
+
+        delta = self.mousepos - evt.GetPosition()
+        self.mousepos = evt.GetPosition()
+        self.pan[0] -= delta[0]
+        self.pan[1] -= delta[1]
+        self.Refresh()
+
+    def OnRightIsDown(self, evt):
+        """Change the window/level when the right mouse button is dragged."""
+
+        delta = self.mousepos - evt.GetPosition()
+        self.mousepos = evt.GetPosition()
+        self.window -= delta[0]
+        self.level -= delta[1]
+        self.Refresh()
