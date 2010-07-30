@@ -79,6 +79,7 @@ class pluginDVH(wx.Panel):
         wx.EVT_SPINCTRL(self, XRCID('txtConstraint'), self.OnChangeConstraint)
         wx.EVT_COMMAND_SCROLL_THUMBTRACK(self, XRCID('sliderConstraint'), self.OnChangeConstraint)
         wx.EVT_COMMAND_SCROLL_CHANGED(self, XRCID('sliderConstraint'), self.OnChangeConstraint)
+        self.Bind(wx.EVT_WINDOW_DESTROY, self.OnDestroy)
 
         # Initialize variables
         self.structures = {} # structures from initial DICOM data
@@ -103,6 +104,13 @@ class pluginDVH(wx.Panel):
         # show an empty plot when (re)loading a patient
         self.guiDVH.Replot()
         self.EnableConstraints(False)
+
+    def OnDestroy(self, evt):
+        """Unbind to all events before the plugin is destroyed."""
+
+        pub.unsubscribe(self.OnUpdatePatient)
+        pub.unsubscribe(self.OnStructureCheck)
+        pub.unsubscribe(self.OnStructureSelect)
 
     def OnStructureCheck(self, msg):
         """When a structure changes, update the interface and plot."""
