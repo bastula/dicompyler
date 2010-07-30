@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<resource>
+  <object class="wxPanel" name="pluginTreeView" subclass="treeview.pluginTreeView">
+    <object class="wxBoxSizer">
+      <object class="sizeritem">
+        <object class="wxBoxSizer">
+          <object class="spacer">
+            <size>5,5</size>
+          </object>
+          <object class="sizeritem">
+            <object class="wxBoxSizer">
+              <orient>wxHORIZONTAL</orient>
+              <object class="sizeritem">
+                <object class="wxChoice" name="choiceDICOM">
+                  <content>
+                    <item>-                                          </item>
+                  </content>
+                  <selection>0</selection>
+                  <enabled>0</enabled>
+                </object>
+                <flag>wxALIGN_CENTRE</flag>
+              </object>
+            </object>
+          </object>
+          <orient>wxVERTICAL</orient>
+        </object>
+        <option>0</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+        <border>1</border>
+      </object>
+      <object class="spacer">
+        <size>5,5</size>
+      </object>
+      <object class="sizeritem">
+        <object class="wxStaticBoxSizer">
+          <object class="sizeritem">
+            <object class="wxBoxSizer">
+              <orient>wxHORIZONTAL</orient>
+              <object class="sizeritem">
+                <object class="unknown" name="tlcTreeView"/>
+                <option>1</option>
+                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE|wxADJUST_MINSIZE</flag>
+              </object>
+            </object>
+            <option>3</option>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+          </object>
+          <orient>wxVERTICAL</orient>
+        </object>
+        <option>5</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+      </object>
+      <orient>wxVERTICAL</orient>
+    </object>
+  </object>
+</resource>

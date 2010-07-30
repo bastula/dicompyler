@@ -1,0 +1,435 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<resource>
+  <object class="wxPanel" name="panelGeneral">
+    <object class="wxBoxSizer">
+      <orient>wxHORIZONTAL</orient>
+      <object class="sizeritem">
+        <object class="wxBoxSizer">
+          <object class="sizeritem">
+            <object class="wxStaticBoxSizer">
+              <label>Plan</label>
+              <orient>wxHORIZONTAL</orient>
+              <object class="sizeritem">
+                <object class="wxFlexGridSizer">
+                  <object class="sizeritem">
+                    <object class="wxStaticText">
+                      <label>Plan Name:</label>
+                    </object>
+                    <flag>wxRIGHT|wxALIGN_CENTRE_VERTICAL</flag>
+                  </object>
+                  <object class="sizeritem">
+                    <object class="wxStaticText" name="lblPlanName">
+                      <label>-</label>
+                    </object>
+                    <option>1</option>
+                    <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                  </object>
+                  <object class="sizeritem">
+                    <object class="wxStaticText"/>
+                  </object>
+                  <object class="sizeritem">
+                    <object class="wxStaticText">
+                      <label>Rx Dose:</label>
+                    </object>
+                    <flag>wxALIGN_RIGHT|wxALIGN_CENTRE_VERTICAL</flag>
+                  </object>
+                  <object class="sizeritem">
+                    <object class="wxStaticText" name="lblRxDose">
+                      <label>-</label>
+                    </object>
+                    <option>1</option>
+                    <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                  </object>
+                  <object class="sizeritem">
+                    <object class="wxStaticText">
+                      <label>cGy  </label>
+                    </object>
+                    <flag>wxALIGN_CENTRE</flag>
+                  </object>
+                  <cols>3</cols>
+                  <rows>3</rows>
+                  <vgap>5</vgap>
+                  <hgap>5</hgap>
+                  <growablecols>1</growablecols>
+                </object>
+                <option>1</option>
+                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+              </object>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+          </object>
+          <object class="sizeritem">
+            <object class="wxBoxSizer">
+              <orient>wxVERTICAL</orient>
+              <object class="sizeritem">
+                <object class="wxNotebook" name="notebookTools"/>
+                <option>1</option>
+                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+              </object>
+            </object>
+            <option>3</option>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+          </object>
+          <object class="sizeritem">
+            <object class="wxStaticBoxSizer">
+              <object class="sizeritem">
+                <object class="wxChoice" name="choiceStructure">
+                  <content>
+                    <item>-</item>
+                  </content>
+                  <selection>1</selection>
+                  <enabled>0</enabled>
+                </object>
+                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                <ratio>0</ratio>
+              </object>
+              <object class="spacer">
+                <size>0, 5</size>
+              </object>
+              <object class="sizeritem">
+                <object class="wxFlexGridSizer">
+                  <object class="sizeritem">
+                    <object class="wxStaticText">
+                      <label>Volume:</label>
+                    </object>
+                    <flag>wxALIGN_RIGHT|wxALIGN_CENTRE_VERTICAL</flag>
+                  </object>
+                  <object class="sizeritem">
+                    <object class="wxStaticText" name="lblStructureVolume">
+                      <label>-</label>
+                    </object>
+                  </object>
+                  <object class="sizeritem">
+                    <object class="wxStaticText">
+                      <label>cm³</label>
+                    </object>
+                  </object>
+                  <object class="sizeritem">
+                    <object class="wxStaticText">
+                      <label>Min Dose:</label>
+                    </object>
+                    <flag>wxALIGN_RIGHT|wxALIGN_CENTRE_VERTICAL</flag>
+                  </object>
+                  <object class="sizeritem">
+                    <object class="wxStaticText" name="lblStructureMinDose">
+                      <label>-</label>
+                    </object>
+                    <option>1</option>
+                  </object>
+                  <object class="sizeritem">
+                    <object class="wxStaticText">
+                      <label>%</label>
+                    </object>
+                  </object>
+                  <object class="sizeritem">
+                    <object class="wxStaticText">
+                      <label>Max Dose:</label>
+                    </object>
+                    <flag>wxALIGN_RIGHT</flag>
+                  </object>
+                  <object class="sizeritem">
+                    <object class="wxStaticText" name="lblStructureMaxDose">
+                      <label>-</label>
+                    </object>
+                    <option>1</option>
+                  </object>
+                  <object class="sizeritem">
+                    <object class="wxStaticText">
+                      <label>%</label>
+                    </object>
+                  </object>
+                  <object class="sizeritem">
+                    <object class="wxStaticText">
+                      <label>Mean Dose:</label>
+                    </object>
+                  </object>
+                  <object class="sizeritem">
+                    <object class="wxStaticText" name="lblStructureMeanDose">
+                      <label>-</label>
+                    </object>
+                  </object>
+                  <object class="sizeritem">
+                    <object class="wxStaticText">
+                      <label>%</label>
+                    </object>
+                  </object>
+                  <cols>3</cols>
+                  <rows>1</rows>
+                  <vgap>5</vgap>
+                  <hgap>5</hgap>
+                  <growablecols>1</growablecols>
+                </object>
+                <option>1</option>
+                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+              </object>
+              <label>Structure Information</label>
+              <orient>wxVERTICAL</orient>
+            </object>
+            <flag>wxLEFT|wxRIGHT|wxEXPAND|wxALIGN_CENTRE</flag>
+          </object>
+          <orient>wxVERTICAL</orient>
+        </object>
+        <option>3</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+        <border>3</border>
+      </object>
+      <object class="sizeritem">
+        <object class="wxBoxSizer">
+          <object class="sizeritem">
+            <object class="wxStaticBoxSizer">
+              <object class="sizeritem">
+                <object class="wxFlexGridSizer">
+                  <object class="sizeritem">
+                    <object class="wxStaticText">
+                      <label>Name:</label>
+                    </object>
+                    <flag>wxALIGN_RIGHT|wxALIGN_CENTRE_VERTICAL</flag>
+                  </object>
+                  <object class="sizeritem">
+                    <object class="wxStaticText" name="lblPatientName">
+                    </object>
+                    <option>1</option>
+                    <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                  </object>
+                  <object class="sizeritem">
+                    <object class="wxStaticText">
+                      <label>ID:</label>
+                    </object>
+                    <flag>wxALIGN_RIGHT|wxALIGN_CENTRE_VERTICAL</flag>
+                  </object>
+                  <object class="sizeritem">
+                    <object class="wxStaticText" name="lblPatientID"/>
+                    <option>1</option>
+                    <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                  </object>
+                  <object class="sizeritem">
+                    <object class="wxStaticText">
+                      <label>Gender:</label>
+                    </object>
+                  </object>
+                  <object class="sizeritem">
+                    <object class="wxStaticText" name="lblPatientGender"/>
+                    <option>1</option>
+                    <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                  </object>
+                  <object class="sizeritem">
+                    <object class="wxStaticText">
+                      <label>DOB:</label>
+                    </object>
+                  </object>
+                  <object class="sizeritem">
+                    <object class="wxStaticText" name="lblPatientDOB"/>
+                    <option>1</option>
+                    <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                  </object>
+                  <cols>4</cols>
+                  <rows>2</rows>
+                  <vgap>5</vgap>
+                  <hgap>5</hgap>
+                  <growablecols>1,3,5,7</growablecols>
+                </object>
+                <option>1</option>
+                <flag>wxALL|wxEXPAND</flag>
+              </object>
+              <label>Patient</label>
+              <orient>wxVERTICAL</orient>
+            </object>
+            <option>0</option>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+          </object>
+          <object class="sizeritem">
+            <object class="wxBoxSizer">
+              <object class="spacer">
+                <size>0,2</size>
+                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+              </object>
+              <object class="sizeritem">
+                <object class="wxNotebook" name="notebook"/>
+                <option>1</option>
+                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+              </object>
+              <orient>wxVERTICAL</orient>
+            </object>
+            <option>1</option>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+          </object>
+          <orient>wxVERTICAL</orient>
+        </object>
+        <option>11</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+        <border>3</border>
+      </object>
+    </object>
+  </object>
+  <object class="wxPanel" name="panelWelcome">
+    <object class="wxBoxSizer">
+      <orient>wxVERTICAL</orient>
+      <object class="sizeritem">
+        <object class="wxBoxSizer">
+          <object class="spacer">
+            <option>1</option>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+          </object>
+          <object class="sizeritem">
+            <object class="wxBoxSizer">
+              <object class="spacer">
+                <option>1</option>
+                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+              </object>
+              <object class="sizeritem">
+                <object class="wxBoxSizer">
+                  <orient>wxVERTICAL</orient>
+                  <object class="sizeritem">
+                    <object class="wxStaticBitmap">
+                      <size>448,136</size>
+                      <bitmap>dicompyler_logo.png</bitmap>
+                    </object>
+                  </object>
+                  <object class="sizeritem">
+                    <object class="wxBoxSizer">
+                      <object class="spacer">
+                        <option>1</option>
+                        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                      </object>
+                      <object class="sizeritem">
+                        <object class="wxStaticText" name="lblVersion">
+                          <label>Version 0.2</label>
+                          <style>wxALIGN_RIGHT</style>
+                        </object>
+                        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                      </object>
+                      <orient>wxHORIZONTAL</orient>
+                    </object>
+                    <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                  </object>
+                </object>
+              </object>
+              <object class="spacer">
+                <option>1</option>
+                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+              </object>
+              <orient>wxHORIZONTAL</orient>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+          </object>
+          <orient>wxVERTICAL</orient>
+          <object class="sizeritem">
+            <object class="wxBoxSizer">
+              <object class="spacer">
+                <option>1</option>
+                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+              </object>
+              <object class="sizeritem">
+                <object class="wxBoxSizer">
+                  <object class="sizeritem">
+                    <object class="wxBoxSizer">
+                      <object class="spacer">
+                        <option>1</option>
+                        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                      </object>
+                      <object class="sizeritem">
+                        <object class="wxStaticText" name="lblGetStarted">
+                          <label>\n\nWelcome to dicompyler. To get started, open a patient file.</label>
+                          <style>wxALIGN_CENTRE</style>
+                        </object>
+                        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                      </object>
+                      <object class="spacer">
+                        <option>1</option>
+                        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                      </object>
+                      <orient>wxHORIZONTAL</orient>
+                    </object>
+                    <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                  </object>
+                  <object class="sizeritem">
+                    <object class="wxBoxSizer">
+                      <object class="sizeritem">
+                        <object class="wxStaticBitmap">
+                          <bitmap>error.png</bitmap>
+                        </object>
+                        <flag>wxALIGN_BOTTOM</flag>
+                        <minsize>16,16</minsize>
+                      </object>
+                      <object class="spacer">
+                        <size>5,0</size>
+                      </object>
+                      <object class="sizeritem">
+                        <object class="wxStaticText" name="lblDisclaimerHeader">
+                          <label>\n\n\nDisclaimer:</label>
+                        </object>
+                        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                      </object>
+                      <orient>wxHORIZONTAL</orient>
+                    </object>
+                    <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                  </object>
+                  <object class="sizeritem">
+                    <object class="wxStaticText" name="lblDisclaimer">
+                      <label>\nThis software comes without any warranty and has not been approved for clinical use by any\nregulatory bodies. Use at your own risk. dicompyler is open source software. Please review\nthe license and feel free to modify and redistribute dicompyler under those terms.</label>
+                    </object>
+                  </object>
+                  <orient>wxVERTICAL</orient>
+                </object>
+                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+              </object>
+              <object class="spacer">
+                <option>1</option>
+                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+              </object>
+              <orient>wxHORIZONTAL</orient>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+          </object>
+          <object class="spacer">
+            <option>1</option>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+          </object>
+        </object>
+        <option>1</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+      </object>
+      <object class="sizeritem">
+        <object class="wxBoxSizer">
+          <orient>wxVERTICAL</orient>
+        </object>
+      </object>
+    </object>
+  </object>
+  <object class="wxMenuBar" name="menuMain">
+    <object class="wxMenu">
+      <label>&amp;File</label>
+      <object class="wxMenuItem" name="menuOpen">
+        <label>&amp;Open Patient...</label>
+        <accel>Ctrl-O</accel>
+      </object>
+      <object class="separator"/>
+      <object class="wxMenuItem" name="menuExit">
+        <label>E&amp;xit</label>
+        <accel>Alt+F4</accel>
+      </object>
+    </object>
+    <object class="wxMenu" name="menuTools">
+      <object class="wxMenuItem" name="menuPluginManager">
+        <label>&amp;Plugin Manager...</label>
+      </object>
+      <label>&amp;Tools</label>
+    </object>
+    <object class="wxMenu">
+      <label>&amp;Help</label>
+      <object class="wxMenuItem" name="menuHomepage">
+        <label>&amp;Homepage</label>
+      </object>
+      <object class="wxMenuItem" name="menuLicense">
+        <label>&amp;License</label>
+      </object>
+      <object class="separator"/>
+      <object class="wxMenuItem" name="menuAbout">
+        <label>&amp;About dicompyler</label>
+      </object>
+    </object>
+  </object>
+  <object class="wxToolBar" name="toolbarMain">
+    <style>wxTB_FLAT|wxTB_DOCKABLE|wxTB_TEXT</style>
+  </object>
+</resource>

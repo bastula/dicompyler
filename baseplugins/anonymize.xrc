@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<resource>
+  <object class="wxDialog" name="AnonymizeDialog" subclass="anonymize.AnonymizeDialog">
+    <object class="wxBoxSizer">
+      <orient>wxVERTICAL</orient>
+      <object class="sizeritem">
+        <object class="wxStaticBoxSizer">
+          <object class="sizeritem">
+            <object class="wxBoxSizer">
+              <object class="sizeritem">
+                <object class="wxTextCtrl" name="txtDICOMFolder">
+                  <style>wxTE_READONLY</style>
+                </object>
+                <option>1</option>
+                <flag>wxALIGN_LEFT|wxALIGN_CENTRE_VERTICAL</flag>
+              </object>
+              <object class="spacer">
+                <size>5,0</size>
+              </object>
+              <object class="sizeritem">
+                <object class="wxButton" name="btnFolderBrowse">
+                  <label>&amp;Browse...</label>
+                </object>
+              </object>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+          </object>
+          <label>Folder for Anonymized DICOM Files</label>
+          <orient>wxVERTICAL</orient>
+        </object>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+        <border>3</border>
+      </object>
+      <object class="sizeritem">
+        <object class="wxStaticBoxSizer">
+          <object class="spacer">
+            <size>0,5</size>
+          </object>
+          <object class="sizeritem">
+            <object class="wxCheckBox" name="checkPatientName">
+              <label>Change Patient Name:</label>
+              <checked>1</checked>
+            </object>
+          </object>
+          <object class="spacer">
+            <size>0,5</size>
+          </object>
+          <object class="sizeritem">
+            <object class="wxBoxSizer">
+              <object class="spacer">
+                <size>20,0</size>
+              </object>
+              <object class="sizeritem">
+                <object class="wxStaticText" name="lblFirstName">
+                  <label>First Name:</label>
+                  <style>wxALIGN_RIGHT</style>
+                </object>
+                <flag>wxALIGN_CENTRE</flag>
+              </object>
+              <object class="spacer">
+                <size>5,0</size>
+              </object>
+              <object class="sizeritem">
+                <object class="wxTextCtrl" name="txtFirstName"/>
+                <option>2</option>
+                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+              </object>
+              <object class="spacer">
+                <size>7,0</size>
+              </object>
+              <object class="sizeritem">
+                <object class="wxStaticText" name="lblLastName">
+                  <label>Last Name:</label>
+                  <style>wxALIGN_RIGHT</style>
+                </object>
+                <flag>wxALIGN_CENTRE</flag>
+              </object>
+              <object class="spacer">
+                <size>5,0</size>
+              </object>
+              <object class="sizeritem">
+                <object class="wxTextCtrl" name="txtLastName">
+                  <value>anonymous</value>
+                </object>
+                <option>2</option>
+                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+              </object>
+              <orient>wxHORIZONTAL</orient>
+            </object>
+            <option>1</option>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+          </object>
+          <object class="spacer">
+            <size>0,5</size>
+          </object>
+          <object class="sizeritem">
+            <object class="wxCheckBox" name="checkPatientID">
+              <label>Change Patient ID:</label>
+              <checked>1</checked>
+            </object>
+          </object>
+          <object class="spacer">
+            <size>0,5</size>
+          </object>
+          <object class="sizeritem">
+            <object class="wxBoxSizer">
+              <object class="spacer">
+                <size>20,0</size>
+              </object>
+              <object class="sizeritem">
+                <object class="wxStaticText" name="lblPatientID">
+                  <label>ID:</label>
+                </object>
+                <flag>wxALIGN_CENTRE</flag>
+              </object>
+              <object class="spacer">
+                <size>5,0</size>
+              </object>
+              <orient>wxHORIZONTAL</orient>
+              <object class="sizeritem">
+                <object class="wxTextCtrl" name="txtPatientID">
+                  <value>123456</value>
+                </object>
+                <flag>wxALIGN_CENTRE</flag>
+              </object>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+          </object>
+          <object class="spacer">
+            <size>0,5</size>
+          </object>
+          <object class="sizeritem">
+            <object class="wxCheckBox" name="checkPrivateTags">
+              <label>Remove Private Tags (Vendor Specific Data)</label>
+              <checked>1</checked>
+            </object>
+          </object>
+          <object class="spacer">
+            <size>0,15</size>
+          </object>
+          <object class="sizeritem">
+            <object class="wxBoxSizer">
+              <object class="sizeritem">
+                <object class="wxStaticBitmap">
+                  <bitmap>resources/error.png</bitmap>
+                </object>
+                <minsize>16,16</minsize>
+              </object>
+              <object class="spacer">
+                <size>5,0</size>
+              </object>
+              <object class="sizeritem">
+                <object class="wxStaticText" name="lblDescription">
+                  <label>Note: All patient and institution specific data will be de-identified as much as possible.\nAs anonymization is not a perfect process, please carefully look at your data for inadvertent tags.</label>
+                  <font>
+                    <style>normal</style>
+                    <weight>bold</weight>
+                    <underlined>0</underlined>
+                    <family>default</family>
+                    <encoding>ISO-8859-1</encoding>
+                  </font>
+                </object>
+                <flag>wxALIGN_LEFT</flag>
+              </object>
+              <orient>wxHORIZONTAL</orient>
+            </object>
+          </object>
+          <object class="spacer">
+            <size>0,5</size>
+          </object>
+          <label>Options</label>
+          <orient>wxVERTICAL</orient>
+        </object>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+        <border>3</border>
+      </object>
+      <object class="spacer">
+        <size>0,5</size>
+      </object>
+      <object class="sizeritem">
+        <object class="wxStdDialogButtonSizer">
+          <object class="button">
+            <object class="wxButton" name="wxID_CANCEL">
+              <label/>
+              <label>&amp;Cancel</label>
+            </object>
+          </object>
+          <object class="button">
+            <object class="wxButton" name="wxID_OK">
+              <label>Anonymize</label>
+              <default>1</default>
+              <focused>1</focused>
+            </object>
+          </object>
+        </object>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+        <border>3</border>
+      </object>
+      <object class="spacer">
+        <size>0,5</size>
+      </object>
+    </object>
+    <title>Anonymize DICOM Data</title>
+    <centered>1</centered>
+    <style>wxDEFAULT_DIALOG_STYLE</style>
+  </object>
+</resource>
