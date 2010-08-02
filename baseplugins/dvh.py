@@ -59,23 +59,46 @@ class pluginDVH(wx.Panel):
         res.AttachUnknownControl('panelDVH', self.guiDVH.panelDVH, self)
 
         # Initialize the Constraint selector controls
-        self.radioVolume = XRCCTRL(self, 'radioVolume')
-        self.radioDose = XRCCTRL(self, 'radioDose')
-        self.radioDosecc = XRCCTRL(self, 'radioDosecc')
+        self.lblType = XRCCTRL(self, 'lblType')
+        self.choiceConstraint = XRCCTRL(self, 'choiceConstraint')
         self.txtConstraint = XRCCTRL(self, 'txtConstraint')
         self.sliderConstraint = XRCCTRL(self, 'sliderConstraint')
+        self.lblResultType = XRCCTRL(self, 'lblResultType')
         self.lblConstraintUnits = XRCCTRL(self, 'lblConstraintUnits')
+        self.lblConstraintTypeUnits = XRCCTRL(self, 'lblConstraintTypeUnits')
+
+        # Initialize the result labels
+        self.lblConstraintType = XRCCTRL(self, 'lblConstraintType')
+        self.lblResultDivider = XRCCTRL(self, 'lblResultDivider')
         self.lblConstraintPercent = XRCCTRL(self, 'lblConstraintPercent')
 
-        # Initialize the Constraint selector labels
-        self.lblConstraintType = XRCCTRL(self, 'lblConstraintType')
-        self.lblConstraintTypeUnits = XRCCTRL(self, 'lblConstraintTypeUnits')
-        self.lblConstraintResultUnits = XRCCTRL(self, 'lblConstraintResultUnits')
+        # Modify the control and font size on Mac
+        controls = [self.lblType, self.choiceConstraint, self.sliderConstraint,
+            self.lblResultType, self.lblConstraintUnits, self.lblConstraintPercent,
+            self.lblConstraintType, self.lblConstraintTypeUnits, self.lblResultDivider]
+        # Add children of composite controls to modification list
+        compositecontrols = [self.txtConstraint]
+        for control in compositecontrols:
+            for child in control.GetChildren():
+                controls.append(child)
+        # Add the constraint static box to the modification list
+        controls.append(self.lblType.GetContainingSizer().GetStaticBox())
+
+        if guiutil.IsMac():
+            font = wx.SystemSettings.GetFont(wx.SYS_DEFAULT_GUI_FONT)
+            font.SetPointSize(10)
+            for control in controls:
+                control.SetWindowVariant(wx.WINDOW_VARIANT_SMALL)
+                control.SetFont(font)
+
+        # Adjust the control size for the result value labels
+        te = self.lblType.GetTextExtent('0')
+        self.lblConstraintUnits.SetMinSize((te[0]*10, te[1]))
+        self.lblConstraintPercent.SetMinSize((te[0]*6, te[1]))
+        self.Layout()
 
         # Bind ui events to the proper methods
-        wx.EVT_RADIOBUTTON(self, XRCID('radioVolume'), self.OnToggleConstraints)
-        wx.EVT_RADIOBUTTON(self, XRCID('radioDose'), self.OnToggleConstraints)
-        wx.EVT_RADIOBUTTON(self, XRCID('radioDosecc'), self.OnToggleConstraints)
+        wx.EVT_CHOICE(self, XRCID('choiceConstraint'), self.OnToggleConstraints)
         wx.EVT_SPINCTRL(self, XRCID('txtConstraint'), self.OnChangeConstraint)
         wx.EVT_COMMAND_SCROLL_THUMBTRACK(self, XRCID('sliderConstraint'), self.OnChangeConstraint)
         wx.EVT_COMMAND_SCROLL_CHANGED(self, XRCID('sliderConstraint'), self.OnChangeConstraint)
@@ -130,7 +153,7 @@ class pluginDVH(wx.Panel):
                 self.dvhdata[id] = dvhdata.DVH(self.dvhs[id])
                 # Create an instance of the dvh arrays so that guidvh can plot it
                 self.dvharray[id] = dvhdata.DVH(self.dvhs[id]).dvh
-                # 'Toggle' the radio box to refresh the dose data
+                # 'Toggle' the choice box to refresh the dose data
                 self.OnToggleConstraints(None)
         if not len(self.checkedstructures):
             self.EnableConstraints(False)
@@ -153,14 +176,12 @@ class pluginDVH(wx.Panel):
     def EnableConstraints(self, value):
         """Enable or disable the constraint selector."""
 
-        self.radioVolume.Enable(value)
-        self.radioDose.Enable(value)
-        self.radioDosecc.Enable(value)
+        self.choiceConstraint.Enable(value)
         self.txtConstraint.Enable(value)
         self.sliderConstraint.Enable(value)
         if not value:
-            self.lblConstraintUnits.SetLabel('-            ')
-            self.lblConstraintPercent.SetLabel('-            ')
+            self.lblConstraintUnits.SetLabel('- ')
+            self.lblConstraintPercent.SetLabel('- ')
             self.txtConstraint.SetValue(0)
             self.sliderConstraint.SetValue(0)
 
@@ -178,35 +199,43 @@ class pluginDVH(wx.Panel):
 
         # Check if the function was called via an event or not
         if not (evt == None):
-            label = evt.GetEventObject().GetLabel()
+            constrainttype = evt.GetInt()
         else:
-            if self.radioVolume.GetValue():
-                label = 'Volume Constraint (V__)'
-            elif self.radioDose.GetValue():
-                label = 'Dose Constraint (D__)'
-            elif self.radioDosecc.GetValue():
-                label = 'Dose Constraint (D__cc)'
+            constrainttype = self.choiceConstraint.GetSelection()
 
         constraintrange = 0
-        if (label == 'Volume Constraint (V__)'):
+        # Volume constraint
+        if (constrainttype == 0):
             self.lblConstraintType.SetLabel('   Dose:')
             self.lblConstraintTypeUnits.SetLabel('%  ')
-            self.lblConstraintResultUnits.SetLabel(u'cm³')
+            self.lblResultType.SetLabel('Volume:')
             rxDose = float(self.plan['rxdose'])
             dvhdata = len(self.dvhs[self.structureid]['data'])
             constraintrange = int(dvhdata*100/rxDose)
             # never go over the max dose as data does not exist
             if (constraintrange > int(self.dvhs[self.structureid]['max'])):
                 constraintrange = int(self.dvhs[self.structureid]['max'])
-        elif (label == 'Dose Constraint (D__)'):
+        # Volume constraint in Gy
+        elif (constrainttype == 1):
+            self.lblConstraintType.SetLabel('   Dose:')
+            self.lblConstraintTypeUnits.SetLabel('Gy ')
+            self.lblResultType.SetLabel('Volume:')
+            constraintrange = self.plan['rxdose']/100
+            maxdose = int(self.dvhs[self.structureid]['max']*self.plan['rxdose']/10000)
+            # never go over the max dose as data does not exist
+            if (constraintrange*100 > maxdose):
+                constraintrange = maxdose
+        # Dose constraint
+        elif (constrainttype == 2):
             self.lblConstraintType.SetLabel('Volume:')
             self.lblConstraintTypeUnits.SetLabel(u'%  ')
-            self.lblConstraintResultUnits.SetLabel(u'cGy')
+            self.lblResultType.SetLabel('   Dose:')
             constraintrange = 100
-        elif (label == 'Dose Constraint (D__cc)'):
+        # Dose constraint in cc
+        elif (constrainttype == 3):
             self.lblConstraintType.SetLabel('Volume:')
             self.lblConstraintTypeUnits.SetLabel(u'cm³')
-            self.lblConstraintResultUnits.SetLabel(u'cGy')
+            self.lblResultType.SetLabel('   Dose:')
             constraintrange = int(self.structures[self.structureid]['volume'])
 
         self.sliderConstraint.SetRange(0, constraintrange)
@@ -230,31 +259,44 @@ class pluginDVH(wx.Panel):
         rxDose = self.plan['rxdose']
         id = self.structureid
 
-        if self.radioVolume.GetValue():
+        constrainttype = self.choiceConstraint.GetSelection()
+        # Volume constraint
+        if (constrainttype == 0):
             absDose = rxDose * slidervalue / 100
             volume = self.structures[self.structureid]['volume']
             cc = self.dvhdata[id].GetVolumeConstraintCC(absDose, volume)
             constraint = self.dvhdata[id].GetVolumeConstraint(absDose)
 
-            self.lblConstraintUnits.SetLabel("%.3f" % cc)
-            self.lblConstraintPercent.SetLabel("%.3f" % constraint)
+            self.lblConstraintUnits.SetLabel("%.1f" % cc + u' cm³')
+            self.lblConstraintPercent.SetLabel("%.1f" % constraint + " %")
             self.guiDVH.Replot(self.dvharray, self.checkedstructures,
                 ([absDose], [constraint]), id)
+        # Volume constraint in Gy
+        elif (constrainttype == 1):
+            absDose = slidervalue*100
+            volume = self.structures[self.structureid]['volume']
+            cc = self.dvhdata[id].GetVolumeConstraintCC(absDose, volume)
+            constraint = self.dvhdata[id].GetVolumeConstraint(absDose)
 
-        elif self.radioDose.GetValue():
+            self.lblConstraintUnits.SetLabel("%.1f" % cc + u' cm³')
+            self.lblConstraintPercent.SetLabel("%.1f" % constraint + " %")
+            self.guiDVH.Replot(self.dvharray, self.checkedstructures,
+                ([absDose], [constraint]), id)
+        # Dose constraint
+        elif (constrainttype == 2):
             dose = self.dvhdata[id].GetDoseConstraint(slidervalue)
 
-            self.lblConstraintUnits.SetLabel("%.3f" % dose)
-            self.lblConstraintPercent.SetLabel("%.3f" % (dose*100/rxDose))
+            self.lblConstraintUnits.SetLabel("%.1f" % dose + u' cGy')
+            self.lblConstraintPercent.SetLabel("%.1f" % (dose*100/rxDose) + " %")
             self.guiDVH.Replot(self.dvharray, self.checkedstructures,
                 ([dose], [slidervalue]), id)
-
-        elif self.radioDosecc.GetValue():
+        # Dose constraint in cc
+        elif (constrainttype == 3):
             volumepercent = slidervalue*100/self.structures[self.structureid]['volume']
 
             dose = self.dvhdata[id].GetDoseConstraint(volumepercent)
 
-            self.lblConstraintUnits.SetLabel("%.3f" % dose)
-            self.lblConstraintPercent.SetLabel("%.3f" % (dose*100/rxDose))
+            self.lblConstraintUnits.SetLabel("%.1f" % dose + u' cGy')
+            self.lblConstraintPercent.SetLabel("%.1f" % (dose*100/rxDose) + " %")
             self.guiDVH.Replot(self.dvharray, self.checkedstructures,
                 ([dose], [volumepercent]), id)
