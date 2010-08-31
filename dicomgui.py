@@ -414,7 +414,7 @@ class DicomImporterDialog(wx.Dialog):
                                     numimages = str(series['numimages']) + ' images)'
                                 name = name + numimages
                                 series['treeid'] = self.tcPatients.AppendItem(study['treeid'], name, 3)
-                                self.EnableItemSelection(patient, series)
+                                self.EnableItemSelection(patient, series, [])
             # Search for RT Structure Sets
             if patient.has_key('structures'):
                 for structureid, structure in patient['structures'].iteritems():
