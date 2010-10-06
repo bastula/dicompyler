@@ -25,7 +25,7 @@ def pluginProperties():
     props['name'] = 'DVH'
     props['description'] = "Display and evaluate dose volume histogram (DVH) data"
     props['author'] = 'Aditya Panchal'
-    props['version'] = 0.2
+    props['version'] = 0.3
     props['plugin_type'] = 'main'
     props['plugin_version'] = 1
     props['min_dicom'] = ['rtss', 'rtdose']
