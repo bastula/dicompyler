@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<resource>
+  <object class="wxPanel" name="pluginDVH" subclass="dvh.pluginDVH">
+    <object class="wxBoxSizer">
+      <object class="sizeritem">
+        <object class="wxBoxSizer">
+          <label/>
+          <border>3</border>
+          <orient>wxVERTICAL</orient>
+          <object class="sizeritem">
+            <object class="unknown" name="panelDVH"/>
+            <option>1</option>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE|wxADJUST_MINSIZE</flag>
+            <border>4</border>
+          </object>
+        </object>
+        <option>5</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+      </object>
+      <object class="sizeritem">
+        <object class="wxBoxSizer">
+          <object class="sizeritem">
+            <object class="wxStaticBoxSizer">
+              <label>Structure Constraints</label>
+              <orient>wxHORIZONTAL</orient>
+              <object class="sizeritem">
+                <object class="wxStaticText" name="lblType">
+                  <label>Type:</label>
+                </object>
+                <flag>wxALIGN_RIGHT|wxALIGN_CENTRE_VERTICAL</flag>
+              </object>
+              <object class="spacer">
+                <size>3,0</size>
+              </object>
+              <object class="sizeritem">
+                <object class="wxChoice" name="choiceConstraint">
+                  <content>
+                    <item>Volume (V___)</item>
+                    <item>Volume (V__Gy)</item>
+                    <item>Dose (D__)</item>
+                    <item>Dose (D__cc)</item>
+                  </content>
+                  <selection>0</selection>
+                </object>
+                <flag>wxALIGN_LEFT|wxALIGN_CENTRE_VERTICAL</flag>
+              </object>
+              <object class="spacer">
+                <size>5,0</size>
+                <option>1</option>
+              </object>
+              <object class="sizeritem">
+                <object class="wxStaticText" name="lblConstraintType">
+                  <label>   Dose:</label>
+                </object>
+                <flag>wxALIGN_RIGHT|wxALIGN_CENTRE_VERTICAL</flag>
+              </object>
+              <object class="spacer">
+                <size>3,0</size>
+              </object>
+              <object class="sizeritem">
+                <object class="wxSlider" name="sliderConstraint">
+                  <value>100</value>
+                  <tickfreq>1</tickfreq>
+                </object>
+                <option>7</option>
+                <flag>wxALIGN_CENTRE_VERTICAL</flag>
+              </object>
+              <object class="spacer">
+                <size>3,0</size>
+              </object>
+              <object class="sizeritem">
+                <object class="wxSpinCtrl" name="txtConstraint">
+                  <value>100</value>
+                  <min>0</min>
+                </object>
+                <option>4</option>
+                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+              </object>
+              <object class="spacer">
+                <size>3,0</size>
+              </object>
+              <object class="sizeritem">
+                <object class="wxStaticText" name="lblConstraintTypeUnits">
+                  <label>%  </label>
+                </object>
+                <flag>wxALIGN_LEFT|wxALIGN_CENTRE_VERTICAL</flag>
+              </object>
+              <object class="spacer">
+                <size>5,0</size>
+                <option>1</option>
+              </object>
+              <object class="sizeritem">
+                <object class="wxStaticText" name="lblResultType">
+                  <label>Volume:</label>
+                </object>
+                <flag>wxALIGN_CENTRE_VERTICAL</flag>
+              </object>
+              <object class="spacer">
+                <size>3,0</size>
+              </object>
+              <object class="sizeritem">
+                <object class="wxStaticText" name="lblConstraintUnits">
+                  <label>-</label>
+                  <style>wxALIGN_RIGHT</style>
+                </object>
+                <flag>wxALIGN_CENTRE_VERTICAL</flag>
+              </object>
+              <object class="spacer">
+                <size>3,0</size>
+              </object>
+              <object class="sizeritem">
+                <object class="wxStaticText" name="lblResultDivider">
+                  <label> / </label>
+                </object>
+                <flag>wxALIGN_CENTRE_VERTICAL</flag>
+              </object>
+              <object class="sizeritem">
+                <object class="wxStaticText" name="lblConstraintPercent">
+                  <label>-</label>
+                  <style>wxALIGN_RIGHT</style>
+                </object>
+                <flag>wxALIGN_CENTRE_VERTICAL</flag>
+              </object>
+              <object class="spacer">
+                <size>10,0</size>
+              </object>
+            </object>
+            <option>2</option>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+          </object>
+          <orient>wxHORIZONTAL</orient>
+        </object>
+        <option>0</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+      </object>
+      <orient>wxVERTICAL</orient>
+    </object>
+  </object>
+</resource>
