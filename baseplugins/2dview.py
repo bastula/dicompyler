@@ -21,7 +21,7 @@ def pluginProperties():
     props['name'] = '2D View'
     props['description'] = "Display image, structure and dose data in 2D"
     props['author'] = 'Aditya Panchal'
-    props['version'] = 0.1
+    props['version'] = 0.3
     props['plugin_type'] = 'main'
     props['plugin_version'] = 1
     props['min_dicom'] = ['images']

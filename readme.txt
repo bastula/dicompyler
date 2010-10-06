@@ -10,7 +10,7 @@ or available online at: http://code.google.com/p/dicompyler/
 Full documentation and source code for dicompyler is available online at:
 http://code.google.com/p/dicompyler/
 
-Version 0.2 Features
+Features
 -----------------
 
 - Import CT Images, DICOM RT structure set, RT dose and RT plan files
@@ -19,6 +19,27 @@ Version 0.2 Features
   - Dose volume histogram viewer with the ability to analyze DVH parameters
   - DICOM data tree viewer
   - Patient anonymizer
+
+Release Notes for dicompyler 0.3
+-----------------
+
+- 2D image viewer
+  - Added Mousewheel image navigation
+  - Added Zoom controls via toolbar and +/- keys
+  - Added Panning of image via left mouse dragging
+  - Added Window & level control via right mouse dragging
+  - Fixed display of structures in the 2D View for feet first patients
+  - Fixed image sorting based on slice location rather than instance number
+  - Fixed sort order with respect to feet first or head first patient setup
+- DVH viewer
+  - Simplified and streamlined the DVH constraint interface
+  - Fixed a bug regarding formatting of the constraint result values.
+- General
+  - New open patient icon
+  - Added focus events for notebook tab plugins
+  - Added toolbar buttons for plugins
+  - Fixed a bug if there were two image series present in the same study. If one
+    series was selected, all series would be loaded and merged into one.
 
 Getting Started
 -----------------
@@ -51,7 +72,7 @@ Included Plugins
 You can use the 2D View tab to navigate CT data with corresponding structures
 and isodoses. The DVH tab can be used to inspect and analyze DVH curves. The
 DICOM tree view tab can be used to delve into the raw DICOM data of the imported
-files.You can anonymize the loaded DICOM files via the anonymizer found in the
+files. You can anonymize the loaded DICOM files via the anonymizer found in the
 Tools menu.
 
 Custom Plugins

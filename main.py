@@ -557,7 +557,7 @@ class MainFrame(wx.Frame):
         # First we create and fill the info object
         info = wx.AboutDialogInfo()
         info.Name = "dicompyler"
-        info.Version = "0.2"
+        info.Version = "0.3"
         info.Copyright = u"© 2009-2010 Aditya Panchal"
         credits = util.get_credits()
         info.Developers = credits['developers']
