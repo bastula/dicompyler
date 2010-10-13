@@ -485,7 +485,7 @@ class DicomImporterDialog(wx.Dialog):
                         if dose['hasdvh']:
                             name = 'RT Dose with DVH'
                         else:
-                            name = 'RT Dose without DVH or Differential DVH'
+                            name = 'RT Dose without DVH'
                         foundstructure = False
                         if patient.has_key('structures'):
                             for structureid, structure in patient['structures'].iteritems():
