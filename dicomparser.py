@@ -309,8 +309,6 @@ class DicomParser:
 
         if not "DVHs" in self.ds:
             return False
-        elif not (self.ds.DVHs[0].DVHType == 'CUMULATIVE'):
-            return False
         else:
             return True
 
@@ -322,13 +320,19 @@ class DicomParser:
         if "DVHs" in self.ds:
             for item in self.ds.DVHs:
                 dvhitem = {}
+                # If the DVH is differential, convert it to a cumulative DVH
+                if (self.ds.DVHs[0].DVHType == 'DIFFERENTIAL'):
+                    dvhitem['data'] = self.GenerateCDVH(item.DVHData)
+                    dvhitem['bins'] = len(dvhitem['data'])
+                # Otherwise the DVH is cumulative
                 # Remove "filler" values from DVH data array (even values are DVH values)
-                dvhitem['data'] = np.array(item.DVHData[1::2])
-                dvhitem['type'] = item.DVHType
+                else:
+                    dvhitem['data'] = np.array(item.DVHData[1::2])
+                    dvhitem['bins'] = int(item.DVHNumberofBins)
+                dvhitem['type'] = 'CUMULATIVE'
                 dvhitem['doseunits'] = item.DoseUnits
                 dvhitem['volumeunits'] = item.DVHVolumeUnits
                 dvhitem['scaling'] = item.DVHDoseScaling
-                dvhitem['bins'] = int(item.DVHNumberofBins)
                 if "DVHMinimumDose" in item:
                     dvhitem['min'] = item.DVHMinimumDose
                 else:
@@ -347,6 +351,42 @@ class DicomParser:
                 self.dvhs[item.DVHReferencedROIs[0].ReferencedROINumber] = dvhitem
 
         return self.dvhs
+
+    def GenerateCDVH(self, data):
+        """Generate a cumulative DVH (cDVH) from a differential DVH (dDVH)"""
+
+        dDVH = np.array(data)
+        # Separate the dose and volume values into distinct arrays 
+        dose = data[0::2]
+        volume = data[1::2]
+
+        # Get the min and max dose and volume values
+        mindose = int(dose[0]*100)
+        maxdose = int(sum(dose)*100)
+        maxvol = sum(volume)
+
+        # Determine the dose values that are missing from the original data
+        missingdose = np.ones(mindose) * maxvol
+
+        # Generate the cumulative dose and cumulative volume data
+        k = 0
+        cumvol = []
+        cumdose = []
+        while k < len(dose):
+            cumvol += [sum(volume[k:])]
+            cumdose += [sum(dose[:k])]
+            k += 1
+        cumvol = np.array(cumvol)
+        cumdose = np.array(cumdose)*100
+
+        # Interpolate the dDVH data for 1 cGy bins
+        interpdose = np.arange(mindose, maxdose+1)
+        interpcumvol = np.interp(interpdose, cumdose, cumvol)
+
+        # Append the interpolated values to the missing dose values
+        cumDVH = np.append(missingdose, interpcumvol)
+
+        return cumDVH
 
     def GetDoseGrid(self, slicenumber = 0):
         """Return the dose grid for the given slice number."""
