@@ -98,6 +98,7 @@ def get_ddvh(cdvh):
     while j < jmax:
         ddvh += [cdvh[j] - cdvh[j+1]]
         j += 1
+    ddvh += [cdvh[j]]
 
     return ddvh
 
