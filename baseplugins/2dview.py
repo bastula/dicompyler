@@ -93,8 +93,16 @@ class plugin2DView(wx.Panel):
             self.structurepixlut = image.GetPatientToPixelLUT()
             # Determine the default window and level of the series
             if ('WindowWidth' in image.ds) and ('WindowCenter' in image.ds):
-                self.window = image.ds.WindowWidth
-                self.level = image.ds.WindowCenter
+                if isinstance(image.ds.WindowWidth, float):
+                    self.window = image.ds.WindowWidth
+                elif isinstance(image.ds.WindowWidth, list):
+                    if (len(image.ds.WindowWidth) > 1):
+                        self.window = image.ds.WindowWidth[1]
+                if isinstance(image.ds.WindowCenter, float):
+                    self.level = image.ds.WindowCenter
+                elif isinstance(image.ds.WindowCenter, list):
+                    if (len(image.ds.WindowCenter) > 1):
+                        self.level = image.ds.WindowCenter[1]
             else:
                 wmax = 0
                 wmin = 0
