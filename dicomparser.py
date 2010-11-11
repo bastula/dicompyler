@@ -152,12 +152,20 @@ class DicomParser:
 
         return data
 
-    def GetImage(self, window = None, level = None):
+    def GetImage(self, window = 0, level = 0):
         """Return the image from a DICOM image storage file."""
 
         if ((window == None) and (level == None)):
-            window = self.ds.WindowWidth
-            level = self.ds.WindowCenter
+            if isinstance(self.ds.WindowWidth, float):
+                window = self.ds.WindowWidth
+            elif isinstance(self.ds.WindowWidth, list):
+                if (len(self.ds.WindowWidth) > 1):
+                    window = self.ds.WindowWidth[1]
+            if isinstance(self.ds.WindowCenter, float):
+                level = self.ds.WindowCenter
+            elif isinstance(self.ds.WindowCenter, list):
+                if (len(self.ds.WindowCenter) > 1):
+                    level = self.ds.WindowCenter[1]
         image = self.GetLUTValue(self.ds.pixel_array, window, level)
 
         return Image.fromarray(image).convert('L')
