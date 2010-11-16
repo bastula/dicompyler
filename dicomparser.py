@@ -22,7 +22,7 @@ class DicomParser:
             self.ds = dataset
         elif filename:
             try:
-                self.ds = dicom.read_file(filename, defer_size=100)
+                self.ds = dicom.read_file(filename, defer_size=100, force=True)
             except (EOFError, IOError):
                 # Raise the error for the calling method to handle
                 raise
@@ -173,10 +173,13 @@ class DicomParser:
     def GetLUTValue(self, data, window, level):
         """Apply the RGB Look-Up Table for the given data and window/level value."""
 
-        return np.piecewise(data,
+        lutvalue = np.piecewise(data,
             [data <= (level - 0.5 - (window-1)/2),
                 data > (level - 0.5 + (window-1)/2)],
                 [0, 255, lambda data: ((data - (level - 0.5))/(window-1) + 0.5)*(255-0)])
+        # Convert the resultant array to an unsigned 8-bit array to create
+        # an 8-bit grayscale LUT since the range is only from 0 to 255
+        return np.array(lutvalue, dtype=np.uint8)
 
     def GetPatientToPixelLUT(self):
         """Get the image transformation matrix from the DICOM standard Part 3
