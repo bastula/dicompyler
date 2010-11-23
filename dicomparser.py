@@ -8,7 +8,6 @@
 #    See the file license.txt included with this distribution, also
 #    available at http://code.google.com/p/dicompyler/
 
-from decimal import Decimal
 import numpy as np
 import dicom
 from PIL import Image
@@ -271,7 +270,7 @@ class DicomParser:
 
                         # Add each plane to the planes dictionary of the current ROI
                         if plane.has_key('geometricType'):
-                            z = Decimal(str(plane['contourData'][0][2]))
+                            z = '%.2f' % plane['contourData'][0][2]
                             if not planes.has_key(z):
                                 planes[z] = []
                             planes[z].append(plane)
@@ -296,7 +295,7 @@ class DicomParser:
 
         # Iterate over each plane in the structure
         for z in planesDict.iterkeys():
-            planes.append(z)
+            planes.append(float(z))
         planes.sort()
 
         # Determine the thickness

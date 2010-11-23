@@ -11,7 +11,6 @@
 import wx
 from wx.xrc import XmlResource, XRCCTRL, XRCID
 from wx.lib.pubsub import Publisher as pub
-from decimal import Decimal
 import guiutil, util
 
 def pluginProperties():
@@ -369,7 +368,7 @@ class plugin2DView(wx.Panel):
             else:
                 feetfirst = False
             for id, structure in self.structures.iteritems():
-                self.DrawStructure(structure, gc, Decimal(z), prone, feetfirst)
+                self.DrawStructure(structure, gc, z, prone, feetfirst)
 
             # Draw the isodoses if present
             for id, isodose in iter(sorted(self.isodoses.iteritems())):
