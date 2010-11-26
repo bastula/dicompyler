@@ -11,6 +11,7 @@
 import numpy as np
 import dicom
 from PIL import Image
+from math import pow, sqrt
 
 class DicomParser:
     """Parses DICOM / DICOM RT files."""
@@ -327,7 +328,7 @@ class DicomParser:
 
         self.dvhs = {}
 
-        if "DVHs" in self.ds:
+        if self.HasDVHs():
             for item in self.ds.DVHs:
                 dvhitem = {}
                 # If the DVH is differential, convert it to a cumulative DVH
@@ -404,12 +405,79 @@ class DicomParser:
         sn = len(self.ds.pixel_array) - slicenumber
         return self.ds.pixel_array[sn].tolist()
 
-    def GetIsodoseGrid(self, slicenumber = 0, level = 100):
-        """Return the dose grid for the given slice number and isodose level."""
+    def GetIsodoseGrid(self, z = 0, level = 100, threshold = 1.5):
+        """
+        Return the dose grid for the given slice position and isodose level.
 
-        sn = len(self.ds.pixel_array) - slicenumber
-        isodose = (self.ds.pixel_array[sn] >= level).nonzero()
-        return zip(isodose[1].tolist(), isodose[0].tolist())
+        :param z:           Slice position in mm.
+        :param level:       Isodose level in percentage form.
+        :param threshold:   Threshold in mm to determine the max difference from z to the closest dose slice without using interpolation.
+        :return:            An array of tuples representing isodose points.
+        """
+
+        # If this is a multi-frame dose pixel array,
+        # determine the offset for each frame
+        if 'GridFrameOffsetVector' in self.ds:
+            # Get the initial dose grid position (z) in patient coordinates
+            imagepatpos = self.ds.ImagePositionPatient[2]
+            # Add the position to the offset vector to determine the
+            # z coordinate of each dose plane
+            planes = np.array(self.ds.GridFrameOffsetVector)+imagepatpos
+            frame = -1
+            # Check to see if the requested plane exists in the array
+            if (np.amin(np.fabs(planes - float(z))) < threshold):
+                frame = np.argmin(np.fabs(planes - float(z)))
+            # Return the requested isodose from the plane, since it was found
+            if not (frame == -1):
+                f = frame
+                isodose = (self.ds.pixel_array[f] >= level).nonzero()
+                return zip(isodose[1].tolist(), isodose[0].tolist())
+            # The requested plane was not found, so interpolate between planes
+            else:
+                frame = np.argmin(np.fabs(planes - float(z)))
+                if (planes[frame] - float(z) > 0):
+                    ub = frame
+                    lb = frame-1
+                elif (planes[frame] - float(z) < 0):
+                    ub = frame+1
+                    lb = frame
+                isodose = (self.ds.pixel_array[frame] >= level).nonzero()
+                ubisodose = (self.ds.pixel_array[ub] >= level).nonzero()
+                ubpoints = zip(ubisodose[1].tolist(), ubisodose[0].tolist())
+                lbisodose = (self.ds.pixel_array[lb] >= level).nonzero()
+                lbpoints = zip(lbisodose[1].tolist(), lbisodose[0].tolist())
+
+                plane = self.InterpolatePlanes(planes[ub], planes[lb], float(z),
+                    ubpoints, lbpoints)
+                return plane
+        else:
+            return []
+
+    def InterpolatePlanes(self, ub, lb, location, ubpoints, lbpoints):
+        """Interpolates a plane between two bounding planes at the given location."""
+
+        # If the number of points in the upper bound is higher, use it as the starting bound
+        # otherwise switch the upper and lower bounds
+        if not (len(ubpoints) >= len(lbpoints)):
+            lbCopy = lb.copy()
+            lb = ub.copy()
+            ub = lbCopy.copy()
+
+        plane = []
+        # Determine the closest point in the lower bound from each point in the upper bound
+        for u, up in enumerate(ubpoints):
+            dist = 100000
+            # Determine the distance from each point in the upper bound to each point in the lower bound
+            for l, lp in enumerate(lbpoints):
+                newDist = sqrt(pow((up[0]-lp[0]), 2) + pow((up[1]-lp[1]), 2) + pow((ub-lb), 2))
+                # If the distance is smaller, then linearly interpolate the point
+                if (newDist < dist):
+                    dist = newDist
+                    x = lp[0] + (location-lb) * (up[0]-lp[0]) / (ub-lb)
+                    y = lp[1] + (location-lb) * (up[1]-lp[1]) / (ub-lb)
+            if not (dist == 100000):
+                plane.append((int(x),int(y)))
+        return plane
 
     def GetDoseData(self):
         """Return the dose data from a DICOM RT Dose file."""

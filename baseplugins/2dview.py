@@ -217,13 +217,13 @@ class plugin2DView(wx.Panel):
                 # Draw the path
                 gc.DrawPath(path)
 
-    def DrawIsodose(self, isodose, gc, imagenum):
+    def DrawIsodose(self, isodose, gc, z):
         """Draw the given structure on the panel."""
 
         # Calculate the isodose level according to rx dose and dose grid scaling
         level = isodose['data']['level'] * self.rxdose / (self.dosedata['dosegridscaling'] * 10000)
         # Get the isodose contour data for this slice and isodose level
-        contour = self.dose.GetIsodoseGrid(imagenum, level)
+        contour = self.dose.GetIsodoseGrid(z, level)
 
         if len(contour):
             # Set the color of the isodose line
@@ -357,6 +357,7 @@ class plugin2DView(wx.Panel):
             # Draw the structures if present
             imdata = self.images[self.imagenum-1].GetImageData()
             z = '%.2f' % imdata['position'][2]
+
             # Determine whether the patient is prone or supine
             if 'p' in imdata['patientposition'].lower():
                 prone = True
@@ -372,7 +373,7 @@ class plugin2DView(wx.Panel):
 
             # Draw the isodoses if present
             for id, isodose in iter(sorted(self.isodoses.iteritems())):
-                self.DrawIsodose(isodose, gc, self.imagenum)
+                self.DrawIsodose(isodose, gc, z)
 
             # Restore the translation and scaling
             gc.PopState()
