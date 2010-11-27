@@ -399,11 +399,64 @@ class DicomParser:
 
         return cumDVH
 
-    def GetDoseGrid(self, slicenumber = 0):
-        """Return the dose grid for the given slice number."""
+#    def GetDoseGrid(self, slicenumber = 0):
+#        """Return the dose grid for the given slice number."""
 
-        sn = len(self.ds.pixel_array) - slicenumber
-        return self.ds.pixel_array[sn].tolist()
+#        sn = len(self.ds.pixel_array) - slicenumber
+#        return self.ds.pixel_array[sn].tolist()
+
+    def GetDoseGrid(self, z = 0):
+        """Return the 2-D dose grid for the given slice position (mm)."""
+
+        # If this is a multi-frame dose pixel array,
+        # determine the offset for each frame
+        if 'GridFrameOffsetVector' in self.ds:
+            z = float(z)
+            # Get the initial dose grid position (z) in patient coordinates
+            imagepatpos = self.ds.ImagePositionPatient[2]
+            # Add the position to the offset vector to determine the
+            # z coordinate of each dose plane
+            planes = np.array(self.ds.GridFrameOffsetVector)+imagepatpos
+            frame = -1
+            # Check to see if the requested plane exists in the array
+            if (np.amin(np.fabs(planes - z)) < threshold):
+                frame = np.argmin(np.fabs(planes - z))
+            # Return the requested isodose from the plane, since it was found
+            if not (frame == -1):
+                f = frame
+                return self.ds.pixel_array[f]
+            # Check whether the requested plane is within the dose grid boundaries
+	        elif ((z < np.amin(planes)) or (z > np.amax(planes))):
+	            return []
+            # The requested plane was not found, so interpolate between planes
+            else:
+                frame = np.argmin(np.fabs(planes - z))
+                if (planes[frame] - z > 0):
+                    ub = frame
+                    lb = frame-1
+                elif (planes[frame] - z < 0):
+                    ub = frame+1
+                    lb = frame
+                # Fractional distance of dose plane between upper and lower bound
+                fz = (z - plane[lb]) / (plane[ub] - plane[lb])
+
+                plane = self.InterpolateDosePlanes(self.ds.pixel_array[ub], self.ds.pixel_array[lb], fz)
+                return plane.tolist()
+        else:
+            return []
+
+    def InterpolateDosePlanes(self, uplane, lplane, fz):
+        """Interpolates a dose plane between two bounding planes at the given relative location."""
+
+        # uplane and lplane are the upper and lower dose plane, between which the new dose plane
+        #   will be interpolated.
+        # fz is the fractional distance from the bottom to the top, where the new plane is located.
+        #   E.g. if fz = 1, the plane is at the upper plane, fz = 0, it is at the lower plane.
+
+        # A simple linear interpolation
+        doseplane = fz*uplane + (1.0 - fz)*lplane
+
+        return doseplane
 
     def GetIsodoseGrid(self, z = 0, level = 100, threshold = 1.5):
         """
@@ -446,7 +499,7 @@ class DicomParser:
                 elif (planes[frame] - z < 0):
                     ub = frame+1
                     lb = frame
-                isodose = (self.ds.pixel_array[frame] >= level).nonzero()
+                #isodose = (self.ds.pixel_array[frame] >= level).nonzero() # This seems to do nothing
                 ubisodose = (self.ds.pixel_array[ub] >= level).nonzero()
                 ubpoints = zip(ubisodose[1].tolist(), ubisodose[0].tolist())
                 lbisodose = (self.ds.pixel_array[lb] >= level).nonzero()
@@ -471,7 +524,7 @@ class DicomParser:
         plane = []
         # Determine the closest point in the lower bound from each point in the upper bound
         for u, up in enumerate(ubpoints):
-            dist = 100000
+            dist = 100000 # Arbitrary large number
             # Determine the distance from each point in the upper bound to each point in the lower bound
             for l, lp in enumerate(lbpoints):
                 newDist = sqrt(pow((up[0]-lp[0]), 2) + pow((up[1]-lp[1]), 2) + pow((ub-lb), 2))
