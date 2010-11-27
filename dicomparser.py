@@ -418,6 +418,7 @@ class DicomParser:
         # If this is a multi-frame dose pixel array,
         # determine the offset for each frame
         if 'GridFrameOffsetVector' in self.ds:
+            z = float(z)
             # Get the initial dose grid position (z) in patient coordinates
             imagepatpos = self.ds.ImagePositionPatient[2]
             # Add the position to the offset vector to determine the
@@ -425,20 +426,24 @@ class DicomParser:
             planes = np.array(self.ds.GridFrameOffsetVector)+imagepatpos
             frame = -1
             # Check to see if the requested plane exists in the array
-            if (np.amin(np.fabs(planes - float(z))) < threshold):
-                frame = np.argmin(np.fabs(planes - float(z)))
+            if (np.amin(np.fabs(planes - z)) < threshold):
+                frame = np.argmin(np.fabs(planes - z))
             # Return the requested isodose from the plane, since it was found
             if not (frame == -1):
-                f = frame
-                isodose = (self.ds.pixel_array[f] >= level).nonzero()
+                isodose = (self.ds.pixel_array[frame] >= level).nonzero()
                 return zip(isodose[1].tolist(), isodose[0].tolist())
+            # Check whether the requested plane is within the dose grid boundaries
+            elif ((z < np.amin(planes)) or (z > np.amax(planes))):
+                return []
             # The requested plane was not found, so interpolate between planes
             else:
-                frame = np.argmin(np.fabs(planes - float(z)))
-                if (planes[frame] - float(z) > 0):
+                frame = np.argmin(np.fabs(planes - z))
+                print frame, planes, len(planes)
+                print self.ds.pixel_array.shape
+                if (planes[frame] - z > 0):
                     ub = frame
                     lb = frame-1
-                elif (planes[frame] - float(z) < 0):
+                elif (planes[frame] - z < 0):
                     ub = frame+1
                     lb = frame
                 isodose = (self.ds.pixel_array[frame] >= level).nonzero()
@@ -447,7 +452,7 @@ class DicomParser:
                 lbisodose = (self.ds.pixel_array[lb] >= level).nonzero()
                 lbpoints = zip(lbisodose[1].tolist(), lbisodose[0].tolist())
 
-                plane = self.InterpolatePlanes(planes[ub], planes[lb], float(z),
+                plane = self.InterpolatePlanes(planes[ub], planes[lb], z,
                     ubpoints, lbpoints)
                 return plane
         else:
