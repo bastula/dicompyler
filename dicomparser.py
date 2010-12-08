@@ -3,7 +3,7 @@
 # dicomparser.py
 """Class that parses and returns formatted DICOM RT data."""
 # Copyright (c) 2009-2010 Aditya Panchal
-# Copyright (c) 2009 Roy Keyes
+# Copyright (c) 2009-2010 Roy Keyes
 # This file is part of dicompyler, relased under a BSD license.
 #    See the file license.txt included with this distribution, also
 #    available at http://code.google.com/p/dicompyler/
@@ -399,14 +399,14 @@ class DicomParser:
 
         return cumDVH
 
-#    def GetDoseGrid(self, slicenumber = 0):
-#        """Return the dose grid for the given slice number."""
+    def GetDoseGrid(self, z = 0, threshold = 0.5):
+        """
+        Return the 2d dose grid for the given slice position (mm).
 
-#        sn = len(self.ds.pixel_array) - slicenumber
-#        return self.ds.pixel_array[sn].tolist()
-
-    def GetDoseGrid(self, z = 0):
-        """Return the 2-D dose grid for the given slice position (mm)."""
+        :param z:           Slice position in mm.
+        :param threshold:   Threshold in mm to determine the max difference from z to the closest dose slice without using interpolation.
+        :return:            An numpy 2d array of dose points.
+        """
 
         # If this is a multi-frame dose pixel array,
         # determine the offset for each frame
@@ -421,12 +421,12 @@ class DicomParser:
             # Check to see if the requested plane exists in the array
             if (np.amin(np.fabs(planes - z)) < threshold):
                 frame = np.argmin(np.fabs(planes - z))
-            # Return the requested isodose from the plane, since it was found
+            # Return the requested dose plane, since it was found
             if not (frame == -1):
                 f = frame
                 return self.ds.pixel_array[f]
             # Check whether the requested plane is within the dose grid boundaries
-	        elif ((z < np.amin(planes)) or (z > np.amax(planes))):
+            elif ((z < np.amin(planes)) or (z > np.amax(planes))):
 	            return []
             # The requested plane was not found, so interpolate between planes
             else:
@@ -438,10 +438,10 @@ class DicomParser:
                     ub = frame+1
                     lb = frame
                 # Fractional distance of dose plane between upper and lower bound
-                fz = (z - plane[lb]) / (plane[ub] - plane[lb])
+                fz = (z - planes[lb]) / (planes[ub] - planes[lb])
 
                 plane = self.InterpolateDosePlanes(self.ds.pixel_array[ub], self.ds.pixel_array[lb], fz)
-                return plane.tolist()
+                return plane
         else:
             return []
 
@@ -458,58 +458,19 @@ class DicomParser:
 
         return doseplane
 
-    def GetIsodoseGrid(self, z = 0, level = 100, threshold = 1.5):
+    def GetIsodosePoints(self, z = 0, level = 100, threshold = 0.5):
         """
-        Return the dose grid for the given slice position and isodose level.
+        Return points for the given isodose level and slice position from the dose grid.
 
         :param z:           Slice position in mm.
-        :param level:       Isodose level in percentage form.
         :param threshold:   Threshold in mm to determine the max difference from z to the closest dose slice without using interpolation.
+        :param level:       Isodose level in scaled form (multiplied by self.ds.DoseGridScaling)
         :return:            An array of tuples representing isodose points.
         """
 
-        # If this is a multi-frame dose pixel array,
-        # determine the offset for each frame
-        if 'GridFrameOffsetVector' in self.ds:
-            z = float(z)
-            # Get the initial dose grid position (z) in patient coordinates
-            imagepatpos = self.ds.ImagePositionPatient[2]
-            # Add the position to the offset vector to determine the
-            # z coordinate of each dose plane
-            planes = np.array(self.ds.GridFrameOffsetVector)+imagepatpos
-            frame = -1
-            # Check to see if the requested plane exists in the array
-            if (np.amin(np.fabs(planes - z)) < threshold):
-                frame = np.argmin(np.fabs(planes - z))
-            # Return the requested isodose from the plane, since it was found
-            if not (frame == -1):
-                isodose = (self.ds.pixel_array[frame] >= level).nonzero()
-                return zip(isodose[1].tolist(), isodose[0].tolist())
-            # Check whether the requested plane is within the dose grid boundaries
-            elif ((z < np.amin(planes)) or (z > np.amax(planes))):
-                return []
-            # The requested plane was not found, so interpolate between planes
-            else:
-                frame = np.argmin(np.fabs(planes - z))
-                print frame, planes, len(planes)
-                print self.ds.pixel_array.shape
-                if (planes[frame] - z > 0):
-                    ub = frame
-                    lb = frame-1
-                elif (planes[frame] - z < 0):
-                    ub = frame+1
-                    lb = frame
-                #isodose = (self.ds.pixel_array[frame] >= level).nonzero() # This seems to do nothing
-                ubisodose = (self.ds.pixel_array[ub] >= level).nonzero()
-                ubpoints = zip(ubisodose[1].tolist(), ubisodose[0].tolist())
-                lbisodose = (self.ds.pixel_array[lb] >= level).nonzero()
-                lbpoints = zip(lbisodose[1].tolist(), lbisodose[0].tolist())
-
-                plane = self.InterpolatePlanes(planes[ub], planes[lb], z,
-                    ubpoints, lbpoints)
-                return plane
-        else:
-            return []
+        plane = self.GetDoseGrid(z, threshold)
+        isodose = (plane >= level).nonzero()
+        return zip(isodose[1].tolist(), isodose[0].tolist())
 
     def InterpolatePlanes(self, ub, lb, location, ubpoints, lbpoints):
         """Interpolates a plane between two bounding planes at the given location."""
