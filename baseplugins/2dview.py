@@ -223,7 +223,7 @@ class plugin2DView(wx.Panel):
         # Calculate the isodose level according to rx dose and dose grid scaling
         level = isodose['data']['level'] * self.rxdose / (self.dosedata['dosegridscaling'] * 10000)
         # Get the isodose contour data for this slice and isodose level
-        contour = self.dose.GetIsodoseGrid(z, level)
+        contour = self.dose.GetIsodosePoints(z, level)
 
         if len(contour):
             # Set the color of the isodose line
