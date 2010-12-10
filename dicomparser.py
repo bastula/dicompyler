@@ -423,11 +423,10 @@ class DicomParser:
                 frame = np.argmin(np.fabs(planes - z))
             # Return the requested dose plane, since it was found
             if not (frame == -1):
-                f = frame
-                return self.ds.pixel_array[f]
+                return self.ds.pixel_array[frame]
             # Check whether the requested plane is within the dose grid boundaries
             elif ((z < np.amin(planes)) or (z > np.amax(planes))):
-	            return []
+                return []
             # The requested plane was not found, so interpolate between planes
             else:
                 frame = np.argmin(np.fabs(planes - z))
@@ -439,8 +438,8 @@ class DicomParser:
                     lb = frame
                 # Fractional distance of dose plane between upper and lower bound
                 fz = (z - planes[lb]) / (planes[ub] - planes[lb])
-
-                plane = self.InterpolateDosePlanes(self.ds.pixel_array[ub], self.ds.pixel_array[lb], fz)
+                plane = self.InterpolateDosePlanes(
+                    self.ds.pixel_array[ub], self.ds.pixel_array[lb], fz)
                 return plane
         else:
             return []
