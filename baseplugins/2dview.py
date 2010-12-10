@@ -201,23 +201,25 @@ class plugin2DView(wx.Panel):
             else:
                 gc.SetBrush(wx.Brush(color))
             gc.SetPen(wx.Pen(tuple(structure['color'])))
+            # Create the path for the contour
+            path = gc.CreatePath()
             for contour in structure['planes'][position]:
                 if (contour['geometricType'] == u"CLOSED_PLANAR"):
-                    # Create the path for the contour
-                    path = gc.CreatePath()
                     # Convert the structure data to pixel data
                     pixeldata = self.GetContourPixelData(
                         self.structurepixlut, contour['contourData'], prone, feetfirst)
 
-                    # Move the origin to the first point of the contour
-                    point = pixeldata[0]
+                    # Move the origin to the last point of the contour
+                    point = pixeldata[-1]
                     path.MoveToPoint(point[0], point[1])
 
                     # Add each contour point to the path
                     for point in pixeldata:
                         path.AddLineToPoint(point[0], point[1])
-                # Draw the path
-                gc.DrawPath(path)
+                    # Close the subpath in preparation for the next contour
+                    path.CloseSubpath()
+            # Draw the path
+            gc.DrawPath(path)
 
     def DrawIsodose(self, isodose, gc, isodosegen):
         """Draw the given structure on the panel."""
