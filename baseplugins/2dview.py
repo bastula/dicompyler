@@ -11,6 +11,8 @@
 import wx
 from wx.xrc import XmlResource, XRCCTRL, XRCID
 from wx.lib.pubsub import Publisher as pub
+from matplotlib import _cntr as cntr
+import numpy as np
 import guiutil, util
 
 def pluginProperties():
@@ -217,56 +219,35 @@ class plugin2DView(wx.Panel):
                 # Draw the path
                 gc.DrawPath(path)
 
-    def DrawIsodose(self, isodose, gc, z):
+    def DrawIsodose(self, isodose, gc, isodosegen):
         """Draw the given structure on the panel."""
 
         # Calculate the isodose level according to rx dose and dose grid scaling
         level = isodose['data']['level'] * self.rxdose / (self.dosedata['dosegridscaling'] * 10000)
-        # Get the isodose contour data for this slice and isodose level
-        contour = self.dose.GetIsodosePoints(z, level)
+        contours = isodosegen.trace(level, points = 0)
+        if len(contours):
 
-        if len(contour):
             # Set the color of the isodose line
             color = wx.Colour(isodose['color'][0], isodose['color'][1],
                 isodose['color'][2], 64)
             gc.SetBrush(wx.Brush(color))
             gc.SetPen(wx.Pen(tuple(isodose['color'])))
 
-            # Create the path for the isodose line
+            # Create the drawing path for the isodose line
             path = gc.CreatePath()
-
-            # Move the origin to the first point of the isodose line
-            point = contour[0]
-            path.MoveToPoint(
-                self.dosepixlut[0][point[0]], self.dosepixlut[1][point[1]])
-
-            # Create two arrays of points: left side (down) and right side (up)
-            prevpt = (self.dosepixlut[0][point[0]], self.dosepixlut[1][point[1]])
-            down = [(self.dosepixlut[0][point[0]], self.dosepixlut[1][point[1]])]
-            up = []
-            for index, point in enumerate(contour):
-                pt = (self.dosepixlut[0][point[0]], self.dosepixlut[1][point[1]])
-                # If the point is on a new line,
-                # add the point to down and add the prev point to up
-                if (self.dosepixlut[1][point[1]] > prevpt[1]):
-                    down.append(pt)
-                    up.append(prevpt)
-                # If this is the very last point, add it to up
-                if ((index-1) == len(contour)):
-                    up.append(pt)
-                # Save the point for comparsion to the next point
-                prevpt = pt
-
-            # Add each contour point to the path, first drawing the left side,
-            # going down, then drawing the right side going up
-            for point in down:
-                path.AddLineToPoint(point[0], point[1])
-            for point in reversed(up):
-                path.AddLineToPoint(point[0], point[1])
-            # Draw a line back to the original starting point
-            path.AddLineToPoint(
-                self.dosepixlut[0][contour[0][0]], self.dosepixlut[1][contour[0][1]])
-            # Draw the path
+            # Draw each contour for the isodose line
+            for c in contours:
+                # Move the origin to the last point of the contour
+                path.MoveToPoint(
+                    self.dosepixlut[0][int(c[-1][0])], self.dosepixlut[1][int(c[-1][1])])
+                # Add a line to the rest of the points
+                # Note: draw every other point since there are too many points
+                for p in c[::2]:
+                    path.AddLineToPoint(
+                        self.dosepixlut[0][int(p[0])], self.dosepixlut[1][int(p[1])])
+                # Close the subpath in preparation for the next contour
+                path.CloseSubpath()
+            # Draw the final isodose path
             gc.DrawPath(path)
 
     def GetContourPixelData(self, pixlut, contour, prone = False, feetfirst = False):
@@ -372,8 +353,14 @@ class plugin2DView(wx.Panel):
                 self.DrawStructure(structure, gc, z, prone, feetfirst)
 
             # Draw the isodoses if present
-            for id, isodose in iter(sorted(self.isodoses.iteritems())):
-                self.DrawIsodose(isodose, gc, z)
+            if len(self.isodoses):
+                grid = self.dose.GetDoseGrid(float(z))
+                x, y = np.meshgrid(
+                    np.arange(grid.shape[1]), np.arange(grid.shape[0]))
+                # Instantiate the isodose generator for this slice
+                isodosegen = cntr.Cntr(x, y, grid)
+                for id, isodose in iter(sorted(self.isodoses.iteritems())):
+                    self.DrawIsodose(isodose, gc, isodosegen)
 
             # Restore the translation and scaling
             gc.PopState()
