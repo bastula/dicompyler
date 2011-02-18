@@ -2,7 +2,7 @@
 # -*- coding: ISO-8859-1 -*-
 # main.py
 """Main file for dicompyler."""
-# Copyright (c) 2009 Aditya Panchal
+# Copyright (c) 2009-2011 Aditya Panchal
 # Copyright (c) 2009 Roy Keyes
 # This file is part of dicompyler, relased under a BSD license.
 #    See the file license.txt included with this distribution, also
@@ -15,11 +15,10 @@ import wx.lib.dialogs, webbrowser
 # Uncomment line to setup pubsub for frozen targets on wxPython 2.8.11 and above
 # from wx.lib.pubsub import setupv1
 from wx.lib.pubsub import Publisher as pub
-from model import *
 import guiutil, util
 import dicomgui, dvhdata, dvhdoses
 from dicomparser import DicomParser as dp
-import plugin
+import plugin, preferences
 
 class MainFrame(wx.Frame):
     def __init__(self, parent, id, title, res):
@@ -86,6 +85,7 @@ class MainFrame(wx.Frame):
         # If we are running on Mac OS X, alter the menu location
         if guiutil.IsMac():
             wx.App_SetMacAboutMenuItemId(XRCID('menuAbout'))
+            wx.App_SetMacPreferencesMenuItemId(XRCID('menuPreferences'))
             wx.App_SetMacExitMenuItemId(XRCID('menuExit'))
 
         # Set the menu as the default menu for this frame
@@ -97,6 +97,7 @@ class MainFrame(wx.Frame):
         # Bind menu events to the proper methods
         wx.EVT_MENU(self, XRCID('menuOpen'), self.OnOpenPatient)
         wx.EVT_MENU(self, XRCID('menuExit'), self.OnClose)
+        wx.EVT_MENU(self, XRCID('menuPreferences'), self.OnPreferences)
         wx.EVT_MENU(self, XRCID('menuPluginManager'), self.OnPluginManager)
         wx.EVT_MENU(self, XRCID('menuAbout'), self.OnAbout)
         wx.EVT_MENU(self, XRCID('menuHomepage'), self.OnHomepage)
@@ -139,17 +140,6 @@ class MainFrame(wx.Frame):
         self.SetMinSize(size)
         self.Centre(wx.BOTH)
 
-        # Initalize the database
-        datapath = guiutil.get_data_dir()
-        dbpath = os.path.join(datapath, 'dicompyler.db')
-        # Set the database path to the data path before writing to disk
-        metadata.bind = "sqlite:///" + dbpath
-        setup_all()
-        if not os.path.exists(datapath):
-            os.mkdir(datapath)
-        if not os.path.isfile(dbpath):
-            create_all()
-
         # Initialize the welcome notebook tab
         panelWelcome = self.res.LoadPanel(self.notebook, 'panelWelcome')
         self.notebook.AddPage(panelWelcome, 'Welcome')
@@ -159,11 +149,32 @@ class MainFrame(wx.Frame):
         self.notebookTools.AddPage(self.cclbIsodoses, 'Isodoses')
 
         # Load and initialize plugins
-        userpluginpath = os.path.join(datapath, 'plugins')
+        userpluginpath = os.path.join(guiutil.get_data_dir(), 'plugins')
         if not os.path.exists(userpluginpath):
             os.mkdir(userpluginpath)
         self.plugins = plugin.import_plugins()
         self.menuDict = {}
+
+        # Initialize the preferences
+        if guiutil.IsMac():
+            self.prefmgr = preferences.PreferencesManager(None)
+        else:
+            self.prefmgr = preferences.PreferencesManager(None, 'Options')
+        sp = wx.StandardPaths.Get()
+        self.generalpreftemplate = [
+            {'DICOM Import Settings':
+                [{'name':'Import Location',
+                 'type':'choice',
+               'values':['Remember Last Used', 'Always Use Default'],
+              'default':'Remember Last Used',
+             'callback':'general.dicom.import_location_setting'},
+                {'name':'Default Location',
+                 'type':'directory',
+              'default':unicode(sp.GetDocumentsDir()),
+             'callback':'general.dicom.import_location'}]
+            }]
+        self.preftemplate = [{'General':self.generalpreftemplate}]
+        pub.sendMessage('preferences.updated.template', self.preftemplate)
 
         # Set up pubsub
         pub.subscribe(self.OnLoadPatientData, 'patient.updated.raw_data')
@@ -192,6 +203,8 @@ class MainFrame(wx.Frame):
                 for menuid, menu in self.menuDict.iteritems():
                     self.menuPlugins.Delete(menuid)
                 self.menuDict = {}
+            # Reset the preferences template
+            self.preftemplate = [{'General':self.generalpreftemplate}]
             # Set up the plugins for each plugin entry point of dicompyler
             for i, p in enumerate(self.plugins):
                 props = p.pluginProperties()
@@ -215,9 +228,8 @@ class MainFrame(wx.Frame):
                     if add:
                         # Load the main panel plugins
                         if (props['plugin_type'] == 'main'):
-                            self.notebook.AddPage(
-                                p.pluginLoader(self.notebook),
-                                props['name'])
+                            plugin = p.pluginLoader(self.notebook)
+                            self.notebook.AddPage(plugin, props['name'])
                         # Load the menu plugins
                         if (props['plugin_type'] == 'menu'):
                             if not len(self.menuDict):
@@ -225,6 +237,10 @@ class MainFrame(wx.Frame):
                             self.menuDict[100+i] = self.menuPlugins.Append(100+i, props['name']+'...')
                             plugin = p.plugin(self)
                             wx.EVT_MENU(self, 100+i, plugin.pluginMenu)
+                        # Add the plugin preferences if they exist
+                        if hasattr(plugin, 'preferences'):
+                            self.preftemplate.append({props['name']:plugin.preferences})
+            pub.sendMessage('preferences.updated.template', self.preftemplate)
             pub.sendMessage('patient.updated.raw_data', self.ptdata)
 
     def OnLoadPatientData(self, msg):
@@ -548,8 +564,13 @@ class MainFrame(wx.Frame):
         if guiutil.IsMSWindows():
             pub.sendMessage('main.mousewheel', evt)
 
+    def OnPreferences(self, evt):
+        """Load and show the Preferences dialog box."""
+
+        self.prefmgr.Show()
+
     def OnPluginManager(self, evt):
-        """Load and show the Dicom RT Importer dialog box."""
+        """Load and show the Plugin Manager dialog box."""
 
         self.pm = plugin.PluginManager(self, self.plugins)
 
@@ -590,6 +611,9 @@ class MainFrame(wx.Frame):
         else:
             dlg = wx.lib.dialogs.ScrolledMessageDialog(self, msg,
                 "dicompyler License", size=(650, 550))
+
+
+
         dlg.ShowModal()
         dlg.Destroy()
 

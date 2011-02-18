@@ -2,7 +2,7 @@
 # -*- coding: ISO-8859-1 -*-
 # guiutil.py
 """Several GUI utility functions that don't really belong anywhere."""
-# Copyright (c) 2009 Aditya Panchal
+# Copyright (c) 2009-2011 Aditya Panchal
 # This file is part of dicompyler, relased under a BSD license.
 #    See the file license.txt included with this distribution, also
 #    available at http://code.google.com/p/dicompyler/
@@ -97,6 +97,15 @@ def get_progress_dialog(parent, title="Loading..."):
     dialogProgress.Init(res, title)
 
     return dialogProgress
+
+def adjust_control(control):
+    """Adjust the control and font size on the Mac."""
+
+    if IsMac():
+        font = control.GetFont()
+        font.SetPointSize(11)
+        control.SetWindowVariant(wx.WINDOW_VARIANT_SMALL)
+        control.SetFont(font)
 
 class ProgressDialog(wx.Dialog):
     """Dialog to show progress for certain long-running events."""

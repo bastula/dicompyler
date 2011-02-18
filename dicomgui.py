@@ -2,7 +2,7 @@
 # -*- coding: ISO-8859-1 -*-
 # dicomgui.py
 """Class that imports and returns DICOM data via a wxPython GUI dialog."""
-# Copyright (c) 2009-2010 Aditya Panchal
+# Copyright (c) 2009-2011 Aditya Panchal
 # Copyright (c) 2009 Roy Keyes
 # This file is part of dicompyler, relased under a BSD license.
 #    See the file license.txt included with this distribution, also
@@ -13,7 +13,7 @@
 import hashlib, os, threading
 import wx
 from wx.xrc import *
-from model import *
+from wx.lib.pubsub import Publisher as pub
 import dicomparser, dvhdoses, guiutil, util
 
 def ImportDicom(parent):
@@ -99,24 +99,9 @@ class DicomImporterDialog(wx.Dialog):
         # Initialize the patients dictionary
         self.patients = {}
 
-        # Initialize the import location
-
-        # Get the location from the preferences if it hasn't been set,
-        # otherwise set it
-        sp = wx.StandardPaths.Get()
-        testdata = os.path.join(util.get_main_dir(), 'testdata')
-        if os.path.isdir(testdata):
-            self.path = unicode(testdata)
-        else:
-            self.path = unicode(sp.GetDocumentsDir())
-        if not len(Preferences.query.all()):
-            Preferences(name=u'dicom_import_location', value=unicode(self.path))
-            session.commit()
-        else:
-            path = Preferences.get_by(name=u'dicom_import_location').value
-            if os.path.isdir(path):
-                self.path = path
-        self.txtDicomImport.SetValue(self.path)
+        # Initialize the import location via pubsub
+        pub.subscribe(self.OnImportPrefsChange, 'general.dicom')
+        pub.sendMessage('preferences.requested.values', 'general.dicom')
 
         # Set the threading termination status to false intially
         self.terminate = False
@@ -128,6 +113,15 @@ class DicomImporterDialog(wx.Dialog):
 
         # Start the directory search as soon as the panel loads
         self.OnDirectorySearch()
+
+    def OnImportPrefsChange(self, msg):
+        """When the import preferences change, update the values."""
+
+        if (msg.topic[2] == 'import_location'):
+            self.path = unicode(msg.data)
+            self.txtDicomImport.SetValue(self.path)
+        elif (msg.topic[2] == 'import_location_setting'):
+            self.import_location_setting = msg.data
 
     def OnBrowseDicomImport(self, evt):
         """Get the directory selected by the user."""
@@ -683,12 +677,11 @@ class DicomImporterDialog(wx.Dialog):
         if (threading.activeCount() == 1):
             if self.tcPatients.GetPyData(item):
                 # Since we have decided to use this location to import from,
-                # save the location back to the db for the next session,
-                # only if the path has not changed from the previous session
-                path = Preferences.get_by(name=u'dicom_import_location')
-                if not (self.path == path.value):
-                    path.value=self.path
-                    session.commit()
+                # update the location in the preferences for the next session
+                # if the 'import_location_setting' is "Remember Last Used"
+                if (self.import_location_setting == "Remember Last Used"):
+                    pub.sendMessage('preferences.updated.value',
+                        {'general.dicom.import_location':self.path})
 
                 filearray = self.tcPatients.GetPyData(item)['filearray']
                 self.btnSelect.Enable(False)
