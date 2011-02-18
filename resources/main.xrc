@@ -410,6 +410,9 @@
       </object>
     </object>
     <object class="wxMenu" name="menuTools">
+      <object class="wxMenuItem" name="menuPreferences">
+        <label>&amp;Options...</label>
+      </object>
       <object class="wxMenuItem" name="menuPluginManager">
         <label>&amp;Plugin Manager...</label>
       </object>

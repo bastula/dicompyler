@@ -2,7 +2,7 @@
 # -*- coding: ISO-8859-1 -*-
 # 2dview.py
 """dicompyler plugin that displays images, structures and dose in 2D planes."""
-# Copyright (c) 2010 Aditya Panchal
+# Copyright (c) 2009-2011 Aditya Panchal
 # This file is part of dicompyler, relased under a BSD license.
 #    See the file license.txt included with this distribution, also
 #    available at http://code.google.com/p/dicompyler/
@@ -65,23 +65,58 @@ class plugin2DView(wx.Panel):
         self.zoom = 1
         self.pan = [0, 0]
         self.mousepos = (-10000, -10000)
+        self.isodose_line_style = 'Solid'
+        self.isodose_fill_opacity = 25
+        self.structure_line_style = 'Solid'
+        self.structure_fill_opacity = 50
 
         # Setup toolbar controls
         if guiutil.IsGtk():
             import gtk
             zoominbmp = wx.ArtProvider_GetBitmap(gtk.STOCK_ZOOM_IN, wx.ART_OTHER, (24, 24))
             zoomoutbmp = wx.ArtProvider_GetBitmap(gtk.STOCK_ZOOM_OUT, wx.ART_OTHER, (24, 24))
+            drawingstyles = ['Solid', 'Transparent', 'Dot']
         else:
             zoominbmp = wx.Bitmap(util.GetResourcePath('magnifier_zoom_in.png'))
             zoomoutbmp = wx.Bitmap(util.GetResourcePath('magnifier_zoom_out.png'))
+            drawingstyles = ['Solid', 'Transparent', 'Dot', 'Dash', 'Dot Dash']
         self.tools = []
         self.tools.append({'label':"Zoom In", 'bmp':zoominbmp, 'shortHelp':"Zoom In", 'eventhandler':self.OnZoomIn})
         self.tools.append({'label':"Zoom Out", 'bmp':zoomoutbmp, 'shortHelp':"Zoom Out", 'eventhandler':self.OnZoomOut})
+
+        # Set up preferences
+        self.preferences = [
+            {'Drawing Settings':
+                [{'name':'Isodose Line Style',
+                 'type':'choice',
+               'values':drawingstyles,
+              'default':'Solid',
+             'callback':'2dview.drawingprefs.isodose_line_style'},
+                {'name':'Isodose Fill Opacity',
+                 'type':'range',
+               'values':[0, 100],
+              'default':25,
+                'units':'%',
+             'callback':'2dview.drawingprefs.isodose_fill_opacity'},
+                {'name':'Structure Line Style',
+                 'type':'choice',
+               'values':drawingstyles,
+              'default':'Solid',
+             'callback':'2dview.drawingprefs.structure_line_style'},
+                {'name':'Structure Fill Opacity',
+                 'type':'range',
+               'values':[0, 100],
+              'default':50,
+                'units':'%',
+             'callback':'2dview.drawingprefs.structure_fill_opacity'}]
+            }]
 
         # Set up pubsub
         pub.subscribe(self.OnUpdatePatient, 'patient.updated.parsed_data')
         pub.subscribe(self.OnStructureCheck, 'structures.checked')
         pub.subscribe(self.OnIsodoseCheck, 'isodoses.checked')
+        pub.subscribe(self.OnDrawingPrefsChange, '2dview.drawingprefs')
+        pub.sendMessage('preferences.requested.values', '2dview.drawingprefs')
 
     def OnUpdatePatient(self, msg):
         """Update and load the patient data."""
@@ -170,6 +205,7 @@ class plugin2DView(wx.Panel):
         pub.unsubscribe(self.OnUpdatePatient)
         pub.unsubscribe(self.OnStructureCheck)
         pub.unsubscribe(self.OnIsodoseCheck)
+        pub.unsubscribe(self.OnDrawingPrefsChange)
         self.OnUnfocus()
 
     def OnStructureCheck(self, msg):
@@ -186,6 +222,19 @@ class plugin2DView(wx.Panel):
         self.SetFocus()
         self.Refresh()
 
+    def OnDrawingPrefsChange(self, msg):
+        """When the drawing preferences change, update the drawing styles."""
+
+        if (msg.topic[2] == 'isodose_line_style'):
+            self.isodose_line_style = msg.data
+        elif (msg.topic[2] == 'isodose_fill_opacity'):
+            self.isodose_fill_opacity = msg.data
+        elif (msg.topic[2] == 'structure_line_style'):
+            self.structure_line_style = msg.data
+        elif (msg.topic[2] == 'structure_fill_opacity'):
+            self.structure_fill_opacity = msg.data
+        self.Refresh()
+
     def DrawStructure(self, structure, gc, position, prone, feetfirst):
         """Draw the given structure on the panel."""
 
@@ -194,13 +243,14 @@ class plugin2DView(wx.Panel):
         if structure['planes'].has_key(position):
             # Set the color of the contour
             color = wx.Colour(structure['color'][0], structure['color'][1],
-                structure['color'][2], 128)
+                structure['color'][2], int(self.structure_fill_opacity*255/100))
             # Set fill (brush) color, transparent for external contour
             if (('RTROIType' in structure) and (structure['RTROIType'].lower() == 'external')):
                 gc.SetBrush(wx.Brush(color, style=wx.TRANSPARENT))
             else:
                 gc.SetBrush(wx.Brush(color))
-            gc.SetPen(wx.Pen(tuple(structure['color'])))
+            gc.SetPen(wx.Pen(tuple(structure['color']),
+                style=self.GetLineDrawingStyle(self.structure_line_style)))
             # Create the path for the contour
             path = gc.CreatePath()
             for contour in structure['planes'][position]:
@@ -231,9 +281,10 @@ class plugin2DView(wx.Panel):
 
             # Set the color of the isodose line
             color = wx.Colour(isodose['color'][0], isodose['color'][1],
-                isodose['color'][2], 64)
+                isodose['color'][2], int(self.isodose_fill_opacity*255/100))
             gc.SetBrush(wx.Brush(color))
-            gc.SetPen(wx.Pen(tuple(isodose['color'])))
+            gc.SetPen(wx.Pen(tuple(isodose['color']),
+                style=self.GetLineDrawingStyle(self.isodose_line_style)))
 
             # Create the drawing path for the isodose line
             path = gc.CreatePath()
@@ -251,6 +302,16 @@ class plugin2DView(wx.Panel):
                 path.CloseSubpath()
             # Draw the final isodose path
             gc.DrawPath(path)
+
+    def GetLineDrawingStyle(self, style):
+        """Convert the stored line drawing style into wxWidgets pen drawing format."""
+
+        styledict = {'Solid':wx.SOLID,
+                    'Transparent':wx.TRANSPARENT,
+                    'Dot':wx.DOT,
+                    'Dash':wx.SHORT_DASH,
+                    'Dot Dash':wx.DOT_DASH}
+        return styledict[style]
 
     def GetContourPixelData(self, pixlut, contour, prone = False, feetfirst = False):
         """Convert structure data into pixel data using the patient to pixel LUT."""
