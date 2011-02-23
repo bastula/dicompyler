@@ -2,7 +2,7 @@
 # -*- coding: ISO-8859-1 -*-
 # dicomparser.py
 """Class that parses and returns formatted DICOM RT data."""
-# Copyright (c) 2009-2010 Aditya Panchal
+# Copyright (c) 2009-2011 Aditya Panchal
 # Copyright (c) 2009-2010 Roy Keyes
 # This file is part of dicompyler, relased under a BSD license.
 #    See the file license.txt included with this distribution, also
@@ -10,6 +10,7 @@
 
 import numpy as np
 import dicom
+import random
 from PIL import Image
 from math import pow, sqrt
 
@@ -251,7 +252,14 @@ class DicomParser:
                 number = roi.ReferencedROINumber
 
                 # Get the RGB color triplet for the current ROI
-                structures[number]['color'] = np.array(roi.ROIDisplayColor, dtype=float)
+                if roi.has_key('ROIDisplayColor'):
+                    structures[number]['color'] = np.array(roi.ROIDisplayColor, dtype=float)
+                # Otherwise generate a random color for the current ROI
+                else:
+                    structures[number]['color'] = np.array((
+                        random.randint(0,255),
+                        random.randint(0,255),
+                        random.randint(0,255)), dtype=float)
 
                 planes = {}
                 if roi.has_key('Contours'):
