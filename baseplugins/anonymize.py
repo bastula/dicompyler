@@ -11,7 +11,6 @@
 import wx
 from wx.xrc import XmlResource, XRCCTRL, XRCID
 from wx.lib.pubsub import Publisher as pub
-from model import *
 import os, threading
 import guiutil, util
 
@@ -232,11 +231,9 @@ class AnonymizeDialog(wx.Dialog):
             font.SetWeight(wx.FONTWEIGHT_BOLD)
             self.lblDescription.SetFont(font)
 
-        # Get the location from the preferences
-        self.txtDICOMFolder.SetValue(
-            os.path.join(Preferences.get_by(name=u'dicom_import_location').value,
-                self.txtLastName.GetValue()))
-        self.path = self.txtDICOMFolder.GetValue()
+        # Initialize the import location via pubsub
+        pub.subscribe(self.OnImportPrefsChange, 'general.dicom.import_location')
+        pub.sendMessage('preferences.requested.value', 'general.dicom.import_location')
 
         # Pre-select the text on the text controls due to a Mac OS X bug
         self.txtFirstName.SetSelection(-1, -1)
@@ -247,6 +244,12 @@ class AnonymizeDialog(wx.Dialog):
         self.name = self.txtLastName.GetValue() + '^' + self.txtFirstName.GetValue()
         self.patientid = self.txtPatientID.GetValue()
         self.privatetags = True
+
+    def OnImportPrefsChange(self, msg):
+        """When the import preferences change, update the values."""
+
+        self.path = unicode(msg.data)
+        self.txtDICOMFolder.SetValue(self.path)
 
     def OnFolderBrowse(self, evt):
         """Get the directory selected by the user."""
