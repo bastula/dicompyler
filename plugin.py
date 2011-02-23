@@ -10,7 +10,6 @@
 import imp, os
 import wx
 from wx.xrc import *
-from model import *
 import guiutil, util
 
 def import_plugins():
