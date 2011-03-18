@@ -222,8 +222,6 @@ class DicomImporterDialog(wx.Dialog):
                             image = {}
                             image['id'] = dp.GetSOPInstanceUID()
                             image['filename'] = files[n]
-                            image['slicelocation'] = dp.ds.SliceLocation
-                            image['imagenumber'] = dp.ds.InstanceNumber
                             image['series'] = seinfo['id']
                             image['referenceframe'] = dp.GetFrameofReferenceUID()
                             patients[h]['series'][seinfo['id']]['numimages'] = \
@@ -650,6 +648,8 @@ class DicomImporterDialog(wx.Dialog):
             sortedimages = []
             slicenums = []
             for image in self.patient['images']:
+                if not 'SliceLocation' in image:
+                    image.SliceLocation = image.ImagePositionPatient[2]
                 slicenums.append(image.SliceLocation)
             # Sort images in ascending order for feet first patients
             if 'ff' in image.PatientPosition.lower():
