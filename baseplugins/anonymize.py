@@ -217,6 +217,7 @@ class AnonymizeDialog(wx.Dialog):
         self.checkPatientID = XRCCTRL(self, 'checkPatientID')
         self.txtPatientID = XRCCTRL(self, 'txtPatientID')
         self.checkPrivateTags = XRCCTRL(self, 'checkPrivateTags')
+        self.bmpError = XRCCTRL(self, 'bmpError')
         self.lblDescription = XRCCTRL(self, 'lblDescription')
 
         # Bind interface events to the proper methods
@@ -239,6 +240,9 @@ class AnonymizeDialog(wx.Dialog):
         self.txtFirstName.SetSelection(-1, -1)
         self.txtLastName.SetSelection(-1, -1)
         self.txtPatientID.SetSelection(-1, -1)
+
+        # Load the error bitmap
+        self.bmpError.SetBitmap(wx.Bitmap(util.GetResourcePath('error.png')))
 
         # Initialize variables
         self.name = self.txtLastName.GetValue() + '^' + self.txtFirstName.GetValue()
