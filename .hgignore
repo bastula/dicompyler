@@ -1,0 +1,9 @@
+syntax: glob
+*.pyc
+*~
+.*.swp
+.DS_Store
+.AppleDouble
+._*
+dist
+build

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<resource>
+  <object class="wxDialog" name="PreferencesDialog" subclass="preferences.PreferencesDialog">
+    <object class="wxBoxSizer">
+      <object class="sizeritem">
+        <object class="wxNotebook" name="notebook">
+          <size>550,350</size>
+        </object>
+        <option>1</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+        <border>7</border>
+      </object>
+      <orient>wxVERTICAL</orient>
+      <object class="sizeritem">
+        <object class="wxStdDialogButtonSizer">
+          <object class="button">
+            <object class="wxButton" name="wxID_CANCEL">
+              <label>&amp;Close</label>
+            </object>
+          </object>
+        </object>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+        <border>7</border>
+      </object>
+    </object>
+    <title>Preferences</title>
+    <centered>1</centered>
+    <style>wxDEFAULT_DIALOG_STYLE</style>
+  </object>
+</resource>
