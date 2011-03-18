@@ -141,9 +141,7 @@
           <object class="sizeritem">
             <object class="wxBoxSizer">
               <object class="sizeritem">
-                <object class="wxStaticBitmap">
-                  <bitmap>resources/error.png</bitmap>
-                </object>
+                <object class="wxStaticBitmap" name="bmpError"/>
                 <minsize>16,16</minsize>
               </object>
               <object class="spacer">

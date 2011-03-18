@@ -23,10 +23,7 @@ def GetResourcePath(resource):
     if main_is_frozen():
         if (platform() == 'mac'):
             return os.path.join((os.path.join(get_main_dir(), '../Resources')), resource)
-        else:
-            return os.path.join((os.path.join(get_main_dir(), 'resources')), resource)
-    else:
-        return os.path.join((os.path.join(os.getcwd(), 'resources')), resource)
+    return os.path.join((os.path.join(get_main_dir(), 'resources')), resource)
 
 def GetBasePluginsPath(resource):
     """Return the specified item from the base plugins folder."""
@@ -34,10 +31,7 @@ def GetBasePluginsPath(resource):
     if main_is_frozen():
         if (platform() == 'mac'):
             return os.path.join((os.path.join(get_main_dir(), '../PlugIns')), resource)
-        else:
-            return os.path.join((os.path.join(get_main_dir(), 'baseplugins')), resource)
-    else:
-        return os.path.join((os.path.join(os.getcwd(), 'baseplugins')), resource)
+    return os.path.join((os.path.join(get_main_dir(), 'baseplugins')), resource)
 
 # from http://www.py2exe.org/index.cgi/HowToDetermineIfRunningFromExe
 def main_is_frozen():
@@ -46,9 +40,9 @@ def main_is_frozen():
            or imp.is_frozen("__main__")) # tools/freeze
 
 def get_main_dir():
-   if main_is_frozen():
-       return os.path.dirname(sys.executable)
-   return os.path.dirname(sys.argv[0])
+    if main_is_frozen():
+        return os.path.dirname(sys.executable)
+    return os.path.dirname(sys.argv[0])
 
 def get_text_resources(resource):
     """Return the resources that are located in the root folder of the
@@ -56,9 +50,9 @@ def get_text_resources(resource):
         in the Resources folder in the app bundle."""
 
     if (main_is_frozen() and (platform() == 'mac')):
-        credits = GetResourcePath(resource)
+        resource = GetResourcePath(resource)
     else:
-        resource = resource
+        resource = (os.path.join(get_main_dir(), resource))
 
     return resource
 
