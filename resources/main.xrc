@@ -293,7 +293,7 @@
                       </object>
                       <object class="sizeritem">
                         <object class="wxStaticText" name="lblVersion">
-                          <label>Version 0.3</label>
+                          <label>Version xxxx</label>
                           <style>wxALIGN_RIGHT</style>
                         </object>
                         <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
