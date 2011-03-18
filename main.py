@@ -148,8 +148,13 @@ class MainFrame(wx.Frame):
         self.notebookTools.AddPage(self.cclbStructures, 'Structures')
         self.notebookTools.AddPage(self.cclbIsodoses, 'Isodoses')
 
+        # Create the data folder
+        datapath = guiutil.get_data_dir()
+        if not os.path.exists(datapath):
+            os.mkdir(datapath)
+
         # Load and initialize plugins
-        userpluginpath = os.path.join(guiutil.get_data_dir(), 'plugins')
+        userpluginpath = os.path.join(datapath, 'plugins')
         if not os.path.exists(userpluginpath):
             os.mkdir(userpluginpath)
         self.plugins = plugin.import_plugins()
