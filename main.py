@@ -20,6 +20,8 @@ import dicomgui, dvhdata, dvhdoses
 from dicomparser import DicomParser as dp
 import plugin, preferences
 
+__version__ = "0.4"
+
 class MainFrame(wx.Frame):
     def __init__(self, parent, id, title, res):
 
@@ -143,6 +145,8 @@ class MainFrame(wx.Frame):
         # Initialize the welcome notebook tab
         panelWelcome = self.res.LoadPanel(self.notebook, 'panelWelcome')
         self.notebook.AddPage(panelWelcome, 'Welcome')
+        # Set the version on the welcome notebook tab
+        XRCCTRL(self, 'lblVersion').SetLabel('Version ' + __version__)
 
         # Initialize the tools notebook
         self.notebookTools.AddPage(self.cclbStructures, 'Structures')
@@ -578,8 +582,8 @@ class MainFrame(wx.Frame):
         # First we create and fill the info object
         info = wx.AboutDialogInfo()
         info.Name = "dicompyler"
-        info.Version = "0.3"
-        info.Copyright = u"© 2009-2010 Aditya Panchal"
+        info.Version = __version__
+        info.Copyright = u"© 2009-2011 Aditya Panchal"
         credits = util.get_credits()
         info.Developers = credits['developers']
         info.Artists = credits['artists']
