@@ -23,7 +23,11 @@ class DicomParser:
             self.ds = dataset
         elif filename:
             try:
-                self.ds = dicom.read_file(filename, defer_size=100, force=True)
+                # Only pydicom 0.9.5 and above supports the force read argument
+                if (dicom.__version__ >= "0.9.5"):
+                    self.ds = dicom.read_file(filename, defer_size=100, force=True)
+                else:
+                    self.ds = dicom.read_file(filename, defer_size=100)
             except (EOFError, IOError):
                 # Raise the error for the calling method to handle
                 raise
