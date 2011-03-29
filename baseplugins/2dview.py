@@ -561,8 +561,8 @@ class plugin2DView(wx.Panel):
 
         delta = self.mousepos - evt.GetPosition()
         self.mousepos = evt.GetPosition()
-        self.pan[0] -= delta[0]
-        self.pan[1] -= delta[1]
+        self.pan[0] -= (delta[0]/self.zoom)
+        self.pan[1] -= (delta[1]/self.zoom)
         self.Refresh()
 
     def OnRightIsDown(self, evt):
