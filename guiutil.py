@@ -141,11 +141,11 @@ class ProgressDialog(wx.Dialog):
         if (message == 'Done'):
             self.EndModal(wx.ID_OK)
 
-class ColorCheckListBox(wx.Panel):
+class ColorCheckListBox(wx.ScrolledWindow):
     """Control similar to a wx.CheckListBox with additional color indication."""
 
     def __init__(self, parent, pubsubname=''):
-        wx.Panel.__init__(self, parent, -1, style=wx.SUNKEN_BORDER)
+        wx.ScrolledWindow.__init__(self, parent, -1, style=wx.SUNKEN_BORDER)
 
         # Initialize variables
         self.pubsubname = pubsubname
@@ -159,6 +159,10 @@ class ColorCheckListBox(wx.Panel):
         self.Layout()
 
         self.Clear()
+
+    def Layout(self):
+        self.SetScrollbars(20,20,50,50)
+        super(ColorCheckListBox,self).Layout()
 
     def Append(self, item, data=None, color=None, refresh=True):
         """Add an item to the control."""
