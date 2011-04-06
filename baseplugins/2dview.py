@@ -12,6 +12,7 @@ import wx
 from wx.xrc import XmlResource, XRCCTRL, XRCID
 from wx.lib.pubsub import Publisher as pub
 from matplotlib import _cntr as cntr
+from matplotlib import __version__ as mplversion
 import numpy as np
 import guiutil, util
 
@@ -276,7 +277,10 @@ class plugin2DView(wx.Panel):
 
         # Calculate the isodose level according to rx dose and dose grid scaling
         level = isodose['data']['level'] * self.rxdose / (self.dosedata['dosegridscaling'] * 10000)
-        contours = isodosegen.trace(level, points = 0)
+        contours = isodosegen.trace(level)
+        # matplotlib 1.0.0 and above returns vertices and segments, but we only need vertices
+        if (mplversion >= "1.0.0"):
+            contours = contours[:len(contours)//2]
         if len(contours):
 
             # Set the color of the isodose line
