@@ -171,7 +171,14 @@ class DicomParser:
             elif isinstance(self.ds.WindowCenter, list):
                 if (len(self.ds.WindowCenter) > 1):
                     level = self.ds.WindowCenter[1]
-        image = self.GetLUTValue(self.ds.pixel_array, window, level)
+        # Rescale the slope and intercept of the image if present
+        if (self.ds.has_key('RescaleIntercept') and
+            self.ds.has_key('RescaleSlope')):
+            rescaled_image = self.ds.pixel_array*self.ds.RescaleSlope + \
+                             self.ds.RescaleIntercept
+        else:
+            rescaled_image = self.ds.pixel_array
+        image = self.GetLUTValue(rescaled_image, window, level)
 
         return Image.fromarray(image).convert('L')
 
