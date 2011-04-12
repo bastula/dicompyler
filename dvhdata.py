@@ -2,7 +2,7 @@
 # -*- coding: ISO-8859-1 -*-
 # dvhdata.py
 """Class and functions related to dose volume histogram (DVH) data."""
-# Copyright (c) 2009 Aditya Panchal
+# Copyright (c) 2009-2011 Aditya Panchal
 # This file is part of dicompyler, relased under a BSD license.
 #    See the file license.txt included with this distribution, also
 #    available at http://code.google.com/p/dicompyler/
@@ -17,6 +17,7 @@ class DVH:
     def __init__(self, dvh):
         """Take a dvh numpy array and convert it to cGy."""
         self.dvh = dvh['data'] * 100 / dvh['data'][0]
+        self.scaling = dvh['scaling']
 
         # Instruct numpy to print the full extent of the array
         np.set_printoptions(threshold=2147483647, suppress=True)
@@ -25,7 +26,7 @@ class DVH:
         """ Return the volume (in percent) of the structure that receives at
             least a specific dose in cGy. i.e. V100, V150."""
 
-        return self.dvh[dose]
+        return self.dvh[int(dose/self.scaling)]
 
     def GetVolumeConstraintCC(self, dose, volumecc):
         """ Return the volume (in cc) of the structure that receives at least a
@@ -39,7 +40,7 @@ class DVH:
         """ Return the maximum dose (in cGy) that a specific volume (in percent)
             receives. i.e. D90, D20."""
 
-        return np.argmin(np.fabs(self.dvh - volume))
+        return np.argmin(np.fabs(self.dvh - volume))*self.scaling
 
 def CalculateVolume(structure):
     """Calculates the volume for the given structure."""

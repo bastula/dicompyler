@@ -2,7 +2,7 @@
 # -*- coding: ISO-8859-1 -*-
 # guidvh.py
 """Class that displays the dose volume histogram via wxPython and matplotlib."""
-# Copyright (c) 2009 Aditya Panchal
+# Copyright (c) 2009-2011 Aditya Panchal
 # This file is part of dicompyler, relased under a BSD license.
 #    See the file license.txt included with this distribution, also
 #    available at http://code.google.com/p/dicompyler/
@@ -20,7 +20,7 @@ class guiDVH:
                     size=(6, 4.50), dpi=68, crosshairs=False)
         self.Replot()
 
-    def Replot(self, dvhs=None, structures=None, point=None, pointid=None):
+    def Replot(self, dvhs=None, scaling=None, structures=None, point=None, pointid=None):
         """Redraws the plot."""
 
         fig = self.panelDVH.get_figure()
@@ -39,7 +39,10 @@ class guiDVH:
                         color = colorarray/255
                     else:
                         color = np.zeros(3)
-                    axes.plot(dvh,
+                    dose = np.arange(len(dvh))
+                    if not (scaling == None):
+                        dose = dose * scaling[id]
+                    axes.plot(dose, dvh,
                             label=structures[id]['name'],
                             color=color,
                             linewidth=2)
