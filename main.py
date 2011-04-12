@@ -302,11 +302,11 @@ class MainFrame(wx.Frame):
         if patient.has_key('dvhs'):
             for key, dvh in patient['dvhs'].iteritems():
                 if (dvh['min'] == -1):
-                    dvh['min'] = dvhdoses.get_dvh_min(dvh['data'], ptdata['rxdose'])
+                    dvh['min'] = dvhdoses.get_dvh_min(dvh['data'], ptdata['rxdose']/dvh['scaling'])
                 if (dvh['max'] == -1):
-                    dvh['max'] = dvhdoses.get_dvh_max(dvh['data'], ptdata['rxdose'])
+                    dvh['max'] = dvhdoses.get_dvh_max(dvh['data'], ptdata['rxdose']/dvh['scaling'])
                 if (dvh['mean'] == -1):
-                    dvh['mean'] = dvhdoses.get_dvh_mean(dvh['data'], ptdata['rxdose'])
+                    dvh['mean'] = dvhdoses.get_dvh_mean(dvh['data'], ptdata['rxdose']/dvh['scaling'])
         wx.CallAfter(progressFunc, 98, 100, 'Done')
         wx.CallAfter(updateFunc, patient)
 
