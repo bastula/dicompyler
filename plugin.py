@@ -44,7 +44,9 @@ def import_plugins():
                     # Import the module if no exception occurred
                     plugins.append(imp.load_module(module, f, filename, description))
                     print 'Plugin:', module, 'loaded'
-                    f.close()
+                    # If the module is a single file, close it
+                    if not (description[2] == imp.PKG_DIRECTORY):
+                        f.close()
     return plugins
 
 def PluginManager(parent, plugins):
