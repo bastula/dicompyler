@@ -170,7 +170,12 @@ class pluginDVH(wx.Panel):
             self.EnableConstraints(False)
         else:
             self.structureid = msg.data['id']
-            if self.dvhdata.has_key(self.structureid):
+            if self.dvhs.has_key(self.structureid):
+                # Create an instance of the dvhdata class to can access its functions
+                self.dvhdata[self.structureid] = dvhdata.DVH(self.dvhs[self.structureid])
+                # Create an instance of the dvh scaling data for guidvh
+                self.dvhscaling[self.structureid] = self.dvhs[self.structureid]['scaling']
+                # 'Toggle' the choice box to refresh the dose data
                 self.OnToggleConstraints(None)
             else:
                 self.EnableConstraints(False)
