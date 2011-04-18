@@ -29,10 +29,13 @@ class guiDVH:
         # clear the axes and replot everything
         axes = fig.gca()
         axes.cla()
+        maxlen = 1
         if not (dvhs == None):
             for id, dvh in dvhs.iteritems():
                 if structures.has_key(id):
-                    axes.set_xlim(0, len(dvh))
+                    # Determine the maximum DVH length for the x axis limit
+                    if len(dvh) > maxlen:
+                        maxlen = len(dvh)
                     # if the structure color is white, change it to black
                     colorarray = np.array(structures[id]['color'], dtype=float)
                     if np.size(np.nonzero(colorarray/255 - 1)):
@@ -51,6 +54,7 @@ class guiDVH:
                     axes.legend(fancybox=True, shadow=True)
         # set the volume
         axes.grid(True)
+        axes.set_xlim(0, maxlen)
         axes.set_ylim(0, 100)
         axes.set_xlabel('Dose (cGy)')
         axes.set_ylabel('Volume (%)')
