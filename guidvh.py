@@ -17,7 +17,8 @@ class guiDVH:
     def __init__(self, parent):
 
         self.panelDVH = wxmpl.PlotPanel(parent, -1,
-                    size=(6, 4.50), dpi=68, crosshairs=False)
+                    size=(6, 4.50), dpi=68, crosshairs=False,
+                    autoscaleUnzoom=False)
         self.Replot()
 
     def Replot(self, dvhs=None, scaling=None, structures=None, point=None, pointid=None):
