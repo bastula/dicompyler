@@ -34,6 +34,9 @@ class MainFrame(wx.Frame):
         wx.Frame.__init__(self, parent, id, title, pos=wx.DefaultPosition,
             size=size, style=wx.DEFAULT_FRAME_STYLE)
 
+        # Set up the status bar
+        self.sb = self.CreateStatusBar(3)
+
         # set up resource file and config file
         self.res = res
 
@@ -191,6 +194,7 @@ class MainFrame(wx.Frame):
         pub.subscribe(self.OnStructureUncheck, 'colorcheckbox.unchecked.structure')
         pub.subscribe(self.OnIsodoseCheck, 'colorcheckbox.checked.isodose')
         pub.subscribe(self.OnIsodoseUncheck, 'colorcheckbox.unchecked.isodose')
+        pub.subscribe(self.OnUpdateStatusBar, 'main.update_statusbar')
 
 ########################### Patient Loading Functions ##########################
 
@@ -527,6 +531,12 @@ class MainFrame(wx.Frame):
         pub.sendMessage('isodoses.checked', self.isodoseList)
 
 ################################ Other Functions ###############################
+
+    def OnUpdateStatusBar(self, msg):
+        """Update the status bar text."""
+
+        for k, v in msg.data.iteritems():
+            self.sb.SetStatusText(unicode(v), k)
 
     def OnPageChanged(self, evt):
         """Notify each notebook tab whether it has the focus or not."""

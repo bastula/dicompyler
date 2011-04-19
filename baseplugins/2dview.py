@@ -65,7 +65,10 @@ class plugin2DView(wx.Panel):
         self.level = 0
         self.zoom = 1
         self.pan = [0, 0]
+        self.bwidth = 0
+        self.bheight = 0
         self.mousepos = (-10000, -10000)
+        self.mouse_in_window = False
         self.isodose_line_style = 'Solid'
         self.isodose_fill_opacity = 25
         self.structure_line_style = 'Solid'
@@ -192,6 +195,8 @@ class plugin2DView(wx.Panel):
         self.Bind(wx.EVT_LEFT_UP, self.OnMouseUp)
         self.Bind(wx.EVT_RIGHT_DOWN, self.OnMouseDown)
         self.Bind(wx.EVT_RIGHT_UP, self.OnMouseUp)
+        self.Bind(wx.EVT_ENTER_WINDOW, self.OnMouseEnter)
+        self.Bind(wx.EVT_LEAVE_WINDOW, self.OnMouseLeave)
         self.Bind(wx.EVT_MOTION, self.OnMouseMotion)
         pub.subscribe(self.OnKeyDown, 'main.key_down')
         pub.subscribe(self.OnMouseWheel, 'main.mousewheel')
@@ -405,12 +410,12 @@ class plugin2DView(wx.Panel):
             image = guiutil.convert_pil_to_wx(
                 self.images[self.imagenum-1].GetImage(self.window, self.level))
             bmp = wx.BitmapFromImage(image)
-            bwidth, bheight = bmp.GetSize()
+            self.bwidth, self.bheight = image.GetSize()
 
             # Center the image
-            gc.Translate(self.pan[0]+(width-bwidth*self.zoom)/(2*self.zoom),
-                         self.pan[1]+(height-bheight*self.zoom)/(2*self.zoom))
-            gc.DrawBitmap(bmp, 0, 0, bwidth, bheight)
+            gc.Translate(self.pan[0]+(width-self.bwidth*self.zoom)/(2*self.zoom),
+                         self.pan[1]+(height-self.bheight*self.zoom)/(2*self.zoom))
+            gc.DrawBitmap(bmp, 0, 0, self.bwidth, self.bheight)
 
             # Draw the structures if present
             imdata = self.images[self.imagenum-1].GetImageData()
@@ -460,8 +465,8 @@ class plugin2DView(wx.Panel):
                 zoom = "%.3f" % self.zoom
             imzoom = "Zoom: " + zoom + ":1"
             gc.DrawText(imzoom, 10, height-17)
-            imzoom = "Image Size: " + str(bheight) + "x" + str(bheight) + " px"
-            gc.DrawText(imzoom, 10, height-17-te[1]*1.1)
+            imsize = "Image Size: " + str(self.bheight) + "x" + str(self.bheight) + " px"
+            gc.DrawText(imsize, 10, height-17-te[1]*1.1)
             imwinlevel = "W/L: " + str(self.window) + ' / ' + str(self.level)
             te = gc.GetFullTextExtent(imwinlevel)
             gc.DrawText(imwinlevel, width-te[0]-7, 7)
@@ -469,11 +474,45 @@ class plugin2DView(wx.Panel):
             te = gc.GetFullTextExtent(impatpos)
             gc.DrawText(impatpos, width-te[0]-7, height-17)
 
+            # Update the mouse cursor position display if the display refreshes
+            self.OnUpdatePositionValues(None)
+
     def OnSize(self, evt):
         """Refresh the view when the size of the panel changes."""
 
         self.Refresh()
         evt.Skip()
+
+    def OnUpdatePositionValues(self, evt=None):
+        """Update the current position and value(s) of the mouse cursor."""
+
+        if (evt == None):
+            pos = np.array(self.mousepos)
+        else:
+            pos = np.array(evt.GetPosition())
+
+        # On the Mac, the cursor position is shifted by 1 pixel to the left
+        if guiutil.IsMac():
+            pos = pos - 1
+
+        # Determine the coordinates with respect to the current zoom and pan
+        w, h = self.GetClientSize()
+        xpos = int(pos[0]/self.zoom-self.pan[0]-(w-self.bwidth*self.zoom)/
+                (2*self.zoom))
+        ypos = int(pos[1]/self.zoom-self.pan[1]-(h-self.bheight*self.zoom)/
+                (2*self.zoom))
+
+        # Set an empty text placeholder if the coordinates are not within range
+        text = ""
+        # Only display if the mouse coordinates are in the image size range
+        if ((0 <= xpos < len(self.structurepixlut[0])) and
+            (0 <= ypos < len(self.structurepixlut[1])) and self.mouse_in_window):
+            text = "X: " + unicode('%.2f' % self.structurepixlut[0][xpos]) + \
+                " mm Y: " + unicode('%.2f' % self.structurepixlut[1][ypos]) + \
+                " mm / X: " + unicode(xpos) + \
+                " px Y:" + unicode(ypos) + " px"
+        # Send a message with the coordinate text to the 3rd statusbar section
+        pub.sendMessage('main.update_statusbar', {2:text})
 
     def OnZoomIn(self, evt):
         """Zoom the view in."""
@@ -557,6 +596,18 @@ class plugin2DView(wx.Panel):
 
         self.SetCursor(wx.StockCursor(wx.CURSOR_DEFAULT))
 
+    def OnMouseEnter(self, evt):
+        """Set a flag when the cursor enters the window."""
+
+        self.mouse_in_window = True
+        self.OnUpdatePositionValues(None)
+
+    def OnMouseLeave(self, evt):
+        """Set a flag when the cursor leaves the window."""
+
+        self.mouse_in_window = False
+        self.OnUpdatePositionValues(None)
+
     def OnMouseMotion(self, evt):
         """Process mouse motion events and pass to the appropriate handler."""
 
@@ -569,6 +620,9 @@ class plugin2DView(wx.Panel):
             if guiutil.IsMSWindows():
                 image = wx.Image(util.GetResourcePath('contrast_high.png'))
                 self.SetCursor(wx.CursorFromImage(image))
+        # Update the positon and values of the mouse cursor
+        self.mousepos = evt.GetPosition()
+        self.OnUpdatePositionValues(evt)
 
     def OnLeftIsDown(self, evt):
         """Change the image pan when the left mouse button is dragged."""
