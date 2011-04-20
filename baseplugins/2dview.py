@@ -416,10 +416,12 @@ class plugin2DView(wx.Panel):
             gc.Translate(self.pan[0]+(width-self.bwidth*self.zoom)/(2*self.zoom),
                          self.pan[1]+(height-self.bheight*self.zoom)/(2*self.zoom))
             gc.DrawBitmap(bmp, 0, 0, self.bwidth, self.bheight)
+            gc.SetBrush(wx.Brush(wx.Colour(0, 0, 255, 30)))
+            gc.SetPen(wx.Pen(wx.Colour(0, 0, 255, 30)))
 
             # Draw the structures if present
             imdata = self.images[self.imagenum-1].GetImageData()
-            z = '%.2f' % imdata['position'][2]
+            self.z = '%.2f' % imdata['position'][2]
 
             # Determine whether the patient is prone or supine
             if 'p' in imdata['patientposition'].lower():
@@ -432,11 +434,11 @@ class plugin2DView(wx.Panel):
             else:
                 feetfirst = False
             for id, structure in self.structures.iteritems():
-                self.DrawStructure(structure, gc, z, prone, feetfirst)
+                self.DrawStructure(structure, gc, self.z, prone, feetfirst)
 
             # Draw the isodoses if present
             if len(self.isodoses):
-                grid = self.dose.GetDoseGrid(float(z))
+                grid = self.dose.GetDoseGrid(float(self.z))
                 x, y = np.meshgrid(
                     np.arange(grid.shape[1]), np.arange(grid.shape[0]))
                 # Instantiate the isodose generator for this slice
@@ -457,7 +459,7 @@ class plugin2DView(wx.Panel):
             imtext = "Image: " + str(self.imagenum) + "/" + str(len(self.images))
             te = gc.GetFullTextExtent(imtext)
             gc.DrawText(imtext, 10, 7)
-            impos = "Position: " + str(z) + " mm"
+            impos = "Position: " + str(self.z) + " mm"
             gc.DrawText(impos, 10, 7+te[1]*1.1)
             if ("%.3f" % self.zoom == "1.000"):
                 zoom = "1"
@@ -473,9 +475,6 @@ class plugin2DView(wx.Panel):
             impatpos = "Patient Position: " + imdata['patientposition']
             te = gc.GetFullTextExtent(impatpos)
             gc.DrawText(impatpos, width-te[0]-7, height-17)
-
-            # Update the mouse cursor position display if the display refreshes
-            self.OnUpdatePositionValues(None)
 
     def OnSize(self, evt):
         """Refresh the view when the size of the panel changes."""
@@ -504,15 +503,33 @@ class plugin2DView(wx.Panel):
 
         # Set an empty text placeholder if the coordinates are not within range
         text = ""
-        # Only display if the mouse coordinates are in the image size range
+        value = ""
+        # Only display if the mouse coordinates are within the image size range
         if ((0 <= xpos < len(self.structurepixlut[0])) and
             (0 <= ypos < len(self.structurepixlut[1])) and self.mouse_in_window):
             text = "X: " + unicode('%.2f' % self.structurepixlut[0][xpos]) + \
                 " mm Y: " + unicode('%.2f' % self.structurepixlut[1][ypos]) + \
                 " mm / X: " + unicode(xpos) + \
                 " px Y:" + unicode(ypos) + " px"
-        # Send a message with the coordinate text to the 3rd statusbar section
-        pub.sendMessage('main.update_statusbar', {2:text})
+
+            # Lookup the current image and find the value of the current pixel
+            image = self.images[self.imagenum-1]
+            pixel_array = image.ds.pixel_array*image.ds.RescaleSlope + \
+                          image.ds.RescaleIntercept
+            value = "Value: " + unicode(pixel_array[ypos, xpos])
+
+            # Lookup the current dose plane and find the value of the current
+            # pixel, if the dose has been loaded
+            if not (self.dose == []):
+                xdpos = np.argmin(np.fabs(np.array(self.dosepixlut[0]) - xpos))
+                ydpos = np.argmin(np.fabs(np.array(self.dosepixlut[1]) - ypos))
+                dose = self.dose.GetDoseGrid(float(self.z))[
+                       ydpos, xdpos] * self.dosedata['dosegridscaling']
+                value = value + " / Dose: " + \
+                        unicode('%.2f' % dose) + " Gy / " + \
+                        unicode('%.2f' % float(dose*10000/self.rxdose)) + " %"
+        # Send a message with the text to the 2nd and 3rd statusbar sections
+        pub.sendMessage('main.update_statusbar', {1:text, 2:value})
 
     def OnZoomIn(self, evt):
         """Zoom the view in."""
