@@ -99,6 +99,12 @@ class MainFrame(wx.Frame):
         # Setup Plugins menu
         self.menuPlugins = menuMain.FindItemById(XRCID('menuPluginManager')).GetMenu()
 
+        # Setup Export menu
+        self.menuExport = menuMain.FindItemById(XRCID('menuExportPlaceholder')).GetMenu()
+        self.menuExport.Delete(menuMain.FindItemById(XRCID('menuExportPlaceholder')).GetId())
+        self.menuExportItem = menuMain.FindItemById(XRCID('menuExport'))
+        self.menuExportItem.Enable(False)
+
         # Bind menu events to the proper methods
         wx.EVT_MENU(self, XRCID('menuOpen'), self.OnOpenPatient)
         wx.EVT_MENU(self, XRCID('menuExit'), self.OnClose)
@@ -166,6 +172,7 @@ class MainFrame(wx.Frame):
             os.mkdir(userpluginpath)
         self.plugins = plugin.import_plugins()
         self.menuDict = {}
+        self.menuExportDict = {}
 
         # Initialize the preferences
         if guiutil.IsMac():
@@ -210,12 +217,18 @@ class MainFrame(wx.Frame):
                 # Only delete the plugin toolbar items
                 if (t >= len(self.maintools)):
                     self.toolbar.DeleteToolByPos(len(self.maintools))
-            # Delete the previous menus
+            # Delete the previous plugin menus
             if len(self.menuDict):
                 self.menuPlugins.Delete(wx.ID_SEPARATOR)
                 for menuid, menu in self.menuDict.iteritems():
                     self.menuPlugins.Delete(menuid)
                 self.menuDict = {}
+            # Delete the previous export menus
+            if len(self.menuExportDict):
+                self.menuExportItem.Enable(False)
+                for menuid, menu in self.menuExportDict.iteritems():
+                    self.menuExport.Delete(menuid)
+                self.menuExportDict = {}
             # Reset the preferences template
             self.preftemplate = [{'General':self.generalpreftemplate}]
             # Set up the plugins for each plugin entry point of dicompyler
@@ -247,9 +260,18 @@ class MainFrame(wx.Frame):
                         if (props['plugin_type'] == 'menu'):
                             if not len(self.menuDict):
                                 self.menuPlugins.AppendSeparator()
-                            self.menuDict[100+i] = self.menuPlugins.Append(100+i, props['name']+'...')
+                            self.menuDict[100+i] = self.menuPlugins.Append(
+                                                100+i, props['name']+'...')
                             plugin = p.plugin(self)
                             wx.EVT_MENU(self, 100+i, plugin.pluginMenu)
+                        # Load the export menu plugins
+                        if (props['plugin_type'] == 'export'):
+                            if not len(self.menuExportDict):
+                                self.menuExportItem.Enable(True)
+                            self.menuExportDict[200+i] = self.menuExport.Append(
+                                                200+i, props['menuname'])
+                            plugin = p.plugin(self)
+                            wx.EVT_MENU(self, 200+i, plugin.pluginMenu)
                         # Add the plugin preferences if they exist
                         if hasattr(plugin, 'preferences'):
                             self.preftemplate.append({props['name']:plugin.preferences})

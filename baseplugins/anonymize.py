@@ -19,10 +19,11 @@ def pluginProperties():
 
     props = {}
     props['name'] = 'Anonymize'
+    props['menuname'] = "as Anonymized DICOM"
     props['description'] = "Anonymizes DICOM / DICOM RT data"
     props['author'] = 'Aditya Panchal'
-    props['version'] = 0.1
-    props['plugin_type'] = 'menu'
+    props['version'] = 0.4
+    props['plugin_type'] = 'export'
     props['plugin_version'] = 1
     props['min_dicom'] = []
     props['recommended_dicom'] = ['images', 'rtss', 'rtplan', 'rtdose']

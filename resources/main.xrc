@@ -404,6 +404,13 @@
         <accel>Ctrl-O</accel>
       </object>
       <object class="separator"/>
+      <object class="wxMenu" name="menuExport">
+        <object class="wxMenuItem" name="menuExportPlaceholder">
+          <label>Placeholder</label>
+        </object>
+        <label>&amp;Export</label>
+      </object>
+      <object class="separator"/>
       <object class="wxMenuItem" name="menuExit">
         <label>E&amp;xit</label>
         <accel>Alt+F4</accel>
