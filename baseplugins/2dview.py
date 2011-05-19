@@ -125,6 +125,9 @@ class plugin2DView(wx.Panel):
     def OnUpdatePatient(self, msg):
         """Update and load the patient data."""
 
+        self.z = 0
+        self.structurepixlut = ([], [])
+        self.dosepixlut = ([], [])
         if msg.data.has_key('images'):
             self.images = msg.data['images']
             # Set the first image to the middle of the series
