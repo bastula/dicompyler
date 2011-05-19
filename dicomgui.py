@@ -463,15 +463,11 @@ class DicomImporterDialog(wx.Dialog):
                                 foundplan = True
                                 if dose['hasdvh']:
                                     name = 'RT Dose with DVH'
-                                    dose['treeid'] = self.tcPatients.AppendItem(plan['treeid'], name, 6)
-                                    filearray = [dose['filename']]
-                                    self.EnableItemSelection(patient, dose, filearray)
-                                    break
                                 else:
-                                    name = 'RT Dose without DVH or Differential DVH'
-                                    dose['treeid'] = self.tcPatients.AppendItem(plan['treeid'], name, 9)
-                                    filearray = [dose['filename']]
-                                    self.EnableItemSelection(patient, dose, filearray)
+                                    name = 'RT Dose without DVH'
+                                dose['treeid'] = self.tcPatients.AppendItem(plan['treeid'], name, 6)
+                                filearray = [dose['filename']]
+                                self.EnableItemSelection(patient, dose, filearray)
                     # If no plans were found, add the dose to the structure/study instead
                     if not foundplan:
                         if dose['hasdvh']:

@@ -16,7 +16,7 @@ import wx.lib.dialogs, webbrowser
 # from wx.lib.pubsub import setupv1
 from wx.lib.pubsub import Publisher as pub
 import guiutil, util
-import dicomgui, dvhdata, dvhdoses
+import dicomgui, dvhdata, dvhdoses, dvhcalc
 from dicomparser import DicomParser as dp
 import plugin, preferences
 
@@ -297,23 +297,23 @@ class MainFrame(wx.Frame):
         wx.CallAfter(progressFunc, 0, 0, 'Processing patient data...')
         patient = {}
         if ptdata.has_key('rtss'):
-            wx.CallAfter(progressFunc, 0, 5, 'Processing RT Structure Set...')
+            wx.CallAfter(progressFunc, 20, 100, 'Processing RT Structure Set...')
             if not patient.has_key('id'):
                 patient = dp(ptdata['rtss']).GetDemographics()
             patient['structures'] = dp(ptdata['rtss']).GetStructures()
         if ptdata.has_key('rtplan'):
-            wx.CallAfter(progressFunc, 1, 5, 'Processing RT Plan...')
+            wx.CallAfter(progressFunc, 40, 100, 'Processing RT Plan...')
             if not patient.has_key('id'):
                 patient = dp(ptdata['rtplan']).GetDemographics()
             patient['plan'] = dp(ptdata['rtplan']).GetPlan()
         if ptdata.has_key('rtdose'):
-            wx.CallAfter(progressFunc, 2, 5, 'Processing RT Dose...')
+            wx.CallAfter(progressFunc, 60, 100, 'Processing RT Dose...')
             if not patient.has_key('id'):
                 patient = dp(ptdata['rtdose']).GetDemographics()
             patient['dvhs'] = dp(ptdata['rtdose']).GetDVHs()
             patient['dose'] = dp(ptdata['rtdose'])
         if ptdata.has_key('images'):
-            wx.CallAfter(progressFunc, 3, 5, 'Processing Images...')
+            wx.CallAfter(progressFunc, 80, 100, 'Processing Images...')
             if not patient.has_key('id'):
                 patient = dp(ptdata['images'][0]).GetDemographics()
             patient['images'] = []
@@ -324,17 +324,37 @@ class MainFrame(wx.Frame):
                 patient['plan'] = {}
             patient['plan']['rxdose'] = ptdata['rxdose']
         # if the min/max/mean dose was not present, calculate it and save it for each structure
-        wx.CallAfter(progressFunc, 4, 5, 'Processing DVH data...')
-        if patient.has_key('dvhs'):
+        wx.CallAfter(progressFunc, 90, 100, 'Processing DVH data...')
+        if ('dvhs' in patient) and ('structures' in patient):
+            # If the DVHs are not present, calculate them
+            if not len(patient['dvhs']):
+                i = 0
+                for key, structure in patient['structures'].iteritems():
+                    wx.CallAfter(progressFunc,
+                                 10*i/len(patient['structures'])+90, 100,
+                                 'Calculating DVH for ' + structure['name'] +
+                                 '...')
+                    patient['dvhs'][key] = dvhcalc.get_dvh(structure,
+                                                               patient['dose'])
+                    i += 1
             for key, dvh in patient['dvhs'].iteritems():
-                if (dvh['min'] == -1):
-                    dvh['min'] = dvhdoses.get_dvh_min(dvh['data'], ptdata['rxdose']/dvh['scaling'])
-                if (dvh['max'] == -1):
-                    dvh['max'] = dvhdoses.get_dvh_max(dvh['data'], ptdata['rxdose']/dvh['scaling'])
-                if (dvh['mean'] == -1):
-                    dvh['mean'] = dvhdoses.get_dvh_mean(dvh['data'], ptdata['rxdose']/dvh['scaling'])
-        wx.CallAfter(progressFunc, 98, 100, 'Done')
+                self.CalculateDoseStatistics(dvh, ptdata['rxdose'])
+        wx.CallAfter(progressFunc, 100, 100, 'Done')
         wx.CallAfter(updateFunc, patient)
+
+    def CalculateDoseStatistics(self, dvh, rxdose):
+        """Calculate the dose statistics for the given DVH and rx dose."""
+
+        sfdict = {'min':dvhdoses.get_dvh_min,
+                  'mean':dvhdoses.get_dvh_mean,
+                  'max':dvhdoses.get_dvh_max}
+
+        for stat, func in sfdict.iteritems():
+            # Only calculate stat if the stat was not calculated previously (-1)
+            if dvh[stat] == -1:
+                dvh[stat] = func(dvh['data'], rxdose/dvh['scaling'])
+
+        return dvh
 
     def OnUpdatePatientData(self, patient):
         """Update the patient data in the main program interface."""
@@ -444,13 +464,13 @@ class MainFrame(wx.Frame):
         # Make sure that the volume has been calculated for each structure
         # before setting it
         if not self.structures[id].has_key('volume'):
-            # Use the volume units if they are absolute volume
-            if self.dvhs.has_key(id):
-                if (self.dvhs[id]['volumeunits'] ==  'CM3'):
-                    self.structures[id]['volume'] = self.dvhs[id]['data'][0]
-            # Otherwise calculate the volume
+            # Use the volume units from the DVH if they are absolute volume
+            if self.dvhs.has_key(id) and (self.dvhs[id]['volumeunits'] == 'CM3'):
+                self.structures[id]['volume'] = self.dvhs[id]['data'][0]
+            # Otherwise calculate the volume from the structure data
             else:
-                self.structures[id]['volume'] = dvhdata.CalculateVolume(self.structures[id])
+                self.structures[id]['volume'] = dvhdata.CalculateVolume(
+                                                    self.structures[id])
             structure['data']['volume'] = self.structures[id]['volume']
         self.structureList[id] = structure['data']
 
@@ -652,8 +672,6 @@ class MainFrame(wx.Frame):
         else:
             dlg = wx.lib.dialogs.ScrolledMessageDialog(self, msg,
                 "dicompyler License", size=(650, 550))
-
-
 
         dlg.ShowModal()
         dlg.Destroy()

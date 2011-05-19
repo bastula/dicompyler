@@ -17,6 +17,7 @@ def get_dvh_min(dvh, doseref):
 
     j = 1
     jmax = len(dvh) - 1
+    mindose = 0
     while j < jmax:
         if dvh[j] < v1:
             mindose = (2*j - 1)/2.0
@@ -34,6 +35,7 @@ def get_dvh_max(dvh, doseref):
     # Calulate dDVH
     ddvh = get_ddvh(dvh)
 
+    maxdose = 0
     j = len(ddvh) - 1
     while j >= 0:
         if ddvh[j] > 0.0:
