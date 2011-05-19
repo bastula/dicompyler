@@ -4,7 +4,7 @@
 """Main file for dicompyler."""
 # Copyright (c) 2009-2011 Aditya Panchal
 # Copyright (c) 2009 Roy Keyes
-# This file is part of dicompyler, relased under a BSD license.
+# This file is part of dicompyler, released under a BSD license.
 #    See the file license.txt included with this distribution, also
 #    available at http://code.google.com/p/dicompyler/
 
@@ -645,7 +645,7 @@ class MainFrame(wx.Frame):
         credits = util.get_credits()
         info.Developers = credits['developers']
         info.Artists = credits['artists']
-        desc =  "A Python based radiation therapy research platform using the DICOM standard." + \
+        desc =  "Extensible radiation therapy research platform and viewer for DICOM and DICOM RT." + \
                 "\n\ndicompyler is released under a BSD license.\n" + \
                 "See the Help menu for license information."
         info.Description = desc
