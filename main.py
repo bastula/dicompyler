@@ -20,7 +20,7 @@ import dicomgui, dvhdata, dvhdoses, dvhcalc
 from dicomparser import DicomParser as dp
 import plugin, preferences
 
-__version__ = "0.4"
+__version__ = "0.4a2"
 
 class MainFrame(wx.Frame):
     def __init__(self, parent, id, title, res):
