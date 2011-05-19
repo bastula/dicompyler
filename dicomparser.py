@@ -142,7 +142,7 @@ class DicomParser:
 
 ################################ Image Methods #################################
 
-    def GetImageData(self, window = None, level = None):
+    def GetImageData(self):
         """Return the image data from a DICOM file."""
 
         data = {}

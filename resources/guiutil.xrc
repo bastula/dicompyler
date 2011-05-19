@@ -15,7 +15,7 @@
               </object>
               <object class="sizeritem">
                 <object class="wxStaticText" name="lblProgress">
-                  <label>Loading data...                   </label>
+                  <label>Loading data...                             </label>
                 </object>
                 <option>1</option>
                 <flag>wxALIGN_CENTRE</flag>
@@ -29,7 +29,7 @@
           </object>
           <object class="sizeritem">
             <object class="wxGauge" name="gaugeProgress">
-              <size>100,15</size>
+              <size>150,15</size>
               <range>100</range>
               <value>0</value>
               <style>wxGA_HORIZONTAL|wxGA_SMOOTH</style>

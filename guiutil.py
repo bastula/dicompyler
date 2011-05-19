@@ -131,7 +131,7 @@ class ProgressDialog(wx.Dialog):
         if not length:
             percentDone = 0
         else:
-            percentDone = int(100 * (num+1) / length)
+            percentDone = int(100 * (num) / length)
 
         self.gaugeProgress.SetValue(percentDone)
         self.lblProgressPercent.SetLabel(str(percentDone))
