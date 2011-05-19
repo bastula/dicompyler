@@ -2,7 +2,7 @@ dicompyler Readme
 -----------------
 
 dicompyler:
-A Python based radiation therapy research platform using the DICOM standard
+Extensible radiation therapy research platform and viewer for DICOM and DICOM RT.
 
 dicompyler is released under a BSD license. See the included license.txt file,
 or available online at: http://code.google.com/p/dicompyler/
@@ -20,26 +20,30 @@ Features
   - DICOM data tree viewer
   - Patient anonymizer
 
-Release Notes for dicompyler 0.3
+Release Notes for dicompyler 0.4a2 - May, 19th 2011
 -----------------
 
-- 2D image viewer
-  - Added Mousewheel image navigation
-  - Added Zoom controls via toolbar and +/- keys
-  - Added Panning of image via left mouse dragging
-  - Added Window & level control via right mouse dragging
-  - Fixed display of structures in the 2D View for feet first patients
-  - Fixed image sorting based on slice location rather than instance number
-  - Fixed sort order with respect to feet first or head first patient setup
-- DVH viewer
-  - Simplified and streamlined the DVH constraint interface
-  - Fixed a bug regarding formatting of the constraint result values.
 - General
-  - New open patient icon
-  - Added focus events for notebook tab plugins
-  - Added toolbar buttons for plugins
-  - Fixed a bug if there were two image series present in the same study. If one
-    series was selected, all series would be loaded and merged into one.
+  - Automatic import of TomoTherapy Prescription Dose
+  - Preferences dialog for each plugin with data stored in JSON format
+  - Support structures that don't have color information
+  - Added scrollbars to isodose and structure lists
+  - Added a status bar to the program to show additional information
+  - Added Export plugin capability
+  - Added independent DVH calculation from RT Dose / Structure Set data
+- 2D image viewer
+  - Support CT data that has multiple window / level presets
+  - Support for non-coincident dose planes
+  - New isodose generation using matplotlib backend
+  - Holes in contours are now properly displayed
+  - Support CT data that is missing the SliceLocation tag
+  - More accurate panning when zoomed during mouse movement
+  - Support RescaleIntercept & RescaleSlope tags for more accurate
+    window / level values
+  - Added DICOM / pixel coordinate display of the mouse cursor in the status bar
+  - Added image / dose value display of the mouse cursor in the status bar
+- Anonymization
+  - Now an export plugin, found under the File->Export menu
 
 Getting Started
 -----------------
