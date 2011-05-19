@@ -137,6 +137,7 @@ class MainFrame(wx.Frame):
 
         # Bind interface events to the proper methods
         wx.EVT_CHOICE(self, XRCID('choiceStructure'), self.OnStructureSelect)
+        self.Bind(wx.EVT_CLOSE, self.OnClose)
         self.notebook.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.OnPageChanged)
         # Events to work around a focus bug in Windows
         self.notebook.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
@@ -677,7 +678,7 @@ class MainFrame(wx.Frame):
         dlg.Destroy()
 
     def OnClose(self, _):
-        self.Close()
+        self.Destroy()
 
 class dicompyler(wx.App):
     def OnInit(self):

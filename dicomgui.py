@@ -670,23 +670,22 @@ class DicomImporterDialog(wx.Dialog):
         """Return the patient data if the patient is selected or the button
             is pressed."""
         item = self.tcPatients.GetSelection()
-        if (threading.activeCount() == 1):
-            if self.tcPatients.GetPyData(item):
-                # Since we have decided to use this location to import from,
-                # update the location in the preferences for the next session
-                # if the 'import_location_setting' is "Remember Last Used"
-                if (self.import_location_setting == "Remember Last Used"):
-                    pub.sendMessage('preferences.updated.value',
-                        {'general.dicom.import_location':self.path})
+        if self.tcPatients.GetPyData(item):
+            # Since we have decided to use this location to import from,
+            # update the location in the preferences for the next session
+            # if the 'import_location_setting' is "Remember Last Used"
+            if (self.import_location_setting == "Remember Last Used"):
+                pub.sendMessage('preferences.updated.value',
+                    {'general.dicom.import_location':self.path})
 
-                filearray = self.tcPatients.GetPyData(item)['filearray']
-                self.btnSelect.Enable(False)
-                self.txtRxDose.Enable(False)
-                self.terminate = False
-                self.importThread=threading.Thread(target=self.GetPatientData,
-                args=(self.path, filearray, self.txtRxDose.GetValue(),
-                    self.SetThreadStatus, self.OnUpdateProgress))
-                self.importThread.start()
+            filearray = self.tcPatients.GetPyData(item)['filearray']
+            self.btnSelect.Enable(False)
+            self.txtRxDose.Enable(False)
+            self.terminate = False
+            self.importThread=threading.Thread(target=self.GetPatientData,
+            args=(self.path, filearray, self.txtRxDose.GetValue(),
+                self.SetThreadStatus, self.OnUpdateProgress))
+            self.importThread.start()
 
     def OnCancel(self, evt):
         """Stop the directory search and close the dialog."""
