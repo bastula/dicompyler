@@ -24,6 +24,7 @@ Release Notes for dicompyler 0.4a2 - May, 19th 2011
 -----------------
 
 - General
+  - Automatic conversion of Differential DVHs to Cumulative DVHs
   - Automatic import of TomoTherapy Prescription Dose
   - Preferences dialog for each plugin with data stored in JSON format
   - Support structures that don't have color information
