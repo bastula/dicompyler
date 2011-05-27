@@ -167,19 +167,13 @@ class MainFrame(wx.Frame):
         if not os.path.exists(datapath):
             os.mkdir(datapath)
 
-        # Load and initialize plugins
-        userpluginpath = os.path.join(datapath, 'plugins')
-        if not os.path.exists(userpluginpath):
-            os.mkdir(userpluginpath)
-        self.plugins = plugin.import_plugins()
-        self.menuDict = {}
-        self.menuExportDict = {}
-
         # Initialize the preferences
         if guiutil.IsMac():
-            self.prefmgr = preferences.PreferencesManager(None)
+            self.prefmgr = preferences.PreferencesManager(
+                parent = None, appname = 'dicompyler')
         else:
-            self.prefmgr = preferences.PreferencesManager(None, 'Options')
+            self.prefmgr = preferences.PreferencesManager(
+                parent = None, appname = 'dicompyler', name = 'Options')
         sp = wx.StandardPaths.Get()
         self.generalpreftemplate = [
             {'DICOM Import Settings':
@@ -192,6 +186,13 @@ class MainFrame(wx.Frame):
                  'type':'directory',
               'default':unicode(sp.GetDocumentsDir()),
              'callback':'general.dicom.import_location'}]
+            },
+            {'Plugin Settings':
+                [{'name':'User Plugins Location',
+                 'type':'directory',
+              'default':unicode(os.path.join(datapath, 'plugins')),
+             'callback':'general.plugins.user_plugins_location',
+             'restart':True}]
             }]
         self.preftemplate = [{'General':self.generalpreftemplate}]
         pub.sendMessage('preferences.updated.template', self.preftemplate)
@@ -202,7 +203,18 @@ class MainFrame(wx.Frame):
         pub.subscribe(self.OnStructureUncheck, 'colorcheckbox.unchecked.structure')
         pub.subscribe(self.OnIsodoseCheck, 'colorcheckbox.checked.isodose')
         pub.subscribe(self.OnIsodoseUncheck, 'colorcheckbox.unchecked.isodose')
+        pub.subscribe(self.OnUpdatePlugins, 'general.plugins.user_plugins_location')
         pub.subscribe(self.OnUpdateStatusBar, 'main.update_statusbar')
+
+        # Create the default user plugin path
+        self.userpluginpath = os.path.join(datapath, 'plugins')
+        if not os.path.exists(self.userpluginpath):
+            os.mkdir(self.userpluginpath)
+
+        # Load and initialize plugins
+        self.plugins = []
+        pub.sendMessage('preferences.requested.value',
+                        'general.plugins.user_plugins_location')
 
 ########################### Patient Loading Functions ##########################
 
@@ -574,6 +586,16 @@ class MainFrame(wx.Frame):
         pub.sendMessage('isodoses.checked', self.isodoseList)
 
 ################################ Other Functions ###############################
+
+    def OnUpdatePlugins(self, msg):
+        """Update the location of the user plugins and load all plugins."""
+
+        self.userpluginpath = msg.data
+        # Load the plugins only if they haven't been loaded previously
+        if not len(self.plugins):
+            self.plugins = plugin.import_plugins(self.userpluginpath)
+            self.menuDict = {}
+            self.menuExportDict = {}
 
     def OnUpdateStatusBar(self, msg):
         """Update the status bar text."""

@@ -23,12 +23,13 @@ except ImportError:
 class PreferencesManager():
     """Class to access preferences and set up the preferences dialog."""
 
-    def __init__(self, parent, name = None, filename='preferences.txt'):
+    def __init__(self, parent, name = None, appname = "the application",
+                 filename='preferences.txt'):
 
         # Load the XRC file for our gui resources
         res = XmlResource(util.GetResourcePath('preferences.xrc'))
         self.dlgPreferences = res.LoadDialog(None, "PreferencesDialog")
-        self.dlgPreferences.Init(name)
+        self.dlgPreferences.Init(name, appname)
 
         # Setup internal pubsub methods
         pub.subscribe(self.SetPreferenceTemplate, 'preferences.updated.template')
@@ -124,7 +125,7 @@ class PreferencesDialog(wx.Dialog):
         # the Create step is done by XRC.
         self.PostCreate(pre)
 
-    def Init(self, name = None):
+    def Init(self, name = None, appname = ""):
         """Method called after the panel has been initialized."""
 
         # Hide the close button on Mac
@@ -151,6 +152,7 @@ class PreferencesDialog(wx.Dialog):
         # Initialize variables
         self.preftemplate = []
         self.values = {}
+        self.appname = appname
 
     def LoadPreferences(self, preftemplate, values):
         """Update and load the data for the preferences notebook control."""
@@ -189,10 +191,19 @@ class PreferencesDialog(wx.Dialog):
             # Create a FlexGridSizer to contain the group of settings
             fgsizer = wx.FlexGridSizer(len(group.values()[0]), 4, 10, 4)
             fgsizer.AddGrowableCol(2, 1)
+            show_restart = False
             # Create controls for each setting
             for setting in group.values()[0]:
                 fgsizer.Add((24, 0))
-                t = wx.StaticText(panel, -1, setting['name']+':',
+                # Show the restart asterisk for this setting if required
+                restart = str('*' if 'restart' in setting else '')
+                if ('restart' in setting):
+                    if (setting['restart'] == True):
+                        restart = '*'
+                        show_restart = True
+                    else:
+                        restart = ''
+                t = wx.StaticText(panel, -1, setting['name']+restart+':',
                     style=wx.ALIGN_RIGHT)
                 fgsizer.Add(t, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT)
                 sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -248,7 +259,23 @@ class PreferencesDialog(wx.Dialog):
                 fgsizer.Add((12, 0))
             bsizer.Add(fgsizer, 0, wx.EXPAND|wx.ALL)
             border.Add(bsizer, 0, wx.EXPAND|wx.ALL, 2)
-        border.Add((60, 20), 1, wx.EXPAND|wx.ALL)
+        border.Add((60, 20), 0, wx.EXPAND|wx.ALL)
+        # Show the restart text for this group if required for >= 1 setting
+        if show_restart:
+            r = wx.StaticText(panel, -1,
+                              '* Restart ' + self.appname + \
+                              ' for this setting to take effect.',
+                              style=wx.ALIGN_CENTER)
+            font = r.GetFont()
+            font.SetWeight(wx.FONTWEIGHT_BOLD)
+            r.SetFont(font)
+            border.Add((0,0), 1, wx.EXPAND|wx.ALL)
+            rhsizer = wx.BoxSizer(wx.HORIZONTAL)
+            rhsizer.Add((0,0), 1, wx.EXPAND|wx.ALL)
+            rhsizer.Add(r)
+            rhsizer.Add((0,0), 1, wx.EXPAND|wx.ALL)
+            border.Add(rhsizer, 0, wx.EXPAND|wx.ALL)
+            border.Add((0,5))
         panel.SetSizer(border)
 
         return panel
@@ -275,13 +302,14 @@ class PreferencesDialog(wx.Dialog):
 
         b = evt.GetEventObject()
         # Get the the label associated with the browse button
-        t = self.FindWindowById(b.NextControlId(b.GetId()))
-        dlg = wx.DirDialog(self, defaultPath = t.GetLabel())
+        t = self.FindWindowById(b.PrevControlId(b.GetId()))
+        print t.GetValue()
+        dlg = wx.DirDialog(self, defaultPath = t.GetValue())
 
         if dlg.ShowModal() == wx.ID_OK:
             # Update the associated label with the new directory
             d = unicode(dlg.GetPath())
-            t.SetLabel(d)
+            t.SetValue(d)
             pub.sendMessage(self.callbackdict[b], d)
             SetValue(self.values, self.callbackdict[b], d)
         dlg.Destroy()
