@@ -12,14 +12,15 @@ import wx
 from wx.xrc import *
 import guiutil, util
 
-def import_plugins():
+def import_plugins(userpath=None):
     """Find and import available plugins."""
 
     # Get the base plugin path
     basepath = util.GetBasePluginsPath('')
-    # Get the user plugin path
-    datapath = guiutil.get_data_dir()
-    userpath = os.path.join(datapath, 'plugins')
+    # Get the user plugin path if it has not been set
+    if (userpath == None):
+        datapath = guiutil.get_data_dir()
+        userpath = os.path.join(datapath, 'plugins')
     # Get the list of possible plugins from both paths
     possibleplugins = []
     for i in os.listdir(userpath):
