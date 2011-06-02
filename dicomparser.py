@@ -290,7 +290,7 @@ class DicomParser:
 
                         # Add each plane to the planes dictionary of the current ROI
                         if plane.has_key('geometricType'):
-                            z = '%.2f' % plane['contourData'][0][2]
+                            z = ('%.2f' % plane['contourData'][0][2]).replace('-0','0')
                             if not planes.has_key(z):
                                 planes[z] = []
                             planes[z].append(plane)
