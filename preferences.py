@@ -57,11 +57,11 @@ class PreferencesManager():
         # If the pref dialog has never been shown, load the values and show it
         if not self.dlgPreferences.IsShown():
             self.dlgPreferences.LoadPreferences(self.preftemplate, self.values)
-            self.dlgPreferences.Show()
+            self.dlgPreferences.Hide()
         # Otherwise, hide the dialog and redisplay it to bring it to the front
         else:
             self.dlgPreferences.Hide()
-            self.dlgPreferences.Show()
+        self.dlgPreferences.Show()
 
     def SetPreferenceTemplate(self, msg):
         """Set the template that the preferences will be shown in the dialog."""
@@ -130,7 +130,7 @@ class PreferencesDialog(wx.Dialog):
 
         # Hide the close button on Mac
         if guiutil.IsMac():
-            XRCCTRL(self, 'wxID_CANCEL').Hide()
+            XRCCTRL(self, 'wxID_OK').Hide()
         # Set window icon
         else:
             self.SetIcon(guiutil.get_icon())
@@ -148,6 +148,8 @@ class PreferencesDialog(wx.Dialog):
 
         # Bind ui events to the proper methods
         self.Bind(wx.EVT_CLOSE, self.OnClose)
+        self.Bind(wx.EVT_WINDOW_DESTROY, self.OnClose)
+        wx.EVT_BUTTON(self, XRCID('wxID_OK'), self.OnClose)
 
         # Initialize variables
         self.preftemplate = []
@@ -174,6 +176,7 @@ class PreferencesDialog(wx.Dialog):
 
         panel = wx.Panel(self.notebook, -1)
         border = wx.BoxSizer(wx.VERTICAL)
+        show_restart = False
 
         for group in prefpaneldata:
             # Create a header for each group of settings
@@ -191,7 +194,6 @@ class PreferencesDialog(wx.Dialog):
             # Create a FlexGridSizer to contain the group of settings
             fgsizer = wx.FlexGridSizer(len(group.values()[0]), 4, 10, 4)
             fgsizer.AddGrowableCol(2, 1)
-            show_restart = False
             # Create controls for each setting
             for setting in group.values()[0]:
                 fgsizer.Add((24, 0))
@@ -199,10 +201,7 @@ class PreferencesDialog(wx.Dialog):
                 restart = str('*' if 'restart' in setting else '')
                 if ('restart' in setting):
                     if (setting['restart'] == True):
-                        restart = '*'
                         show_restart = True
-                    else:
-                        restart = ''
                 t = wx.StaticText(panel, -1, setting['name']+restart+':',
                     style=wx.ALIGN_RIGHT)
                 fgsizer.Add(t, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT)
@@ -303,7 +302,6 @@ class PreferencesDialog(wx.Dialog):
         b = evt.GetEventObject()
         # Get the the label associated with the browse button
         t = self.FindWindowById(b.PrevControlId(b.GetId()))
-        print t.GetValue()
         dlg = wx.DirDialog(self, defaultPath = t.GetValue())
 
         if dlg.ShowModal() == wx.ID_OK:
@@ -347,3 +345,97 @@ def SetValue(values, setting, value):
             values[query[0]].update({query[1]:{query[2]:value}})
     else:
         values[query[0]] = {query[1]:{query[2]:value}}
+
+############################### Test Preferences ###############################
+
+def main():
+
+    import tempfile, os
+    import wx
+    from wx.lib.pubsub import Publisher as pub
+
+    app = wx.App(False)
+
+    t = tempfile.NamedTemporaryFile(delete=False)
+    sp = wx.StandardPaths.Get()
+
+    # Create a frame as a parent for the preferences dialog
+    frame = wx.Frame(None, wx.ID_ANY, "Preferences Test")
+    frame.Centre()
+    frame.Show(True)
+    app.SetTopWindow(frame)
+
+    filename = t.name
+    frame.prefmgr = PreferencesManager(parent = frame, appname = 'preftest',
+                                       filename=filename)
+
+    # Set up the preferences template
+    grp1template = [
+        {'Panel 1 Preference Group 1':
+            [{'name':'Choice Setting',
+             'type':'choice',
+           'values':['Choice 1', 'Choice 2', 'Choice 3'],
+          'default':'Choice 2',
+         'callback':'panel1.prefgrp1.choice_setting'},
+            {'name':'Directory setting',
+             'type':'directory',
+          'default':unicode(sp.GetDocumentsDir()),
+         'callback':'panel1.prefgrp1.directory_setting'}]
+        },
+        {'Panel 1 Preference Group 2':
+            [{'name':'Range Setting',
+             'type':'range',
+           'values':[0, 100],
+          'default':50,
+            'units':'%',
+         'callback':'panel1.prefgrp2.range_setting'}]
+        }]
+    grp2template = [
+        {'Panel 2 Preference Group 1':
+           [{'name':'Range Setting',
+             'type':'range',
+           'values':[0, 100],
+          'default':50,
+            'units':'%',
+         'callback':'panel2.prefgrp1.range_setting',
+          'restart':True}]
+        },
+        {'Panel 2 Preference Group 2':
+           [{'name':'Directory setting',
+             'type':'directory',
+          'default':unicode(sp.GetUserDataDir()),
+         'callback':'panel2.prefgrp2.directory_setting'},
+            {'name':'Choice Setting',
+             'type':'choice',
+           'values':['Choice 1', 'Choice 2', 'Choice 3'],
+          'default':'Choice 2',
+         'callback':'panel2.prefgrp2.choice_setting'}]
+        }]
+    preftemplate = [{'Panel 1':grp1template}, {'Panel 2':grp2template}]
+
+    def print_template_value(msg):
+        """Print the received template message."""
+        print msg.topic, msg.data
+
+    # Subscribe the template value printer to each set of preferences
+    pub.subscribe(print_template_value, 'panel1')
+    pub.subscribe(print_template_value, 'panel2')
+
+    # Notify the preferences manager that a pref template is available
+    pub.sendMessage('preferences.updated.template', preftemplate)
+
+    frame.prefmgr.Show()
+    app.MainLoop()
+
+    # Print the results of the preferences
+    with open(filename, mode='r') as f:
+        for line in f:
+            print line,
+
+    try:
+        os.remove(filename)
+    except WindowsError:
+        print '\nCould not delete: '+filename+'. Please delete it manually.'
+
+if __name__ == '__main__':
+    main()
