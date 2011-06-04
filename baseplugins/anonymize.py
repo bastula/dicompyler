@@ -115,9 +115,15 @@ class plugin:
             self.updateElement(rtplan, 'RTPlanName', 'plan')
             self.updateElement(rtplan, 'RTPlanDate', '19010101')
             self.updateElement(rtplan, 'RTPlanTime', '000000')
+            if rtplan.has_key('ToleranceTables'):
+                for item in rtplan.ToleranceTables:
+                    self.updateElement(item, 'ToleranceTableLabel', 'tolerance')
             if rtplan.has_key('Beams'):
                 for item in rtplan.Beams:
                     self.updateElement(item, 'Manufacturer', 'manufacturer')
+                    self.updateElement(item, 'InstitutionName', 'institution')
+                    self.updateElement(item, 'InstitutionAddress', 'address')
+                    self.updateElement(item, 'InstitutionalDepartmentName', 'department')
                     self.updateElement(item, 'ManufacturersModelName', 'model')
                     self.updateElement(item, 'TreatmentMachineName', 'txmachine')
             if rtplan.has_key('TreatmentMachines'):
@@ -125,6 +131,7 @@ class plugin:
                     self.updateElement(item, 'Manufacturer', 'manufacturer')
                     self.updateElement(item, 'InstitutionName', 'vendor')
                     self.updateElement(item, 'InstitutionAddress', 'address')
+                    self.updateElement(item, 'InstitutionalDepartmentName', 'department')
                     self.updateElement(item, 'ManufacturersModelName', 'model')
                     self.updateElement(item, 'DeviceSerialNumber', '0')
                     self.updateElement(item, 'TreatmentMachineName', 'txmachine')
@@ -153,7 +160,8 @@ class plugin:
                 self.updateElement(image, 'SeriesTime', '000000')
                 self.updateElement(image, 'ContentTime', '000000')
                 self.updateElement(image, 'InstitutionName', 'institution')
-                self.updateElement(image, 'InstitutionalDepartmentName', '')
+                self.updateElement(image, 'InstitutionAddress', 'address')
+                self.updateElement(image, 'InstitutionalDepartmentName', 'department')
                 modality = image.SOPClassUID.name.partition(' Image Storage')[0]
                 image.save_as(
                     os.path.join(path, modality.lower() + '.' + str(n) + '.dcm'))
@@ -185,9 +193,11 @@ class plugin:
         self.updateElement(data, 'ReferringPhysiciansName', 'physician')
         self.updateElement(data, 'StationName', 'station')
         self.updateElement(data, 'OperatorsName', 'operator')
+        self.updateElement(data, 'PhysiciansofRecord', 'physician')
         self.updateElement(data, 'ManufacturersModelName', 'model')
         self.updateElement(data, 'PatientsBirthDate', '')
         self.updateElement(data, 'PatientsSex', 'O')
+        self.updateElement(data, 'EthnicGroup', 'ethnicity')
         self.updateElement(data, 'StudyID', '1')
         self.updateElement(data, 'DeviceSerialNumber', '0')
         self.updateElement(data, 'SoftwareVersions', '1.0')
