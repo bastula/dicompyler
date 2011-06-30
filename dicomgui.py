@@ -484,6 +484,8 @@ class DicomImporterDialog(wx.Dialog):
                                         structure['treeid'], "RT Plan not found", 8)
                                     dose['treeid'] = self.tcPatients.AppendItem(badplan, name, 5)
                                     self.tcPatients.SetItemTextColour(badplan, wx.RED)
+                                    filearray = [dose['filename']]
+                                    self.EnableItemSelection(patient, dose, filearray)
                         if not foundstructure:
                             # If there is an image series, add a fake rtss to it
                             foundseries = False

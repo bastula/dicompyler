@@ -442,12 +442,13 @@ class plugin2DView(wx.Panel):
             # Draw the isodoses if present
             if len(self.isodoses):
                 grid = self.dose.GetDoseGrid(float(self.z))
-                x, y = np.meshgrid(
-                    np.arange(grid.shape[1]), np.arange(grid.shape[0]))
-                # Instantiate the isodose generator for this slice
-                isodosegen = cntr.Cntr(x, y, grid)
-                for id, isodose in iter(sorted(self.isodoses.iteritems())):
-                    self.DrawIsodose(isodose, gc, isodosegen)
+                if not (grid == []):
+                    x, y = np.meshgrid(
+                        np.arange(grid.shape[1]), np.arange(grid.shape[0]))
+                    # Instantiate the isodose generator for this slice
+                    isodosegen = cntr.Cntr(x, y, grid)
+                    for id, isodose in iter(sorted(self.isodoses.iteritems())):
+                        self.DrawIsodose(isodose, gc, isodosegen)
 
             # Restore the translation and scaling
             gc.PopState()
@@ -526,11 +527,13 @@ class plugin2DView(wx.Panel):
             if not (self.dose == []):
                 xdpos = np.argmin(np.fabs(np.array(self.dosepixlut[0]) - xpos))
                 ydpos = np.argmin(np.fabs(np.array(self.dosepixlut[1]) - ypos))
-                dose = self.dose.GetDoseGrid(float(self.z))[
-                       ydpos, xdpos] * self.dosedata['dosegridscaling']
-                value = value + " / Dose: " + \
-                        unicode('%.2f' % dose) + " Gy / " + \
-                        unicode('%.2f' % float(dose*10000/self.rxdose)) + " %"
+                dosegrid = self.dose.GetDoseGrid(float(self.z))
+                if not (dosegrid == []):
+                    dose = dosegrid[ydpos, xdpos] * \
+                           self.dosedata['dosegridscaling']
+                    value = value + " / Dose: " + \
+                            unicode('%.2f' % dose) + " Gy / " + \
+                            unicode('%.2f' % float(dose*10000/self.rxdose)) + " %"
         # Send a message with the text to the 2nd and 3rd statusbar sections
         pub.sendMessage('main.update_statusbar', {1:text, 2:value})
 

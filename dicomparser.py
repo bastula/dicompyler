@@ -119,7 +119,10 @@ class DicomParser:
     def GetReferencedRTPlan(self):
         """Return the SOP Class UID of the referenced RT plan."""
 
-        return self.ds.ReferencedRTPlans[0].ReferencedSOPInstanceUID
+        if "ReferencedRTPlans" in self.ds:
+            return self.ds.ReferencedRTPlans[0].ReferencedSOPInstanceUID
+        else:
+            return ''
 
     def GetDemographics(self):
         """Return the patient demographics from a DICOM file."""
