@@ -105,6 +105,8 @@ class DicomParser:
 
         if 'FrameofReferenceUID' in self.ds:
             return self.ds.FrameofReferenceUID
+        elif 'ReferencedFrameofReferences' in self.ds:
+            return self.ds.ReferencedFrameofReferences[0].FrameofReferenceUID
         else:
             return ''
 
