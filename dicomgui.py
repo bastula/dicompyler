@@ -235,6 +235,7 @@ class DicomImporterDialog(wx.Dialog):
                             structure['id'] = dp.GetSOPInstanceUID()
                             structure['filename'] = files[n]
                             structure['series'] = dp.GetReferencedSeries()
+                            structure['referenceframe'] = dp.GetFrameofReferenceUID()
                             patients[h]['structures'][structure['id']] = structure
                         # Create each RT Plan
                         elif (dp.GetSOPClassUID() == 'rtplan'):
@@ -478,11 +479,15 @@ class DicomImporterDialog(wx.Dialog):
                         if patient.has_key('structures'):
                             for structureid, structure in patient['structures'].iteritems():
                                 foundstructure = False
-                                if (structureid == dose['rtss']):
+                                if dose.has_key('rtss'):
+                                    if (structureid == dose['rtss']):
+                                        foundstructure = True
+                                if (structure['referenceframe'] == dose['referenceframe']):
                                     foundstructure = True
+                                if foundstructure:
                                     badplan = self.tcPatients.AppendItem(
                                         structure['treeid'], "RT Plan not found", 8)
-                                    dose['treeid'] = self.tcPatients.AppendItem(badplan, name, 5)
+                                    dose['treeid'] = self.tcPatients.AppendItem(badplan, name, 6)
                                     self.tcPatients.SetItemTextColour(badplan, wx.RED)
                                     filearray = [dose['filename']]
                                     self.EnableItemSelection(patient, dose, filearray)
@@ -557,13 +562,17 @@ class DicomImporterDialog(wx.Dialog):
                     if (structureid == item['rtss']):
                         filearray.append(structure['filename'])
                         break
+                    elif (structure['referenceframe'] == item['referenceframe']):
+                        filearray.append(structure['filename'])
+                        break
                 # If no referenced rtss, but ref'd rtplan, check rtplan->rtss
                 if item.has_key('rtplan'):
-                    for planid, plan in patient['plans'].iteritems():
-                        if (planid == item['rtplan']):
-                            if plan.has_key('rtss'):
-                                if (structureid == plan['rtss']):
-                                    filearray.append(structure['filename'])
+                    if patient.has_key('plans'):
+                        for planid, plan in patient['plans'].iteritems():
+                            if (planid == item['rtplan']):
+                                if plan.has_key('rtss'):
+                                    if (structureid == plan['rtss']):
+                                        filearray.append(structure['filename'])
         # Add the respective rtplan files to the filearray if they exist
         if patient.has_key('plans'):
             for planid, plan in patient['plans'].iteritems():
