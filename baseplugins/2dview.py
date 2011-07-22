@@ -471,7 +471,7 @@ class plugin2DView(wx.Panel):
                 zoom = "%.3f" % self.zoom
             imzoom = "Zoom: " + zoom + ":1"
             gc.DrawText(imzoom, 10, height-17)
-            imsize = "Image Size: " + str(self.bheight) + "x" + str(self.bheight) + " px"
+            imsize = "Image Size: " + str(self.bheight) + "x" + str(self.bwidth) + " px"
             gc.DrawText(imsize, 10, height-17-te[1]*1.1)
             imwinlevel = "W/L: " + str(self.window) + ' / ' + str(self.level)
             te = gc.GetFullTextExtent(imwinlevel)
