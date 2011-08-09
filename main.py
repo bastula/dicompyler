@@ -347,8 +347,9 @@ class MainFrame(wx.Frame):
                                  10*i/len(patient['structures'])+90, 100,
                                  'Calculating DVH for ' + structure['name'] +
                                  '...')
-                    patient['dvhs'][key] = dvhcalc.get_dvh(structure,
-                                                               patient['dose'])
+                    dvh = dvhcalc.get_dvh(structure, patient['dose'])
+                    if len(dvh['data']):
+                        patient['dvhs'][key] = dvh
                     i += 1
             for key, dvh in patient['dvhs'].iteritems():
                 self.CalculateDoseStatistics(dvh, ptdata['rxdose'])
