@@ -12,11 +12,11 @@ import numpy as np
 import numpy.ma as ma
 import matplotlib.nxutils as nx
 
-def get_dvh(structure, dose):
+def get_dvh(structure, dose, callback=None):
     """Get a calculated cumulative DVH along with the associated parameters."""
 
     # Get the differential DVH
-    hist = calculate_dvh(structure, dose)
+    hist = calculate_dvh(structure, dose, callback)
     # Convert the differential DVH into a cumulative DVH
     dvh = get_cdvh(hist)
 
@@ -35,7 +35,7 @@ def get_dvh(structure, dose):
     dvhdata['mean'] = -1
     return dvhdata
 
-def calculate_dvh(structure, dose):
+def calculate_dvh(structure, dose, callback=None):
     """Calculate the differential DVH for the given structure and dose grid."""
 
     sPlanes = structure['planes']
@@ -65,6 +65,7 @@ def calculate_dvh(structure, dose):
         hist = np.array([0])
     volume = 0
 
+    plane = 0
     # Iterate over each plane in the structure
     for z, sPlane in sPlanes.iteritems():
 
@@ -105,6 +106,9 @@ def calculate_dvh(structure, dose):
                 else:
                     hist += h
                     volume += vol
+        plane += 1
+        if not (callback == None):
+            callback(plane, len(sPlanes))
     # Volume units are given in cm^3
     volume = volume/1000
     # Rescale the histogram to reflect the total volume

@@ -125,7 +125,7 @@ class ProgressDialog(wx.Dialog):
         self.gaugeProgress = XRCCTRL(self, 'gaugeProgress')
         self.lblProgressPercent = XRCCTRL(self, 'lblProgressPercent')
 
-    def OnUpdateProgress(self, num, length, message):
+    def OnUpdateProgress(self, num, length, message=None):
         """Update the process interface elements."""
 
         if not length:
@@ -135,7 +135,8 @@ class ProgressDialog(wx.Dialog):
 
         self.gaugeProgress.SetValue(percentDone)
         self.lblProgressPercent.SetLabel(str(percentDone))
-        self.lblProgress.SetLabel(message)
+        if not (message == None):
+            self.lblProgress.SetLabel(message)
 
         # End the dialog since we are done with the import process
         if (message == 'Done'):

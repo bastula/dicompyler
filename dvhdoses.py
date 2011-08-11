@@ -1,15 +1,15 @@
 # dvhdoses.py
 """Functions to calculate minimum, maximum, and mean dose to ROI from a cDVH."""
 # Copyright (c) 2009 Roy Keyes (roy.coding)
+# Copyright (c) 2011 Aditya Panchal
 # This file is part of dicompyler, relased under a BSD license.
 #    See the file license.txt included with this distribution, also
 #    available at http://code.google.com/p/dicompyler/
 #
 # Start - 20 Nov. 2009
-# It's assumed that the reference (prescription) dose is in cGy and the bin width
-# of the cDVH is fixed at 1 cGy.
+# It is assumed that the bin width of the cDVH is fixed at 1 cGy.
 
-def get_dvh_min(dvh, doseref):
+def get_dvh_min(dvh):
     '''Return minimum dose to ROI derived from cDVH.'''
 
     # ROI volume (always receives at least 0% dose)
@@ -25,11 +25,9 @@ def get_dvh_min(dvh, doseref):
         else:
             j += 1
 
-    mindose = 100*mindose/doseref
-
     return mindose
 
-def get_dvh_max(dvh, doseref):
+def get_dvh_max(dvh):
     '''Return maximum dose to ROI derived from cDVH.'''
 
     # Calulate dDVH
@@ -44,11 +42,9 @@ def get_dvh_max(dvh, doseref):
         else:
             j -= 1
 
-    maxdose = 100.0*maxdose/doseref
-
     return maxdose
 
-def get_dvh_median(dvh, doseref):
+def get_dvh_median(dvh):
     '''Return median dose to ROI derived from cDVH.'''
 
     # Half of ROI volume
@@ -63,11 +59,9 @@ def get_dvh_median(dvh, doseref):
         else:
             j += 1
 
-    mediandose = 100*mediandose/doseref
-
     return mediandose
 
-def get_dvh_mean(dvh, doseref):
+def get_dvh_mean(dvh):
     '''Return mean dose to ROI derived from cDVH.'''
 
     # Mean dose = total dose / ROI volume
@@ -86,7 +80,6 @@ def get_dvh_mean(dvh, doseref):
         j += 1
 
     meandose = dose/v1
-    meandose = 100*meandose/doseref
 
     return meandose
 
@@ -103,4 +96,3 @@ def get_ddvh(cdvh):
     ddvh += [cdvh[j]]
 
     return ddvh
-

@@ -25,7 +25,6 @@ class DVH:
     def GetVolumeConstraint(self, dose):
         """ Return the volume (in percent) of the structure that receives at
             least a specific dose in cGy. i.e. V100, V150."""
-
         return self.dvh[int(dose/self.scaling)]
 
     def GetVolumeConstraintCC(self, dose, volumecc):
