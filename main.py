@@ -366,7 +366,7 @@ class MainFrame(wx.Frame):
         for stat, func in sfdict.iteritems():
             # Only calculate stat if the stat was not calculated previously (-1)
             if dvh[stat] == -1:
-                dvh[stat] = func(dvh['data'], rxdose/dvh['scaling'])
+                dvh[stat] = 100*func(dvh['data']*dvh['scaling'])/rxdose
 
         return dvh
 

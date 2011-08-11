@@ -3,7 +3,7 @@
 # dvh.py
 """dicompyler plugin that displays a dose volume histogram (DVH)
     with adjustable constraints via wxPython and matplotlib."""
-# Copyright (c) 2009-2010 Aditya Panchal
+# Copyright (c) 2009-2011 Aditya Panchal
 # This file is part of dicompyler, relased under a BSD license.
 #    See the file license.txt included with this distribution, also
 #    available at http://code.google.com/p/dicompyler/
@@ -219,7 +219,7 @@ class pluginDVH(wx.Panel):
             self.lblConstraintTypeUnits.SetLabel('%  ')
             self.lblResultType.SetLabel('Volume:')
             rxDose = float(self.plan['rxdose'])
-            dvhdata = len(dvh['data'])*dvh['scaling']
+            dvhdata = (len(dvh['data'])-1)*dvh['scaling']
             constraintrange = int(dvhdata*100/rxDose)
             # never go over the max dose as data does not exist
             if (constraintrange > int(dvh['max'])):
