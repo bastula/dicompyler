@@ -12,11 +12,11 @@ import numpy as np
 import numpy.ma as ma
 import matplotlib.nxutils as nx
 
-def get_dvh(structure, dose, callback=None):
+def get_dvh(structure, dose, limit=None, callback=None):
     """Get a calculated cumulative DVH along with the associated parameters."""
 
     # Get the differential DVH
-    hist = calculate_dvh(structure, dose, callback)
+    hist = calculate_dvh(structure, dose, limit, callback)
     # Convert the differential DVH into a cumulative DVH
     dvh = get_cdvh(hist)
 
@@ -35,7 +35,7 @@ def get_dvh(structure, dose, callback=None):
     dvhdata['mean'] = -1
     return dvhdata
 
-def calculate_dvh(structure, dose, callback=None):
+def calculate_dvh(structure, dose, limit=None, callback=None):
     """Calculate the differential DVH for the given structure and dose grid."""
 
     sPlanes = structure['planes']
@@ -60,6 +60,10 @@ def calculate_dvh(structure, dose, callback=None):
     # only if the structure has contour data
     if len(sPlanes):
         maxdose = int(dd['dosemax'] * dd['dosegridscaling'] * 100)
+        # Remove values above the limit (cGy) if specified
+        if not (limit == None):
+            if (limit < maxdose):
+                maxdose = limit
         hist = np.zeros(maxdose)
     else:
         hist = np.array([0])
