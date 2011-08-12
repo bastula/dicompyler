@@ -347,7 +347,8 @@ class MainFrame(wx.Frame):
                                  10*i/len(patient['structures'])+90, 100,
                                  'Calculating DVH for ' + structure['name'] +
                                  '...')
-                    dvh = dvhcalc.get_dvh(structure, patient['dose'])
+                    # Limit DVH bins to 500 Gy due to high doses in brachy
+                    dvh = dvhcalc.get_dvh(structure, patient['dose'], 50000)
                     if len(dvh['data']):
                         patient['dvhs'][key] = dvh
                     i += 1
