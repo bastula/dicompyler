@@ -161,7 +161,7 @@ class pluginDVH(wx.Panel):
         if not len(self.checkedstructures):
             self.EnableConstraints(False)
             # Make an empty plot on the DVH
-            self.guiDVH.Replot(None, None)
+            self.guiDVH.Replot()
 
     def OnStructureSelect(self, msg):
         """Load the constraints for the currently selected structure."""
@@ -179,7 +179,7 @@ class pluginDVH(wx.Panel):
                 self.OnToggleConstraints(None)
             else:
                 self.EnableConstraints(False)
-                self.guiDVH.Replot(self.dvharray, self.dvhscaling, self.checkedstructures)
+                self.guiDVH.Replot([self.dvharray], [self.dvhscaling], self.checkedstructures)
 
     def EnableConstraints(self, value):
         """Enable or disable the constraint selector."""
@@ -199,7 +199,7 @@ class pluginDVH(wx.Panel):
         # Replot the remaining structures and disable the constraints
         # if a structure that has no DVH calculated is selected
         if not self.dvhs.has_key(self.structureid):
-            self.guiDVH.Replot(self.dvharray, self.dvhscaling, self.checkedstructures)
+            self.guiDVH.Replot([self.dvharray], [self.dvhscaling], self.checkedstructures)
             self.EnableConstraints(False)
             return
         else:
@@ -278,7 +278,7 @@ class pluginDVH(wx.Panel):
 
             self.lblConstraintUnits.SetLabel("%.1f" % cc + u' cm³')
             self.lblConstraintPercent.SetLabel("%.1f" % constraint + " %")
-            self.guiDVH.Replot(self.dvharray, self.dvhscaling,
+            self.guiDVH.Replot([self.dvharray], [self.dvhscaling],
                 self.checkedstructures, ([absDose], [constraint]), id)
         # Volume constraint in Gy
         elif (constrainttype == 1):
@@ -289,7 +289,7 @@ class pluginDVH(wx.Panel):
 
             self.lblConstraintUnits.SetLabel("%.1f" % cc + u' cm³')
             self.lblConstraintPercent.SetLabel("%.1f" % constraint + " %")
-            self.guiDVH.Replot(self.dvharray, self.dvhscaling,
+            self.guiDVH.Replot([self.dvharray], [self.dvhscaling],
                 self.checkedstructures, ([absDose], [constraint]), id)
         # Dose constraint
         elif (constrainttype == 2):
@@ -297,7 +297,7 @@ class pluginDVH(wx.Panel):
 
             self.lblConstraintUnits.SetLabel("%.1f" % dose + u' cGy')
             self.lblConstraintPercent.SetLabel("%.1f" % (dose*100/rxDose) + " %")
-            self.guiDVH.Replot(self.dvharray, self.dvhscaling,
+            self.guiDVH.Replot([self.dvharray], [self.dvhscaling],
                 self.checkedstructures, ([dose], [slidervalue]), id)
         # Dose constraint in cc
         elif (constrainttype == 3):
@@ -307,5 +307,5 @@ class pluginDVH(wx.Panel):
 
             self.lblConstraintUnits.SetLabel("%.1f" % dose + u' cGy')
             self.lblConstraintPercent.SetLabel("%.1f" % (dose*100/rxDose) + " %")
-            self.guiDVH.Replot(self.dvharray, self.dvhscaling,
+            self.guiDVH.Replot([self.dvharray], [self.dvhscaling],
                 self.checkedstructures, ([dose], [volumepercent]), id)
