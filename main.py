@@ -340,9 +340,10 @@ class MainFrame(wx.Frame):
         wx.CallAfter(progressFunc, 90, 100, 'Processing DVH data...')
         if ('dvhs' in patient) and ('structures' in patient):
             # If the DVHs are not present, calculate them
-            if not len(patient['dvhs']):
-                i = 0
-                for key, structure in patient['structures'].iteritems():
+            i = 0
+            for key, structure in patient['structures'].iteritems():
+                # Only calculate DVHs if they are not present for the structure
+                if not (key in patient['dvhs'].keys()):
                     wx.CallAfter(progressFunc,
                                  10*i/len(patient['structures'])+90, 100,
                                  'Calculating DVH for ' + structure['name'] +
