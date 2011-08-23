@@ -14,6 +14,7 @@ import hashlib, os, threading
 import wx
 from wx.xrc import *
 from wx.lib.pubsub import Publisher as pub
+import numpy as np
 import dicomparser, dvhdoses, guiutil, util
 
 def ImportDicom(parent):
@@ -211,7 +212,8 @@ class DicomImporterDialog(wx.Dialog):
                             if not patients[h]['studies'].has_key(stinfo['id']):
                                 patients[h]['studies'][stinfo['id']] = stinfo
                         # Create each Series of images
-                        if (dp.GetSOPClassUID() == 'ct'):
+                        if (('ImageOrientationPatient' in dp.ds) and \
+                            not (dp.GetSOPClassUID() == 'rtdose')):
                             seinfo = dp.GetSeriesInfo()
                             seinfo['numimages'] = 0
                             seinfo['modality'] = dp.ds.SOPClassUID.name
@@ -552,7 +554,8 @@ class DicomImporterDialog(wx.Dialog):
                 # used for RT plan / dose
                 if item.has_key('referenceframe'):
                     if (item['referenceframe'] == image['referenceframe']):
-                        appendImage = True
+                        if not 'numimages' in item:
+                            appendImage = True
                 if appendImage:
                     filearray.append(image['filename'])
         # Add the respective rtss files to the filearray if they exist
@@ -639,7 +642,8 @@ class DicomImporterDialog(wx.Dialog):
             if (n == 0):
                 self.patient = {}
                 self.patient['rxdose'] = RxDose
-            if (dp.GetSOPClassUID() == 'ct'):
+            if (('ImageOrientationPatient' in dp.ds) and \
+                not (dp.GetSOPClassUID() == 'rtdose')):
                 if not self.patient.has_key('images'):
                     self.patient['images'] = []
                 self.patient['images'].append(dp.ds)
@@ -650,25 +654,70 @@ class DicomImporterDialog(wx.Dialog):
             elif (dp.GetSOPClassUID() == 'rtdose'):
                 self.patient['rtdose'] = dp.ds
             wx.CallAfter(progressFunc, n, len(filearray), 'Importing patient. Please wait...')
-        # Sort the images based on Slice Location
+        # Sort the images based on a sort descriptor:
+        # (ImagePositionPatient, InstanceNumber or AcquisitionNumber)
         if self.patient.has_key('images'):
             sortedimages = []
-            slicenums = []
-            for image in self.patient['images']:
-                if not 'SliceLocation' in image:
-                    image.SliceLocation = image.ImagePositionPatient[2]
-                slicenums.append(image.SliceLocation)
-            # Sort images in ascending order for feet first patients
-            if 'ff' in image.PatientPosition.lower():
-                sortedslicenums = sorted(slicenums)
-            # Sort images in descending order for head first patients
+            unsortednums = []
+            sortednums = []
+            images = self.patient['images']
+            sort = 'IPP'
+            # Determine if all images in the series are parallel
+            # by testing for differences in ImageOrientationPatient
+            parallel = True
+            for i, item in enumerate(images):
+                if (i > 0):
+                    iop0 = np.array(item.ImageOrientationPatient)
+                    iop1 = np.array(images[i-1].ImageOrientationPatient)
+                    if (np.any(np.array(np.round(iop0 - iop1),
+                    dtype=np.int32))):
+                        parallel = False
+                        break
+                    # Also test ImagePositionPatient, as some series
+                    # use the same patient position for every slice
+                    ipp0 = np.array(item.ImagePositionPatient)
+                    ipp1 = np.array(images[i-1].ImagePositionPatient)
+                    if not (np.any(np.array(np.round(ipp0 - ipp1),
+                    dtype=np.int32))):
+                        parallel = False
+                        break
+            # If the images are parallel, sort by ImagePositionPatient
+            if parallel:
+                sort = 'IPP'
             else:
-                sortedslicenums = reversed(sorted(slicenums))
-            for s, slice in enumerate(sortedslicenums):
-                for i, image in enumerate(self.patient['images']):
-                    if (slice == image.SliceLocation):
-                        image.InstanceNumber = s+1
+                # Otherwise sort by Instance Number
+                if not (images[0].InstanceNumber == \
+                images[1].InstanceNumber):
+                    sort = 'InstanceNumber'
+                # Otherwise sort by Acquisition Number
+                elif not (images[0].AcquisitionNumber == \
+                images[1].AcquisitionNumber):
+                    sort = 'AcquisitionNumber'
+
+            # Add the sort descriptor to a list to be sorted
+            for i, image in enumerate(images):
+                if (sort == 'IPP'):
+                    unsortednums.append(image.ImagePositionPatient[2])
+                else:
+                    unsortednums.append(image.data_element(sort).value)
+
+            # Sort image numbers in descending order for head first patients
+            if ('hf' in image.PatientPosition.lower()) and (sort == 'IPP'):
+                sortednums = sorted(unsortednums, reverse=True)
+            # Otherwise sort image numbers in ascending order
+            else:
+                sortednums = sorted(unsortednums)
+
+            # Add the images to the array based on the sorted order
+            for s, slice in enumerate(sortednums):
+                for i, image in enumerate(images):
+                    if (sort == 'IPP'):
+                        if (slice == image.ImagePositionPatient[2]):
+                            sortedimages.append(image)
+                    elif (slice == image.data_element(sort).value):
                         sortedimages.append(image)
+
+            # Save the images back to the patient dictionary
             self.patient['images'] = sortedimages
         wx.CallAfter(progressFunc, 98, 100, 'Importing patient complete.')
 

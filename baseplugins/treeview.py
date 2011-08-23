@@ -86,10 +86,10 @@ class pluginTreeView(wx.Panel):
                 self.choiceDICOM.SetClientData(i, v)
             # Add the images to the choicebox
             if (k == 'images'):
-                for image in v:
+                for imgnum, image in enumerate(v):
                     i = self.choiceDICOM.Append(
                         image.SOPClassUID.name.split(' Storage')[0] + \
-                        ' Slice ' + str(image.InstanceNumber))
+                        ' Slice ' + str(imgnum + 1))
                     self.choiceDICOM.SetClientData(i, image)
 
     def OnDestroy(self, evt):
