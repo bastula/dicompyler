@@ -165,17 +165,8 @@ class DicomParser:
     def GetImage(self, window = 0, level = 0):
         """Return the image from a DICOM image storage file."""
 
-        if ((window == None) and (level == None)):
-            if isinstance(self.ds.WindowWidth, float):
-                window = self.ds.WindowWidth
-            elif isinstance(self.ds.WindowWidth, list):
-                if (len(self.ds.WindowWidth) > 1):
-                    window = self.ds.WindowWidth[1]
-            if isinstance(self.ds.WindowCenter, float):
-                level = self.ds.WindowCenter
-            elif isinstance(self.ds.WindowCenter, list):
-                if (len(self.ds.WindowCenter) > 1):
-                    level = self.ds.WindowCenter[1]
+        if ((window == 0) and (level == 0)):
+            window, level = self.GetDefaultImageWindowLevel()
         # Rescale the slope and intercept of the image if present
         if (self.ds.has_key('RescaleIntercept') and
             self.ds.has_key('RescaleSlope')):
@@ -186,6 +177,41 @@ class DicomParser:
         image = self.GetLUTValue(rescaled_image, window, level)
 
         return Image.fromarray(image).convert('L')
+
+    def GetDefaultImageWindowLevel(self):
+        """Determine the default window/level for the DICOM image."""
+
+        window, level = 0, 0
+        if ('WindowWidth' in self.ds) and ('WindowCenter' in self.ds):
+            if isinstance(self.ds.WindowWidth, float):
+                window = self.ds.WindowWidth
+            elif isinstance(self.ds.WindowWidth, list):
+                if (len(self.ds.WindowWidth) > 1):
+                    window = self.ds.WindowWidth[1]
+            if isinstance(self.ds.WindowCenter, float):
+                level = self.ds.WindowCenter
+            elif isinstance(self.ds.WindowCenter, list):
+                if (len(self.ds.WindowCenter) > 1):
+                    level = self.ds.WindowCenter[1]
+        else:
+            wmax = 0
+            wmin = 0
+            # Rescale the slope and intercept of the image if present
+            if (self.ds.has_key('RescaleIntercept') and
+                self.ds.has_key('RescaleSlope')):
+                pixel_array = self.ds.pixel_array*self.ds.RescaleSlope + \
+                              self.ds.RescaleIntercept
+            else:
+                pixel_array = self.ds.pixel_array
+            if (pixel_array.max() > wmax):
+                wmax = pixel_array.max()
+            if (pixel_array.min() < wmin):
+                wmin = pixel_array.min()
+            # Default window is the range of the data array
+            window = int(abs(wmax) + abs(wmin))
+            # Default level is the range midpoint minus the window minimum
+            level = int(window / 2 - abs(wmin))
+        return window, level
 
     def GetLUTValue(self, data, window, level):
         """Apply the RGB Look-Up Table for the given data and window/level value."""

@@ -135,36 +135,7 @@ class plugin2DView(wx.Panel):
             image = self.images[self.imagenum-1]
             self.structurepixlut = image.GetPatientToPixelLUT()
             # Determine the default window and level of the series
-            if ('WindowWidth' in image.ds) and ('WindowCenter' in image.ds):
-                if isinstance(image.ds.WindowWidth, float):
-                    self.window = image.ds.WindowWidth
-                elif isinstance(image.ds.WindowWidth, list):
-                    if (len(image.ds.WindowWidth) > 1):
-                        self.window = image.ds.WindowWidth[1]
-                if isinstance(image.ds.WindowCenter, float):
-                    self.level = image.ds.WindowCenter
-                elif isinstance(image.ds.WindowCenter, list):
-                    if (len(image.ds.WindowCenter) > 1):
-                        self.level = image.ds.WindowCenter[1]
-            # If no default window and level, determine via min/max of data
-            else:
-                wmax = 0
-                wmin = 0
-                # Rescale the slope and intercept of the image if present
-                if (image.ds.has_key('RescaleIntercept') and
-                    image.ds.has_key('RescaleSlope')):
-                    pixel_array = image.ds.pixel_array*image.ds.RescaleSlope + \
-                                  image.ds.RescaleIntercept
-                else:
-                    pixel_array = image.ds.pixel_array
-                if (pixel_array.max() > wmax):
-                    wmax = pixel_array.max()
-                if (pixel_array.min() < wmin):
-                    wmin = pixel_array.min()
-                # Default window is the range of the data array
-                self.window = int(abs(wmax) + abs(wmin))
-                # Default level is the range midpoint minus the window minimum
-                self.level = int(self.window / 2 - abs(wmin))
+            self.window, self.level = image.GetDefaultImageWindowLevel()
             # Dose display depends on whether we have images loaded or not
             self.isodoses = {}
             if msg.data.has_key('dose'):
@@ -518,8 +489,13 @@ class plugin2DView(wx.Panel):
 
             # Lookup the current image and find the value of the current pixel
             image = self.images[self.imagenum-1]
-            pixel_array = image.ds.pixel_array*image.ds.RescaleSlope + \
-                          image.ds.RescaleIntercept
+            # Rescale the slope and intercept of the image if present
+            if (image.ds.has_key('RescaleIntercept') and
+                image.ds.has_key('RescaleSlope')):
+                pixel_array = image.ds.pixel_array*image.ds.RescaleSlope + \
+                              image.ds.RescaleIntercept
+            else:
+                pixel_array = image.ds.pixel_array
             value = "Value: " + unicode(pixel_array[ypos, xpos])
 
             # Lookup the current dose plane and find the value of the current
