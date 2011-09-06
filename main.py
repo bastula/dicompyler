@@ -435,7 +435,9 @@ class MainFrame(wx.Frame):
                 {'level':50, 'color':wx.Colour(0, 0, 255)}, {'level':30, 'color':wx.Colour(0, 0, 128)}]
             for isodose in self.isodoses:
                 # Calculate the absolute dose value
-                name = ' / ' + str(isodose['level'] * plan['rxdose'] / 100) + ' cGy'
+                name = ' / ' + unicode("%.6g" %
+                (float(isodose['level']) * float(plan['rxdose']) / 100)) + \
+                ' cGy'
                 if isodose.has_key('name'):
                     name = name + ' [' + isodose['name'] + ']'
                 self.cclbIsodoses.Append(str(isodose['level'])+' %'+name, isodose, isodose['color'],
@@ -461,7 +463,7 @@ class MainFrame(wx.Frame):
                     self.lblPlanName.SetLabel(plan['name'])
                 elif len(plan['label']):
                     self.lblPlanName.SetLabel(plan['label'])
-            self.lblRxDose.SetLabel(str(plan['rxdose']))
+            self.lblRxDose.SetLabel(unicode("%.6g" % plan['rxdose']))
         else:
             self.lblPlanName.SetLabel('-')
             self.lblRxDose.SetLabel('-')
