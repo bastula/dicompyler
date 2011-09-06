@@ -508,8 +508,8 @@ class plugin2DView(wx.Panel):
                     dose = dosegrid[ydpos, xdpos] * \
                            self.dosedata['dosegridscaling']
                     value = value + " / Dose: " + \
-                            unicode('%.2f' % dose) + " Gy / " + \
-                            unicode('%.2f' % float(dose*10000/self.rxdose)) + " %"
+                            unicode('%.4g' % dose) + " Gy / " + \
+                            unicode('%.4g' % float(dose*10000/self.rxdose)) + " %"
         # Send a message with the text to the 2nd and 3rd statusbar sections
         pub.sendMessage('main.update_statusbar', {1:text, 2:value})
 
