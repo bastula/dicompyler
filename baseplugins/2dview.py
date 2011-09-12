@@ -285,12 +285,12 @@ class plugin2DView(wx.Panel):
             for c in contours:
                 # Move the origin to the last point of the contour
                 path.MoveToPoint(
-                    self.dosepixlut[0][int(c[-1][0])], self.dosepixlut[1][int(c[-1][1])])
+                    self.dosepixlut[0][int(c[-1][0])]+1, self.dosepixlut[1][int(c[-1][1])]+1)
                 # Add a line to the rest of the points
                 # Note: draw every other point since there are too many points
                 for p in c[::2]:
                     path.AddLineToPoint(
-                        self.dosepixlut[0][int(p[0])], self.dosepixlut[1][int(p[1])])
+                        self.dosepixlut[0][int(p[0])]+1, self.dosepixlut[1][int(p[1])]+1)
                 # Close the subpath in preparation for the next contour
                 path.CloseSubpath()
             # Draw the final isodose path
@@ -334,18 +334,15 @@ class plugin2DView(wx.Panel):
         dosedata = []
         x = []
         y = []
-        # For each point in the dose data
-        # look up the value in the LUT and find the corresponding pixel pair
-        for p, point in enumerate(doselut[0]):
-            for xv, xval in enumerate(pixlut[0]):
-                if (abs(xval - point) < 1):
-                    x.append(xv)
-                    break
-        for p, point in enumerate(doselut[1]):
-            for yv, yval in enumerate(pixlut[1]):
-                if (abs(yval - point) < 1):
-                    y.append(yv)
-                    break
+        # Determine if the patient is prone or supine
+        imdata = self.images[self.imagenum-1].GetImageData()
+        prone = -1 if 'p' in imdata['patientposition'].lower() else 1
+        # Get the pixel spacing
+        spacing = imdata['pixelspacing']
+
+        # Transpose the dose grid LUT onto the image grid LUT
+        x = (np.array(doselut[0]) - pixlut[0][0]) * prone / spacing[0]
+        y = (np.array(doselut[1]) - pixlut[1][0]) * prone / spacing[1]
         return (x, y)
 
     def OnPaint(self, evt):
