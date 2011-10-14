@@ -97,7 +97,7 @@ def CalculateVolume(structure):
 
         # If the plane is the first or last slice
         # only add half of the volume, otherwise add the full slice thickness
-        if ((n == 0) or (n == len(sPlanes))):
+        if ((n == 0) or (n == len(sPlanes)-1)):
             sVolume = float(sVolume) + float(area) * float(structure['thickness']) * 0.5
         else:
             sVolume = float(sVolume) + float(area) * float(structure['thickness'])
