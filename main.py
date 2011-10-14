@@ -344,6 +344,9 @@ class MainFrame(wx.Frame):
             for key, structure in patient['structures'].iteritems():
                 # Only calculate DVHs if they are not present for the structure
                 if not (key in patient['dvhs'].keys()):
+                    # Only calculate DVHs for structures, not applicators
+                    if structure['name'].startswith('Applicator'):
+                        continue
                     wx.CallAfter(progressFunc,
                                  10*i/len(patient['structures'])+90, 100,
                                  'Calculating DVH for ' + structure['name'] +
