@@ -230,7 +230,7 @@ class DicomImporterDialog(wx.Dialog):
                                 patients[h]['series'][seinfo['id']]['numimages'] + 1 
                             patients[h]['images'][image['id']] = image
                         # Create each RT Structure Set
-                        elif (dp.GetSOPClassUID() == 'rtss'):
+                        elif dp.ds.Modality in ['RTSTRUCT']:
                             if not patients[h].has_key('structures'):
                                 patients[h]['structures'] = {}
                             structure = dp.GetStructureInfo()
@@ -240,7 +240,7 @@ class DicomImporterDialog(wx.Dialog):
                             structure['referenceframe'] = dp.GetFrameofReferenceUID()
                             patients[h]['structures'][structure['id']] = structure
                         # Create each RT Plan
-                        elif (dp.GetSOPClassUID() == 'rtplan'):
+                        elif dp.ds.Modality in ['RTPLAN']:
                             if not patients[h].has_key('plans'):
                                 patients[h]['plans'] = {}
                             plan = dp.GetPlan()
@@ -251,7 +251,7 @@ class DicomImporterDialog(wx.Dialog):
                             plan['rtss'] = dp.GetReferencedStructureSet()
                             patients[h]['plans'][plan['id']] = plan
                         # Create each RT Dose
-                        elif (dp.GetSOPClassUID() == 'rtdose'):
+                        elif dp.ds.Modality in ['RTDOSE']:
                             if not patients[h].has_key('doses'):
                                 patients[h]['doses'] = {}
                             dose = {}
@@ -647,11 +647,11 @@ class DicomImporterDialog(wx.Dialog):
                 if not self.patient.has_key('images'):
                     self.patient['images'] = []
                 self.patient['images'].append(dp.ds)
-            elif (dp.GetSOPClassUID() == 'rtss'):
+            elif (dp.ds.Modality in ['RTSTRUCT']):
                 self.patient['rtss'] = dp.ds
-            elif (dp.GetSOPClassUID() == 'rtplan'):
+            elif (dp.ds.Modality in ['RTPLAN']):
                 self.patient['rtplan'] = dp.ds
-            elif (dp.GetSOPClassUID() == 'rtdose'):
+            elif (dp.ds.Modality in ['RTDOSE']):
                 self.patient['rtdose'] = dp.ds
             wx.CallAfter(progressFunc, n, len(filearray), 'Importing patient. Please wait...')
         # Sort the images based on a sort descriptor:
