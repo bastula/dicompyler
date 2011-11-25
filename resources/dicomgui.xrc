@@ -27,6 +27,19 @@
           </object>
           <label>DICOM Import Location</label>
           <orient>wxVERTICAL</orient>
+          <object class="spacer">
+            <size>0,5</size>
+          </object>
+          <object class="sizeritem">
+            <object class="wxBoxSizer">
+              <object class="sizeritem">
+                <object class="wxCheckBox" name="checkSearchSubfolders">
+                  <label>Search within Subfolders</label>
+                  <checked>1</checked>
+                </object>
+              </object>
+            </object>
+          </object>
         </object>
         <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
         <border>3</border>

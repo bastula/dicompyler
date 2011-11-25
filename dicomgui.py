@@ -55,6 +55,7 @@ class DicomImporterDialog(wx.Dialog):
         # Initialize controls
         self.txtDicomImport = XRCCTRL(self, 'txtDicomImport')
         self.btnDicomImport = XRCCTRL(self, 'btnDicomImport')
+        self.checkSearchSubfolders = XRCCTRL(self, 'checkSearchSubfolders')
         self.lblDirections = XRCCTRL(self, 'lblDirections')
         self.lblDirections2 = XRCCTRL(self, 'lblDirections2')
         self.lblProgressLabel = XRCCTRL(self, 'lblProgressLabel')
@@ -71,6 +72,8 @@ class DicomImporterDialog(wx.Dialog):
 
         # Bind interface events to the proper methods
         wx.EVT_BUTTON(self, XRCID('btnDicomImport'), self.OnBrowseDicomImport)
+        wx.EVT_CHECKBOX(self, XRCID('checkSearchSubfolders'),
+                                    self.OnCheckSearchSubfolders)
         wx.EVT_TREE_SEL_CHANGED(self, XRCID('tcPatients'), self.OnSelectTreeItem)
         wx.EVT_TREE_ITEM_ACTIVATED(self, XRCID('tcPatients'), self.OnOK)
         wx.EVT_BUTTON(self, wx.ID_OK, self.OnOK)
@@ -81,6 +84,7 @@ class DicomImporterDialog(wx.Dialog):
         if guiutil.IsMac():
             self.txtDicomImport.SetFont(font)
             self.btnDicomImport.SetFont(font)
+            self.checkSearchSubfolders.SetFont(font)
             self.lblDirections.SetFont(font)
             self.lblDirections2.SetFont(font)
             self.lblProgressLabel.SetFont(font)
@@ -104,6 +108,9 @@ class DicomImporterDialog(wx.Dialog):
         pub.subscribe(self.OnImportPrefsChange, 'general.dicom')
         pub.sendMessage('preferences.requested.values', 'general.dicom')
 
+        # Search subfolders by default
+        self.import_search_subfolders = True
+
         # Set the threading termination status to false intially
         self.terminate = False
 
@@ -123,6 +130,16 @@ class DicomImporterDialog(wx.Dialog):
             self.txtDicomImport.SetValue(self.path)
         elif (msg.topic[2] == 'import_location_setting'):
             self.import_location_setting = msg.data
+        elif (msg.topic[2] == 'import_search_subfolders'):
+            self.import_search_subfolders = msg.data
+            self.checkSearchSubfolders.SetValue(msg.data)
+
+    def OnCheckSearchSubfolders(self, evt):
+        """Determine whether to search subfolders for DICOM data."""
+
+        self.import_search_subfolders = evt.IsChecked()
+        self.terminate = True
+        self.OnDirectorySearch()
 
     def OnBrowseDicomImport(self, evt):
         """Get the directory selected by the user."""
@@ -156,7 +173,8 @@ class DicomImporterDialog(wx.Dialog):
             self.EnableRxDose(False)
 
         self.t=threading.Thread(target=self.DirectorySearchThread,
-            args=(self, self.path, self.SetThreadStatus, self.OnUpdateProgress,
+            args=(self, self.path, self.import_search_subfolders,
+            self.SetThreadStatus, self.OnUpdateProgress,
             self.AddPatientTree, self.AddPatientDataTree))
         self.t.start()
 
@@ -168,7 +186,8 @@ class DicomImporterDialog(wx.Dialog):
         else:
             return False
 
-    def DirectorySearchThread(self, parent, path, terminate, progressFunc, foundFunc, resultFunc):
+    def DirectorySearchThread(self, parent, path, subfolders, terminate,
+        progressFunc, foundFunc, resultFunc):
         """Thread to start the directory search."""
 
         # Call the progress function to update the gui
@@ -178,7 +197,13 @@ class DicomImporterDialog(wx.Dialog):
 
         # Check if the path is valid
         if os.path.isdir(path):
-            for n in range(0, len(os.listdir(path))):
+
+            files = []
+            for root, dirs, filenames in os.walk(path):
+                files += map(lambda f:os.path.join(root, f), filenames)
+                if (self.import_search_subfolders == False):
+                    break
+            for n in range(len(files)):
 
                 # terminate the thread if the value has changed
                 # during the loop duration
@@ -186,12 +211,10 @@ class DicomImporterDialog(wx.Dialog):
                     wx.CallAfter(progressFunc, 0, 0, 'Search terminated.')
                     return
 
-                files = os.listdir(path)
-                dcmfile = str(os.path.join(path, files[n]))
-                if (os.path.isfile(dcmfile)):
+                if (os.path.isfile(files[n])):
                     try:
                         print 'Reading:', files[n]
-                        dp = dicomparser.DicomParser(filename=dcmfile)
+                        dp = dicomparser.DicomParser(filename=files[n])
                     except (AttributeError, EOFError, IOError, KeyError):
                         pass
                         print files[n] + " is not a valid DICOM file."
@@ -737,6 +760,12 @@ class DicomImporterDialog(wx.Dialog):
             if (self.import_location_setting == "Remember Last Used"):
                 pub.sendMessage('preferences.updated.value',
                     {'general.dicom.import_location':self.path})
+
+            # Since we have updated the search subfolders setting,
+            # update the setting in preferences
+            pub.sendMessage('preferences.updated.value',
+                {'general.dicom.import_search_subfolders':
+                 self.import_search_subfolders})
 
             filearray = self.tcPatients.GetPyData(item)['filearray']
             self.btnSelect.Enable(False)
