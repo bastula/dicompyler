@@ -193,6 +193,13 @@ class MainFrame(wx.Frame):
               'default':unicode(os.path.join(datapath, 'plugins')),
              'callback':'general.plugins.user_plugins_location',
              'restart':True}]
+            },
+            {'Calculation Settings':
+                [{'name':'DVH Calculation',
+                 'type':'choice',
+               'values':['Use RT Dose DVH if Present', 'Always Recalculate DVH'],
+              'default':'Use RT Dose DVH if Present',
+             'callback':'general.calculation.dvh_recalc'}]
             }]
         self.preftemplate = [{'General':self.generalpreftemplate}]
         pub.sendMessage('preferences.updated.template', self.preftemplate)
@@ -204,6 +211,7 @@ class MainFrame(wx.Frame):
         pub.subscribe(self.OnIsodoseCheck, 'colorcheckbox.checked.isodose')
         pub.subscribe(self.OnIsodoseUncheck, 'colorcheckbox.unchecked.isodose')
         pub.subscribe(self.OnUpdatePlugins, 'general.plugins.user_plugins_location')
+        pub.subscribe(self.OnUpdatePreferences, 'general')
         pub.subscribe(self.OnUpdateStatusBar, 'main.update_statusbar')
 
         # Create the default user plugin path
@@ -215,6 +223,8 @@ class MainFrame(wx.Frame):
         self.plugins = []
         pub.sendMessage('preferences.requested.value',
                         'general.plugins.user_plugins_location')
+        pub.sendMessage('preferences.requested.value',
+                        'general.calculation.dvh_calculation')
 
 ########################### Patient Loading Functions ##########################
 
@@ -343,7 +353,9 @@ class MainFrame(wx.Frame):
             i = 0
             for key, structure in patient['structures'].iteritems():
                 # Only calculate DVHs if they are not present for the structure
-                if not (key in patient['dvhs'].keys()):
+                # or recalc all DVHs if the preference is set
+                if ((not (key in patient['dvhs'].keys())) or
+                    (self.dvhRecalc == 'Always Recalculate DVH')):
                     # Only calculate DVHs for structures, not applicators
                     if structure['name'].startswith('Applicator'):
                         continue
@@ -594,6 +606,12 @@ class MainFrame(wx.Frame):
         pub.sendMessage('isodoses.checked', self.isodoseList)
 
 ################################ Other Functions ###############################
+
+    def OnUpdatePreferences(self, msg):
+        """When the preferences change, update the values."""
+
+        if (msg.topic[1] == 'calculation') or (msg.topic[2] == 'dvh_recalc'):
+            self.dvhRecalc = msg.data
 
     def OnUpdatePlugins(self, msg):
         """Update the location of the user plugins and load all plugins."""
