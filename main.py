@@ -224,7 +224,7 @@ class MainFrame(wx.Frame):
         pub.sendMessage('preferences.requested.value',
                         'general.plugins.user_plugins_location')
         pub.sendMessage('preferences.requested.value',
-                        'general.calculation.dvh_calculation')
+                        'general.calculation.dvh_recalc')
 
 ########################### Patient Loading Functions ##########################
 
