@@ -420,6 +420,9 @@
       <object class="wxMenuItem" name="menuPreferences">
         <label>&amp;Options...</label>
       </object>
+      <object class="wxMenuItem" name="menuShowLogs">
+        <label>&amp;Show Logs...</label>
+      </object>
       <object class="wxMenuItem" name="menuPluginManager">
         <label>&amp;Plugin Manager...</label>
       </object>

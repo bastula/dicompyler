@@ -7,6 +7,8 @@
 #    See the file license.txt included with this distribution, also
 #    available at http://code.google.com/p/dicompyler/
 
+import logging
+logger = logging.getLogger('dicompyler.plugin')
 import imp, os
 import wx
 from wx.xrc import *
@@ -44,7 +46,7 @@ def import_plugins(userpath=None):
                 else:
                     # Import the module if no exception occurred
                     plugins.append(imp.load_module(module, f, filename, description))
-                    print 'Plugin:', module, 'loaded'
+                    logger.debug("%s loaded", module)
                     # If the module is a single file, close it
                     if not (description[2] == imp.PKG_DIRECTORY):
                         f.close()

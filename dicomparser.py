@@ -8,6 +8,8 @@
 #    See the file license.txt included with this distribution, also
 #    available at http://code.google.com/p/dicompyler/
 
+import logging
+logger = logging.getLogger('dicompyler.dicomparser')
 import numpy as np
 import dicom
 import random
@@ -279,7 +281,7 @@ class DicomParser:
                 number = item.ROINumber
                 data['id'] = number
                 data['name'] = item.ROIName
-                print 'Found ROI #' + str(number) + ': '  + data['name']
+                logger.debug("Found ROI #%s: %s", str(number), data['name'])
                 structures[number] = data
 
         # Determine the type of each structure (PTV, organ, external, etc)

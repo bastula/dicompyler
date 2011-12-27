@@ -49,7 +49,8 @@ class PreferencesManager():
     def __del__(self):
 
         # Destroy the dialog when the preferences manager object is deleted
-        self.dlgPreferences.Destroy()
+        if self.dlgPreferences:
+            self.dlgPreferences.Destroy()
 
     def Show(self):
         """Show the preferences dialog with the given preferences."""
@@ -220,6 +221,19 @@ class PreferencesDialog(wx.Dialog):
                     # Add control to the callback dict
                     self.callbackdict[c] = setting['callback']
                     self.Bind(wx.EVT_CHOICE, self.OnUpdateChoice, c)
+                # If this is a checkbox setting
+                elif (setting['type'] == 'checkbox'):
+                    c = wx.CheckBox(panel, -1, setting['name']+restart)
+                    c.SetValue(value)
+                    sizer.Add(c, 0, wx.ALIGN_CENTER)
+                    # Remove the label preceding the checkbox
+                    t = self.FindWindowById(c.PrevControlId(c.GetId()))
+                    t.SetLabel('')
+                    # Adjust the sizer preceding the label
+                    fgsizer.GetItem(0).SetSpacer((20,0))
+                    # Add control to the callback dict
+                    self.callbackdict[c] = setting['callback']
+                    self.Bind(wx.EVT_CHECKBOX, self.OnUpdateCheckbox, c)
                 # If this is a range setting
                 elif (setting['type'] == 'range'):
                     s = wx.Slider(panel, -1, value,
@@ -285,6 +299,13 @@ class PreferencesDialog(wx.Dialog):
         c = evt.GetEventObject()
         pub.sendMessage(self.callbackdict[c], evt.GetString())
         SetValue(self.values, self.callbackdict[c], evt.GetString())
+
+    def OnUpdateCheckbox(self, evt):
+        """Publish the updated checkbox when the value changes."""
+
+        c = evt.GetEventObject()
+        pub.sendMessage(self.callbackdict[c], evt.IsChecked())
+        SetValue(self.values, self.callbackdict[c], evt.IsChecked())
 
     def OnUpdateSlider(self, evt):
         """Publish the updated number when the slider value changes."""

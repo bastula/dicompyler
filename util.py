@@ -9,6 +9,7 @@
 
 from __future__ import with_statement
 import imp, os, sys
+import subprocess
 
 def platform():
     if sys.platform.startswith('win'):
@@ -55,6 +56,16 @@ def get_text_resources(resource):
         resource = (os.path.join(get_main_dir(), resource))
 
     return resource
+
+def open_path(path):
+    """Open the specified path in the system default folder viewer."""
+
+    if sys.platform == 'darwin':
+        subprocess.check_call(["open", path])
+    elif sys.platform == 'linux2':
+        subprocess.check_call(["gnome-open", path])
+    elif sys.platform == 'win32':
+        subprocess.Popen("explorer " + path)
 
 def get_credits():
     """Read the credits file and return the data from it."""

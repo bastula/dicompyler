@@ -10,6 +10,8 @@
 #
 # It's assumed that the reference (prescription) dose is in cGy.
 
+import logging
+logger = logging.getLogger('dicompyler.dicomgui')
 import hashlib, os, threading
 import wx
 from wx.xrc import *
@@ -32,8 +34,9 @@ def ImportDicom(parent):
     else:
         value = None
     # Block until the thread is done before destroying the dialog
-    dlgDicomImporter.t.join()
-    dlgDicomImporter.Destroy()
+    if dlgDicomImporter:
+        dlgDicomImporter.t.join()
+        dlgDicomImporter.Destroy()
 
     return value
 
@@ -213,11 +216,11 @@ class DicomImporterDialog(wx.Dialog):
 
                 if (os.path.isfile(files[n])):
                     try:
-                        print 'Reading:', files[n]
+                        logger.debug("Reading: %s", files[n])
                         dp = dicomparser.DicomParser(filename=files[n])
                     except (AttributeError, EOFError, IOError, KeyError):
                         pass
-                        print files[n] + " is not a valid DICOM file."
+                        logger.info("%s is not a valid DICOM file.", files[n])
                     else:
                         patient = dp.GetDemographics()
                         h = hashlib.sha1(patient['id']).hexdigest()
@@ -287,9 +290,9 @@ class DicomImporterDialog(wx.Dialog):
                             patients[h]['doses'][dose['id']] = dose
                         # Otherwise it is a currently unsupported file
                         else:
-                            print files[n] + " is a " \
-                            + dp.ds.SOPClassUID.name \
-                            + " file and is not currently supported."
+                            logger.info("%s is a %s file and is not " + \
+                                "currently supported.",
+                                files[n], dp.ds.SOPClassUID.name)
 
                 # Call the progress function to update the gui
                 wx.CallAfter(progressFunc, n, len(files), 'Searching for patients...')
