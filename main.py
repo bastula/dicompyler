@@ -8,7 +8,13 @@
 #    See the file license.txt included with this distribution, also
 #    available at http://code.google.com/p/dicompyler/
 
+# Configure logging for dicompyler
+import logging, logging.handlers
+logger = logging.getLogger('dicompyler')
+logger.setLevel(logging.DEBUG)
+
 import os, threading
+import sys, traceback
 import wx
 from wx.xrc import *
 import wx.lib.dialogs, webbrowser
@@ -24,6 +30,41 @@ __version__ = "0.4a2"
 
 class MainFrame(wx.Frame):
     def __init__(self, parent, id, title, res):
+
+        # Initialize logging
+        logger = logging.getLogger('dicompyler')
+
+        # Configure the exception hook to process threads as well
+        self.InstallThreadExcepthook()
+
+        # Remap the exception hook so that we can log and display exceptions
+        def LogExcepthook(*exc_info):
+            # Log the exception
+            text = "".join(traceback.format_exception(*exc_info))
+            logger.error("Unhandled exception: %s", text)
+            pub.sendMessage('logging.exception', text)
+
+        sys.excepthook = LogExcepthook
+
+        # Add file logger
+        logpath = os.path.join(guiutil.get_data_dir(), 'logs')
+        if not os.path.exists(logpath):
+            os.mkdir(logpath)
+        self.fh = logging.handlers.RotatingFileHandler(
+                os.path.join(logpath, 'dicompyler.log'),
+                maxBytes=524288, backupCount=7)
+        self.fh.setFormatter(logging.Formatter(
+                '%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+        self.fh.setLevel(logging.WARNING)
+        logger.addHandler(self.fh)
+
+        # Add console logger if not frozen
+        if not util.main_is_frozen():
+            self.ch = logging.StreamHandler()
+            self.ch.setFormatter(logging.Formatter(
+                '%(levelname)s: %(message)s'))
+            self.ch.setLevel(logging.WARNING)
+            logger.addHandler(self.ch)
 
         # Set the window size
         if guiutil.IsMac():
@@ -96,7 +137,8 @@ class MainFrame(wx.Frame):
         # Set the menu as the default menu for this frame
         self.SetMenuBar(menuMain)
 
-        # Setup Plugins menu
+        # Setup Tools menu
+        self.menuShowLogs = menuMain.FindItemById(XRCID('menuShowLogs')).GetMenu()
         self.menuPlugins = menuMain.FindItemById(XRCID('menuPluginManager')).GetMenu()
 
         # Setup Export menu
@@ -109,6 +151,7 @@ class MainFrame(wx.Frame):
         wx.EVT_MENU(self, XRCID('menuOpen'), self.OnOpenPatient)
         wx.EVT_MENU(self, XRCID('menuExit'), self.OnClose)
         wx.EVT_MENU(self, XRCID('menuPreferences'), self.OnPreferences)
+        wx.EVT_MENU(self, XRCID('menuShowLogs'), self.OnShowLogs)
         wx.EVT_MENU(self, XRCID('menuPluginManager'), self.OnPluginManager)
         wx.EVT_MENU(self, XRCID('menuAbout'), self.OnAbout)
         wx.EVT_MENU(self, XRCID('menuHomepage'), self.OnHomepage)
@@ -200,6 +243,12 @@ class MainFrame(wx.Frame):
                'values':['Use RT Dose DVH if Present', 'Always Recalculate DVH'],
               'default':'Use RT Dose DVH if Present',
              'callback':'general.calculation.dvh_recalc'}]
+            },
+            {'Advanced Settings':
+                [{'name':'Enable Detailed Logging',
+                 'type':'checkbox',
+              'default':False,
+             'callback':'general.advanced.detailed_logging'}]
             }]
         self.preftemplate = [{'General':self.generalpreftemplate}]
         pub.sendMessage('preferences.updated.template', self.preftemplate)
@@ -213,6 +262,10 @@ class MainFrame(wx.Frame):
         pub.subscribe(self.OnUpdatePlugins, 'general.plugins.user_plugins_location')
         pub.subscribe(self.OnUpdatePreferences, 'general')
         pub.subscribe(self.OnUpdateStatusBar, 'main.update_statusbar')
+
+        # Send a message to the logging system to turn on/off detailed logging
+        pub.sendMessage('preferences.requested.value',
+                        'general.advanced.detailed_logging')
 
         # Create the default user plugin path
         self.userpluginpath = os.path.join(datapath, 'plugins')
@@ -311,7 +364,8 @@ class MainFrame(wx.Frame):
             self.OnUpdatePatientData))
         self.t.start()
         dlgProgress.ShowModal()
-        dlgProgress.Destroy()
+        if dlgProgress:
+            dlgProgress.Destroy()
 
     def LoadPatientDataThread(self, parent, ptdata, progressFunc, updateFunc):
         """Thread to load the patient data."""
@@ -607,11 +661,39 @@ class MainFrame(wx.Frame):
 
 ################################ Other Functions ###############################
 
+    def InstallThreadExcepthook(self):
+        """Workaround for sys.excepthook thread bug from Jonathan Ellis
+            (http://bugs.python.org/issue1230540).
+            Call once from __main__ before creating any threads.
+            If using psyco, call psyco.cannotcompile(threading.Thread.run)
+            since this replaces a new-style class method."""
+
+        run_old = threading.Thread.run
+        def Run(*args, **kwargs):
+            try:
+                run_old(*args, **kwargs)
+            except (KeyboardInterrupt, SystemExit):
+                raise
+            except:
+                sys.excepthook(*sys.exc_info())
+        threading.Thread.run = Run
+
     def OnUpdatePreferences(self, msg):
         """When the preferences change, update the values."""
 
-        if (msg.topic[1] == 'calculation') or (msg.topic[2] == 'dvh_recalc'):
+        if (msg.topic[1] == 'calculation') and (msg.topic[2] == 'dvh_recalc'):
             self.dvhRecalc = msg.data
+        elif (msg.topic[1] == 'advanced') and \
+                (msg.topic[2] == 'detailed_logging'):
+                    # Enable logging at the debug level if the value is set
+                    if msg.data:
+                        self.fh.setLevel(logging.DEBUG)
+                        if not util.main_is_frozen():
+                            self.ch.setLevel(logging.DEBUG)
+                    else:
+                        self.fh.setLevel(logging.WARNING)
+                        if not util.main_is_frozen():
+                            self.ch.setLevel(logging.WARNING)
 
     def OnUpdatePlugins(self, msg):
         """Update the location of the user plugins and load all plugins."""
@@ -678,6 +760,11 @@ class MainFrame(wx.Frame):
         """Load and show the Preferences dialog box."""
 
         self.prefmgr.Show()
+
+    def OnShowLogs(self, evt):
+        """Open and display the logs folder."""
+
+        util.open_path(os.path.join(guiutil.get_data_dir(), 'logs'))
 
     def OnPluginManager(self, evt):
         """Load and show the Plugin Manager dialog box."""

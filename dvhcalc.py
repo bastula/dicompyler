@@ -8,6 +8,8 @@
 #    See the file license.txt included with this distribution, also
 #    available at http://code.google.com/p/dicompyler/
 
+import logging
+logger = logging.getLogger('dicompyler.dvhcalc')
 import numpy as np
 import numpy.ma as ma
 import matplotlib.nxutils as nx
@@ -39,7 +41,7 @@ def calculate_dvh(structure, dose, limit=None, callback=None):
     """Calculate the differential DVH for the given structure and dose grid."""
 
     sPlanes = structure['planes']
-    print 'Calculating DVH of', structure['id'], structure['name']
+    logger.debug("Calculating DVH of %s %s", structure['id'], structure['name'])
 
     # Get the dose to pixel LUT
     doselut = dose.GetPatientToPixelLUT()
