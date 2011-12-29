@@ -835,6 +835,9 @@ class dicompyler(wx.App):
 
 # end of class dicompyler
 
-if __name__ == '__main__':
+def start():
     app = dicompyler(0)
     app.MainLoop()
+
+if __name__ == '__main__':
+    start()
