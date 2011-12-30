@@ -2,7 +2,7 @@
 # -*- coding: ISO-8859-1 -*-
 # plugin.py
 """Plugin manager for dicompyler."""
-# Copyright (c) 2010 Aditya Panchal
+# Copyright (c) 2010-2011 Aditya Panchal
 # This file is part of dicompyler, relased under a BSD license.
 #    See the file license.txt included with this distribution, also
 #    available at http://code.google.com/p/dicompyler/
@@ -12,7 +12,7 @@ logger = logging.getLogger('dicompyler.plugin')
 import imp, os
 import wx
 from wx.xrc import *
-import guiutil, util
+from dicompyler import guiutil, util
 
 def import_plugins(userpath=None):
     """Find and import available plugins."""

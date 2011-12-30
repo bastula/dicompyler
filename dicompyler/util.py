@@ -2,7 +2,7 @@
 # -*- coding: ISO-8859-1 -*-
 # util.py
 """Several utility functions that don't really belong anywhere."""
-# Copyright (c) 2009 Aditya Panchal
+# Copyright (c) 2009-2011 Aditya Panchal
 # This file is part of dicompyler, relased under a BSD license.
 #    See the file license.txt included with this distribution, also
 #    available at http://code.google.com/p/dicompyler/
@@ -43,7 +43,7 @@ def main_is_frozen():
 def get_main_dir():
     if main_is_frozen():
         return os.path.dirname(sys.executable)
-    return os.path.dirname(sys.argv[0])
+    return os.path.dirname(__file__)
 
 def get_text_resources(resource):
     """Return the resources that are located in the root folder of the

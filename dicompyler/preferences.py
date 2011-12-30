@@ -11,7 +11,7 @@ import os
 import wx
 from wx.xrc import *
 from wx.lib.pubsub import Publisher as pub
-import guiutil, util
+from dicompyler import guiutil, util
 
 try:
     # Only works on Python 2.6 and above
