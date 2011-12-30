@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <resource>
-  <object class="wxDialog" name="PreferencesDialog" subclass="preferences.PreferencesDialog">
+  <object class="wxDialog" name="PreferencesDialog" subclass="dicompyler.preferences.PreferencesDialog">
     <object class="wxBoxSizer">
       <object class="sizeritem">
         <object class="wxNotebook" name="notebook">

@@ -13,10 +13,10 @@
 import wx
 from wx.xrc import XmlResource, XRCCTRL, XRCID
 from wx.lib.pubsub import Publisher as pub
-import guiutil, util
-import wxmpl
+from dicompyler import guiutil, util
+from dicompyler import dvhdata, guidvh
+from dicompyler import wxmpl
 import numpy as np
-import dvhdata, guidvh
 
 def pluginProperties():
     """Properties of the plugin."""
@@ -25,7 +25,7 @@ def pluginProperties():
     props['name'] = 'DVH'
     props['description'] = "Display and evaluate dose volume histogram (DVH) data"
     props['author'] = 'Aditya Panchal'
-    props['version'] = 0.3
+    props['version'] = 0.4
     props['plugin_type'] = 'main'
     props['plugin_version'] = 1
     props['min_dicom'] = ['rtss', 'rtdose']

@@ -2,7 +2,7 @@
 # -*- coding: ISO-8859-1 -*-
 # treeview.py
 """dicompyler plugin that displays a tree view of the DICOM data structure."""
-# Copyright (c) 2010 Aditya Panchal
+# Copyright (c) 2010-2011 Aditya Panchal
 # This file is part of dicompyler, relased under a BSD license.
 #    See the file license.txt included with this distribution, also
 #    available at http://code.google.com/p/dicompyler/
@@ -13,7 +13,7 @@ import wx
 from wx.xrc import XmlResource, XRCCTRL, XRCID
 from wx.lib.pubsub import Publisher as pub
 from wx.gizmos import TreeListCtrl as tlc
-import guiutil, util
+from dicompyler import guiutil, util
 import dicom
 
 def pluginProperties():

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <resource>
-  <object class="wxDialog" name="PluginManagerDialog" subclass="plugin.PluginManagerDialog">
+  <object class="wxDialog" name="PluginManagerDialog" subclass="dicompyler.plugin.PluginManagerDialog">
     <object class="wxBoxSizer">
       <orient>wxHORIZONTAL</orient>
       <object class="sizeritem">

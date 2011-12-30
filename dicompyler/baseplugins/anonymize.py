@@ -2,7 +2,7 @@
 # -*- coding: ISO-8859-1 -*-
 # anonymize.py
 """dicompyler plugin that anonymizes DICOM / DICOM RT data."""
-# Copyright (c) 2010 Aditya Panchal
+# Copyright (c) 2010-2011 Aditya Panchal
 # This file is part of dicompyler, relased under a BSD license.
 #    See the file license.txt included with this distribution, also
 #    available at http://code.google.com/p/dicompyler/
@@ -12,7 +12,7 @@ import wx
 from wx.xrc import XmlResource, XRCCTRL, XRCID
 from wx.lib.pubsub import Publisher as pub
 import os, threading
-import guiutil, util
+from dicompyler import guiutil, util
 
 def pluginProperties():
     """Properties of the plugin."""

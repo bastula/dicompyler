@@ -17,7 +17,7 @@ import wx
 from wx.xrc import *
 from wx.lib.pubsub import Publisher as pub
 import numpy as np
-import dicomparser, dvhdoses, guiutil, util
+from dicompyler import dicomparser, dvhdoses, guiutil, util
 
 def ImportDicom(parent):
     """Prepare to show the dialog that will Import DICOM and DICOM RT files."""

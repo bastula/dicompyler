@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <resource>
-  <object class="wxDialog" name="ProgressDialog" subclass="guiutil.ProgressDialog">
+  <object class="wxDialog" name="ProgressDialog" subclass="dicompyler.guiutil.ProgressDialog">
     <object class="wxBoxSizer">
       <orient>wxVERTICAL</orient>
       <object class="sizeritem">

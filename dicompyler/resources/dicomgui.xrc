@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <resource>
-  <object class="wxDialog" name="DicomImporterDialog" subclass="dicomgui.DicomImporterDialog">
+  <object class="wxDialog" name="DicomImporterDialog" subclass="dicompyler.dicomgui.DicomImporterDialog">
     <object class="wxBoxSizer">
       <orient>wxVERTICAL</orient>
       <object class="sizeritem">

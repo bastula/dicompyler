@@ -14,7 +14,7 @@ from wx.lib.pubsub import Publisher as pub
 from matplotlib import _cntr as cntr
 from matplotlib import __version__ as mplversion
 import numpy as np
-import guiutil, util
+from dicompyler import guiutil, util
 
 def pluginProperties():
     """Properties of the plugin."""
@@ -23,7 +23,7 @@ def pluginProperties():
     props['name'] = '2D View'
     props['description'] = "Display image, structure and dose data in 2D"
     props['author'] = 'Aditya Panchal'
-    props['version'] = 0.3
+    props['version'] = 0.4
     props['plugin_type'] = 'main'
     props['plugin_version'] = 1
     props['min_dicom'] = ['images']
