@@ -46,6 +46,11 @@ class MainFrame(wx.Frame):
 
         sys.excepthook = LogExcepthook
 
+        # Modify the logging system from pydicom to capture important messages
+        pydicom_logger = logging.getLogger('pydicom')
+        for l in pydicom_logger.handlers:
+            pydicom_logger.removeHandler(l)
+
         # Add file logger
         logpath = os.path.join(guiutil.get_data_dir(), 'logs')
         if not os.path.exists(logpath):
@@ -57,6 +62,7 @@ class MainFrame(wx.Frame):
                 '%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
         self.fh.setLevel(logging.WARNING)
         logger.addHandler(self.fh)
+        pydicom_logger.addHandler(self.fh)
 
         # Add console logger if not frozen
         if not util.main_is_frozen():
@@ -65,6 +71,11 @@ class MainFrame(wx.Frame):
                 '%(levelname)s: %(message)s'))
             self.ch.setLevel(logging.WARNING)
             logger.addHandler(self.ch)
+            pydicom_logger.addHandler(self.ch)
+        # Otherwise if frozen, send stdout/stderror to the logging system
+        else:
+            sys.stdout = StreamWrapper(logger, logging.INFO)
+            sys.stderr = StreamWrapper(logger, logging.ERROR)
 
         # Set the window size
         if guiutil.IsMac():
@@ -814,6 +825,18 @@ class MainFrame(wx.Frame):
 
     def OnClose(self, _):
         self.Destroy()
+
+class StreamWrapper(object):
+    """Class that accepts messages redirected from stdout/stderr."""
+    def __init__(self, logger, level):
+        self.logger = logger
+        self.level = level
+
+    def write(self, string):
+        import inspect
+        f = inspect.currentframe(1)
+        caller = f.f_code.co_name
+        self.logger.log(self.level, "%s: %s", caller, string)
 
 class dicompyler(wx.App):
     def OnInit(self):
