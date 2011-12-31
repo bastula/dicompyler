@@ -40,13 +40,17 @@ def import_plugins(userpath=None):
                 modules.append(module)
                 try:
                     f, filename, description = imp.find_module(module, [userpath, basepath])
-                except (ImportError):
+                except ImportError:
                     # Not able to find module so pass
                     pass
                 else:
-                    # Import the module if no exception occurred
-                    plugins.append(imp.load_module(module, f, filename, description))
-                    logger.debug("%s loaded", module)
+                    # Try to import the module if no exception occurred
+                    try:
+                        plugins.append(imp.load_module(module, f, filename, description))
+                    except ImportError:
+                        logger.exception("%s could not be loaded", module)
+                    else:
+                        logger.debug("%s loaded", module)
                     # If the module is a single file, close it
                     if not (description[2] == imp.PKG_DIRECTORY):
                         f.close()
