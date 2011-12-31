@@ -20,10 +20,11 @@ Features
     - DICOM data tree viewer
     - Patient anonymizer
 
-Release Notes for dicompyler 0.4.1 - December 29th, 2011
+Release Notes for dicompyler 0.4.1 - December 31st, 2011
 ========================================================
 
 - General
+    - Added an error reporter for Windows and Mac versions allowing easy error submission
     - Added support for volumetric image series (i.e. CT, MR, PET)
     - Added support for RT Ion Plan
     - Improved image sorting significantly which now allows for non-axial orientations and non-parallel image series
