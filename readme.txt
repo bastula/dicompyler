@@ -20,6 +20,11 @@ Features
     - DICOM data tree viewer
     - Patient anonymizer
 
+Release Notes for dicompyler 0.4.1-1 - January 1st, 2012
+========================================================
+
+- Fixed a critical bug where the logging folder could not be created and dicompyler would not run.
+
 Release Notes for dicompyler 0.4.1 - December 31st, 2011
 ========================================================
 
