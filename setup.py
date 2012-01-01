@@ -25,6 +25,7 @@ if sys.version_info[0] == 2 and sys.version_info[1] < 6:
 setup(
     name="dicompyler",
     version="0.4.1",
+    include_package_data = True,
     packages = find_packages(),
     package_data = {'dicompyler':
         ['*.txt', 'resources/*.png', 'resources/*.xrc', 'resources/*.ico',
