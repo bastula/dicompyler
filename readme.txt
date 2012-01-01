@@ -20,6 +20,18 @@ Features
     - DICOM data tree viewer
     - Patient anonymizer
 
+Quick Start
+===========
+
+If you have downloaded dicompyler as an application for Windows or Mac, please
+follow the normal process for running any other application on your system.
+
+If you are running from a Python package, a script called "dicompyler" is now
+present on your path, which you can run from your command line or terminal.
+
+If you are running from a source checkout, there is a script in the main folder
+called "dicompyler_app.py" which can be executed via your Python interpreter.
+
 Release Notes for dicompyler 0.4.1-1 - January 1st, 2012
 ========================================================
 
