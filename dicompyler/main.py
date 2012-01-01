@@ -54,7 +54,7 @@ class MainFrame(wx.Frame):
         # Add file logger
         logpath = os.path.join(guiutil.get_data_dir(), 'logs')
         if not os.path.exists(logpath):
-            os.mkdir(logpath)
+            os.makedirs(logpath)
         self.fh = logging.handlers.RotatingFileHandler(
                 os.path.join(logpath, 'dicompyler.log'),
                 maxBytes=524288, backupCount=7)
