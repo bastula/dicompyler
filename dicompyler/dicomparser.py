@@ -382,6 +382,11 @@ class DicomParser:
 
         if self.HasDVHs():
             for item in self.ds.DVHs:
+                # Make sure that the DVH has a referenced structure / ROI
+                if not 'DVHReferencedROIs' in item:
+                    continue
+                number = item.DVHReferencedROIs[0].ReferencedROINumber
+                logger.debug("Found DVH for ROI #%s", str(number))
                 dvhitem = {}
                 # If the DVH is differential, convert it to a cumulative DVH
                 if (self.ds.DVHs[0].DVHType == 'DIFFERENTIAL'):
@@ -411,7 +416,7 @@ class DicomParser:
                 else:
                     # save the mean dose as -1 so we can calculate it later
                     dvhitem['mean'] = -1
-                self.dvhs[item.DVHReferencedROIs[0].ReferencedROINumber] = dvhitem
+                self.dvhs[number] = dvhitem
 
         return self.dvhs
 
