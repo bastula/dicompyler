@@ -72,10 +72,12 @@ class MainFrame(wx.Frame):
             self.ch.setLevel(logging.WARNING)
             logger.addHandler(self.ch)
             pydicom_logger.addHandler(self.ch)
-        # Otherwise if frozen, send stdout/stderror to the logging system
+        # Otherwise if frozen, send stdout/stderror to /dev/null since
+        # logging the messages seems to cause instability due to recursion
         else:
-            sys.stdout = StreamWrapper(logger, logging.INFO)
-            sys.stderr = StreamWrapper(logger, logging.ERROR)
+            devnull = open(os.devnull, 'w')
+            sys.stdout = devnull
+            sys.stderr = devnull
 
         # Set the window size
         if guiutil.IsMac():
@@ -825,18 +827,6 @@ class MainFrame(wx.Frame):
 
     def OnClose(self, _):
         self.Destroy()
-
-class StreamWrapper(object):
-    """Class that accepts messages redirected from stdout/stderr."""
-    def __init__(self, logger, level):
-        self.logger = logger
-        self.level = level
-
-    def write(self, string):
-        import inspect
-        f = inspect.currentframe(1)
-        caller = f.f_code.co_name
-        self.logger.log(self.level, "%s: %s", caller, string)
 
 class dicompyler(wx.App):
     def OnInit(self):
