@@ -67,7 +67,7 @@ class plugin2DView(wx.Panel):
         self.pan = [0, 0]
         self.bwidth = 0
         self.bheight = 0
-        self.mousepos = (-10000, -10000)
+        self.mousepos = wx.Point(-10000, -10000)
         self.mouse_in_window = False
         self.isodose_line_style = 'Solid'
         self.isodose_fill_opacity = 25
