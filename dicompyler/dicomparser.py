@@ -295,15 +295,29 @@ class DicomParser:
             for roi in self.ds.ROIContours:
                 number = roi.ReferencedROINumber
 
-                # Get the RGB color triplet for the current ROI
-                if roi.has_key('ROIDisplayColor'):
-                    structures[number]['color'] = np.array(roi.ROIDisplayColor, dtype=float)
-                # Otherwise generate a random color for the current ROI
-                else:
-                    structures[number]['color'] = np.array((
+                # Generate a random color for the current ROI
+                structures[number]['color'] = np.array((
                         random.randint(0,255),
                         random.randint(0,255),
                         random.randint(0,255)), dtype=float)
+                # Get the RGB color triplet for the current ROI if it exists
+                if roi.has_key('ROIDisplayColor'):
+                    # Make sure the color is not none
+                    if not (roi.ROIDisplayColor == None):
+                        color = roi.ROIDisplayColor
+                    # Otherwise decode values separated by forward slashes
+                    else:
+                        value = roi[0x3006,0x002a].repval
+                        color = value.strip("'").split("/")
+                    # Try to convert the detected value to a color triplet
+                    try:
+                        structures[number]['color'] = \
+                                np.array(color, dtype=float)
+                    # Otherwise fail and fallback on the random color
+                    except:
+                        logger.debug(
+                                "Unable to decode display color for ROI #%s",
+                                str(number))
 
                 planes = {}
                 if roi.has_key('Contours'):
