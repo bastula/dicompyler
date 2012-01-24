@@ -87,7 +87,8 @@ class DicomParser:
         series['description'] = desc
         series['id'] = self.ds.SeriesInstanceUID
         series['study'] = self.ds.StudyInstanceUID
-        series['referenceframe'] = self.ds.FrameofReferenceUID
+        if 'FrameofReferenceUID' in self.ds:
+            series['referenceframe'] = self.ds.FrameofReferenceUID
         
         return series
     
@@ -132,7 +133,7 @@ class DicomParser:
         """Return the patient demographics from a DICOM file."""
 
         patient = {}
-        patient['name'] = str(self.ds.PatientsName).replace('^', ', ')
+        patient['name'] = self.decode("PatientsName").replace('^', ', ')
         patient['id'] = self.ds.PatientID
         if (self.ds.PatientsSex == 'M'):
             patient['gender'] = 'Male'
@@ -146,6 +147,24 @@ class DicomParser:
             patient['dob'] = 'None found'
 
         return patient
+
+    def decode(self, tag):
+        """Apply the DICOM character encoding to the given tag."""
+
+        if not tag in self.ds:
+            return None
+        else:
+            oldval = self.ds.data_element(tag).value
+            try:
+                cs = self.ds.get('SpecificCharacterSet', "ISO_IR 6")
+                dicom.charset.decode(self.ds.data_element(tag), cs)
+            except:
+                logger.info("Could not decode character set for %s.", oldval)
+                return unicode(self.ds.data_element(tag).value, errors='replace')
+
+            newval = self.ds.data_element(tag).value
+            self.ds.data_element(tag).value = oldval
+            return newval
 
 ################################ Image Methods #################################
 

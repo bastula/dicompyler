@@ -8,6 +8,8 @@
 #    available at http://code.google.com/p/dicompyler/
 #
 
+import logging
+logger = logging.getLogger('dicompyler.treeview')
 import threading, Queue
 import wx
 from wx.xrc import XmlResource, XRCCTRL, XRCID
@@ -138,7 +140,8 @@ class pluginTreeView(wx.Panel):
                     wx.CallAfter(progressFunc, i, len(ds), 'Done')
             # Add the data_element to the tree if not a sequence element
             if not (data_element.VR == 'SQ'):
-                wx.CallAfter(addItemFunc, data_element, parent)
+                cs = ds.get('SpecificCharacterSet', "ISO_IR 6")
+                wx.CallAfter(addItemFunc, data_element, parent, cs=cs)
             # Otherwise add the sequence element to the tree
             else:
                 wx.CallAfter(addItemFunc, data_element, parent, needQueue=True)
@@ -152,27 +155,43 @@ class pluginTreeView(wx.Panel):
                     sq = self.queue.get()
                     self.RecurseTreeThread(ds, sq, addItemFunc, progressFunc, 0)
 
-    def AddItemTree(self, data_element, parent, sq_element_text="", needQueue=False):
+    def AddItemTree(self, data_element, parent, sq_element_text="", needQueue=False, cs=None):
         """Add a new item to the DICOM tree."""
 
         # Set the item if it is a child of a sequence element
         if not (sq_element_text == ""):
             item = self.tlcTreeView.AppendItem(parent, text=sq_element_text)
         else:
-            # Account for unicode or string values
-            if isinstance(data_element.value, unicode):
-                item = self.tlcTreeView.AppendItem(parent, text=unicode(data_element.name))
-            else:
-                item = self.tlcTreeView.AppendItem(parent, text=str(data_element.name))
+            item = self.tlcTreeView.AppendItem(parent, text=data_element.name)
             # Set the value if not a sequence element
             if not (data_element.VR == 'SQ'):
+                value = data_element.value
+                # Account for Pixel data
                 if (data_element.name == 'Pixel Data'):
-                    arrayLen = 'Array of ' + str(len(data_element.value)) + ' bytes'
-                    self.tlcTreeView.SetItemText(item, arrayLen, 1)
-                elif (data_element.name == 'Private tag data'):
-                    self.tlcTreeView.SetItemText(item, 'Private tag data', 1)
+                    value = 'Array of ' + str(len(data_element.value)) + ' bytes'
+                # Account for Unknown VRs
+                elif ((data_element.VR == 'UN') and \
+                    not (type(data_element.value) == str)):
+                    value = data_element.repval
                 else:
-                    self.tlcTreeView.SetItemText(item, unicode(data_element.value), 1)
+                    # Apply the DICOM character encoding to the data element
+                    if not isinstance(data_element.value, unicode):
+                        try:
+                            dicom.charset.decode(
+                                    dicom.charset.decode(data_element, cs))
+                        # Otherwise try decoding via ASCII encoding
+                        except:
+                            try:
+                                value = unicode(data_element.value)
+                            except:
+                                logger.info(
+                                    "Could not decode character set for %s.",
+                                    data_element.name)
+                                value = unicode(
+                                    data_element.value, errors='replace')
+                        else:
+                            value = data_element.value
+                self.tlcTreeView.SetItemText(item, value, 1)
             # Fill in the rest of the data_element properties
             self.tlcTreeView.SetItemText(item, unicode(data_element.tag), 2)
             self.tlcTreeView.SetItemText(item, unicode(data_element.VM), 3)
