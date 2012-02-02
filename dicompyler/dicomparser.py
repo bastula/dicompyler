@@ -132,19 +132,23 @@ class DicomParser:
     def GetDemographics(self):
         """Return the patient demographics from a DICOM file."""
 
-        patient = {}
-        patient['name'] = self.decode("PatientsName").replace('^', ', ')
-        patient['id'] = self.ds.PatientID
-        if (self.ds.PatientsSex == 'M'):
-            patient['gender'] = 'Male'
-        elif (self.ds.PatientsSex == 'F'):
-            patient['gender'] = 'Female'
-        else:
-            patient['gender'] = 'Other'
-        if len(self.ds.PatientsBirthDate):
-            patient['dob'] = str(self.ds.PatientsBirthDate)
-        else:
-            patient['dob'] = 'None found'
+        # Set up some sensible defaults for demographics
+        patient = { 'name': 'N/A',
+                    'id':   'N/A',
+                    'dob':  'None Found',
+                    'gender': 'Other'}
+        if 'PatientsName' in self.ds:
+            patient['name'] = self.decode("PatientsName").replace('^', ', ')
+        if 'PatientID' in self.ds:
+            patient['id'] = self.ds.PatientID
+        if 'PatientsSex' in self.ds:
+            if (self.ds.PatientsSex == 'M'):
+                patient['gender'] = 'Male'
+            elif (self.ds.PatientsSex == 'F'):
+                patient['gender'] = 'Female'
+        if 'PatientsBirthDate' in self.ds:
+            if len(self.ds.PatientsBirthDate):
+                patient['dob'] = str(self.ds.PatientsBirthDate)
 
         return patient
 
