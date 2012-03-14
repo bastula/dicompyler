@@ -488,7 +488,7 @@ class MainFrame(wx.Frame):
         self.cclbStructures.Clear()
 
         self.structureList = {}
-        for id, structure in self.structures.iteritems():
+        for id, structure in iter(sorted(self.structures.iteritems())):
             # Only append structures, don't include applicators
             if not(structure['name'].startswith('Applicator')):
                 self.cclbStructures.Append(structure['name'], structure, structure['color'],
