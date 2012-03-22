@@ -2,7 +2,7 @@
 # -*- coding: ISO-8859-1 -*-
 # 2dview.py
 """dicompyler plugin that displays images, structures and dose in 2D planes."""
-# Copyright (c) 2009-2011 Aditya Panchal
+# Copyright (c) 2009-2012 Aditya Panchal
 # This file is part of dicompyler, relased under a BSD license.
 #    See the file license.txt included with this distribution, also
 #    available at http://code.google.com/p/dicompyler/
@@ -119,6 +119,7 @@ class plugin2DView(wx.Panel):
         pub.subscribe(self.OnUpdatePatient, 'patient.updated.parsed_data')
         pub.subscribe(self.OnStructureCheck, 'structures.checked')
         pub.subscribe(self.OnIsodoseCheck, 'isodoses.checked')
+        pub.subscribe(self.OnRefresh, '2dview.refresh')
         pub.subscribe(self.OnDrawingPrefsChange, '2dview.drawingprefs')
         pub.sendMessage('preferences.requested.values', '2dview.drawingprefs')
 
@@ -188,6 +189,7 @@ class plugin2DView(wx.Panel):
         self.Unbind(wx.EVT_MOTION)
         pub.unsubscribe(self.OnKeyDown)
         pub.unsubscribe(self.OnMouseWheel)
+        pub.unsubscribe(self.OnRefresh)
 
     def OnDestroy(self, evt):
         """Unbind to all events before the plugin is destroyed."""
@@ -384,8 +386,9 @@ class plugin2DView(wx.Panel):
             self.bwidth, self.bheight = image.GetSize()
 
             # Center the image
-            gc.Translate(self.pan[0]+(width-self.bwidth*self.zoom)/(2*self.zoom),
-                         self.pan[1]+(height-self.bheight*self.zoom)/(2*self.zoom))
+            transx = self.pan[0]+(width-self.bwidth*self.zoom)/(2*self.zoom)
+            transy = self.pan[1]+(height-self.bheight*self.zoom)/(2*self.zoom)
+            gc.Translate(transx, transy)
             gc.DrawBitmap(bmp, 0, 0, self.bwidth, self.bheight)
             gc.SetBrush(wx.Brush(wx.Colour(0, 0, 255, 30)))
             gc.SetPen(wx.Pen(wx.Colour(0, 0, 255, 30)))
@@ -448,11 +451,30 @@ class plugin2DView(wx.Panel):
             te = gc.GetFullTextExtent(impatpos)
             gc.DrawText(impatpos, width-te[0]-7, height-17)
 
+            # Send message with the current image number and various properties
+            pub.sendMessage('2dview.updated.image',
+                            {'number':self.imagenum,    # slice number
+                             'z':self.z,                # slice location
+                             'window':self.window,      # current window value
+                             'level':self.level,        # curent level value
+                             'gc':gc,                   # wx.GraphicsContext
+                             'scale':self.zoom,         # current zoom level
+                             'transx':transx,           # current x translation
+                             'transy':transy,           # current y translation
+                             'imdata':imdata,           # image data dictionary
+                             'patientpixlut':self.structurepixlut})
+                                                        # pat to pixel coord LUT
+
     def OnSize(self, evt):
         """Refresh the view when the size of the panel changes."""
 
         self.Refresh()
         evt.Skip()
+
+    def OnRefresh(self, msg):
+        """Refresh the view when it is requested by a plugin."""
+
+        self.Refresh()
 
     def OnUpdatePositionValues(self, evt=None):
         """Update the current position and value(s) of the mouse cursor."""
