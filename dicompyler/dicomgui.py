@@ -2,7 +2,7 @@
 # -*- coding: ISO-8859-1 -*-
 # dicomgui.py
 """Class that imports and returns DICOM data via a wxPython GUI dialog."""
-# Copyright (c) 2009-2011 Aditya Panchal
+# Copyright (c) 2009-2012 Aditya Panchal
 # Copyright (c) 2009 Roy Keyes
 # This file is part of dicompyler, relased under a BSD license.
 #    See the file license.txt included with this distribution, also
@@ -38,6 +38,7 @@ def ImportDicom(parent):
         dlgDicomImporter.t.join()
         dlgDicomImporter.Destroy()
 
+    pub.sendMessage('patient.updated.raw_data', value)
     return value
 
 class DicomImporterDialog(wx.Dialog):

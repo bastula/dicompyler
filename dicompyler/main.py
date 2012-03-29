@@ -2,7 +2,7 @@
 # -*- coding: ISO-8859-1 -*-
 # main.py
 """Main file for dicompyler."""
-# Copyright (c) 2009-2011 Aditya Panchal
+# Copyright (c) 2009-2012 Aditya Panchal
 # Copyright (c) 2009 Roy Keyes
 # This file is part of dicompyler, released under a BSD license.
 #    See the file license.txt included with this distribution, also
@@ -297,8 +297,15 @@ class MainFrame(wx.Frame):
     def OnOpenPatient(self, evt):
         """Load and show the Dicom RT Importer dialog box."""
 
-        self.ptdata = dicomgui.ImportDicom(self)
-        if not (self.ptdata == None):
+        dicomgui.ImportDicom(self)
+
+    def OnLoadPatientData(self, msg):
+        """Update and load the patient data."""
+
+        self.ptdata = msg.data
+        if (self.ptdata == None):
+            return
+        else:
             # Delete the previous notebook pages
             self.notebook.DeleteAllPages()
             # Delete the previous toolbar items
@@ -365,15 +372,10 @@ class MainFrame(wx.Frame):
                         if hasattr(plugin, 'preferences'):
                             self.preftemplate.append({props['name']:plugin.preferences})
             pub.sendMessage('preferences.updated.template', self.preftemplate)
-            pub.sendMessage('patient.updated.raw_data', self.ptdata)
 
-    def OnLoadPatientData(self, msg):
-        """Update and load the patient data."""
-
-        ptdata = msg.data
         dlgProgress = guiutil.get_progress_dialog(self, "Loading Patient Data...")
         self.t=threading.Thread(target=self.LoadPatientDataThread,
-            args=(self, ptdata, dlgProgress.OnUpdateProgress,
+            args=(self, self.ptdata, dlgProgress.OnUpdateProgress,
             self.OnUpdatePatientData))
         self.t.start()
         dlgProgress.ShowModal()
