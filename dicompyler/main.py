@@ -154,6 +154,12 @@ class MainFrame(wx.Frame):
         self.menuShowLogs = menuMain.FindItemById(XRCID('menuShowLogs')).GetMenu()
         self.menuPlugins = menuMain.FindItemById(XRCID('menuPluginManager')).GetMenu()
 
+        # Setup Import menu
+        self.menuImport = menuMain.FindItemById(XRCID('menuImportPlaceholder')).GetMenu()
+        self.menuImport.Delete(menuMain.FindItemById(XRCID('menuImportPlaceholder')).GetId())
+        self.menuImportItem = menuMain.FindItemById(XRCID('menuImport'))
+        self.menuImportItem.Enable(False)
+
         # Setup Export menu
         self.menuExport = menuMain.FindItemById(XRCID('menuExportPlaceholder')).GetMenu()
         self.menuExport.Delete(menuMain.FindItemById(XRCID('menuExportPlaceholder')).GetId())
@@ -303,7 +309,7 @@ class MainFrame(wx.Frame):
         """Update and load the patient data."""
 
         self.ptdata = msg.data
-        if (self.ptdata == None):
+        if not len(self.ptdata):
             return
         else:
             # Delete the previous notebook pages
@@ -718,7 +724,21 @@ class MainFrame(wx.Frame):
         if not len(self.plugins):
             self.plugins = plugin.import_plugins(self.userpluginpath)
             self.menuDict = {}
+            self.menuImportDict = {}
             self.menuExportDict = {}
+            # Set up the import plugins for dicompyler
+            for i, p in enumerate(self.plugins):
+                props = p.pluginProperties()
+                # Only load plugin versions that are qualified
+                if ((props['plugin_version'] == 1) and
+                    (props['plugin_type'] == 'import')):
+                    self.menuImportItem.Enable(True)
+                    # Load the import menu plugins
+                    if not len(self.menuImportDict):
+                        self.menuImportItem.Enable(True)
+                    self.menuImportDict[300+i] = self.menuImport.Append(
+                                        300+i, props['menuname'])
+                    self.Bind(wx.EVT_MENU, p.plugin(self).pluginMenu, id=300+i)
 
     def OnUpdateStatusBar(self, msg):
         """Update the status bar text."""
@@ -791,7 +811,7 @@ class MainFrame(wx.Frame):
         info = wx.AboutDialogInfo()
         info.Name = "dicompyler"
         info.Version = __version__
-        info.Copyright = u"© 2009-2011 Aditya Panchal"
+        info.Copyright = u"© 2009-2012 Aditya Panchal"
         credits = util.get_credits()
         info.Developers = credits['developers']
         info.Artists = credits['artists']

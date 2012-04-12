@@ -32,7 +32,7 @@ def ImportDicom(parent):
     if (dlgDicomImporter.ShowModal() == wx.ID_OK):
         value = dlgDicomImporter.GetPatient()
     else:
-        value = None
+        value = {}
     # Block until the thread is done before destroying the dialog
     if dlgDicomImporter:
         dlgDicomImporter.t.join()
