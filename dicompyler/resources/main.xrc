@@ -404,6 +404,12 @@
         <accel>Ctrl-O</accel>
       </object>
       <object class="separator"/>
+      <object class="wxMenu" name="menuImport">
+        <object class="wxMenuItem" name="menuImportPlaceholder">
+          <label>Placeholder</label>
+        </object>
+        <label>&amp;Import</label>
+      </object>
       <object class="wxMenu" name="menuExport">
         <object class="wxMenuItem" name="menuExportPlaceholder">
           <label>Placeholder</label>
