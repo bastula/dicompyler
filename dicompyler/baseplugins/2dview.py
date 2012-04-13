@@ -76,14 +76,11 @@ class plugin2DView(wx.Panel):
 
         # Setup toolbar controls
         if guiutil.IsGtk():
-            import gtk
-            zoominbmp = wx.ArtProvider_GetBitmap(gtk.STOCK_ZOOM_IN, wx.ART_OTHER, (24, 24))
-            zoomoutbmp = wx.ArtProvider_GetBitmap(gtk.STOCK_ZOOM_OUT, wx.ART_OTHER, (24, 24))
             drawingstyles = ['Solid', 'Transparent', 'Dot']
         else:
-            zoominbmp = wx.Bitmap(util.GetResourcePath('magnifier_zoom_in.png'))
-            zoomoutbmp = wx.Bitmap(util.GetResourcePath('magnifier_zoom_out.png'))
             drawingstyles = ['Solid', 'Transparent', 'Dot', 'Dash', 'Dot Dash']
+        zoominbmp = wx.Bitmap(util.GetResourcePath('magnifier_zoom_in.png'))
+        zoomoutbmp = wx.Bitmap(util.GetResourcePath('magnifier_zoom_out.png'))
         self.tools = []
         self.tools.append({'label':"Zoom In", 'bmp':zoominbmp, 'shortHelp':"Zoom In", 'eventhandler':self.OnZoomIn})
         self.tools.append({'label':"Zoom Out", 'bmp':zoomoutbmp, 'shortHelp':"Zoom Out", 'eventhandler':self.OnZoomOut})
