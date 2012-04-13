@@ -182,11 +182,7 @@ class MainFrame(wx.Frame):
         self.toolbar = self.GetToolBar()
 
         # Setup main toolbar controls
-        if guiutil.IsGtk():
-            import gtk
-            folderbmp = wx.ArtProvider_GetBitmap(gtk.STOCK_OPEN, wx.ART_OTHER, (24, 24))
-        else:
-            folderbmp = wx.Bitmap(util.GetResourcePath('folder_user.png'))
+        folderbmp = wx.Bitmap(util.GetResourcePath('folder_user.png'))
         self.maintools = [{'label':"Open Patient", 'bmp':folderbmp,
                             'shortHelp':"Open Patient...",
                             'eventhandler':self.OnOpenPatient}]
@@ -738,7 +734,17 @@ class MainFrame(wx.Frame):
                         self.menuImportItem.Enable(True)
                     self.menuImportDict[300+i] = self.menuImport.Append(
                                         300+i, props['menuname'])
-                    self.Bind(wx.EVT_MENU, p.plugin(self).pluginMenu, id=300+i)
+                    pi = p.plugin(self)
+                    self.Bind(wx.EVT_MENU, pi.pluginMenu, id=300+i)
+                    # If the import plugin has toolbar items, display them
+                    if hasattr(pi, 'tools'):
+                        for t, tool in enumerate(pi.tools):
+                            self.maintools.append(tool)
+                            self.toolbar.AddLabelTool(
+                                        (300+i)*10+t, tool['label'],
+                                        tool['bmp'], shortHelp=tool['shortHelp'])
+                            self.Bind(wx.EVT_TOOL, tool['eventhandler'], id=(300+i)*10+t)
+                        self.toolbar.Realize()
 
     def OnUpdateStatusBar(self, msg):
         """Update the status bar text."""

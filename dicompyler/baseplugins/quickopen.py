@@ -12,7 +12,7 @@ import logging
 logger = logging.getLogger('dicompyler.quickimport')
 import wx
 from wx.lib.pubsub import Publisher as pub
-from dicompyler import dicomparser
+from dicompyler import dicomparser, util
 import dicom
 
 def pluginProperties():
@@ -39,6 +39,12 @@ class plugin:
         pub.sendMessage('preferences.requested.values', 'general.dicom')
 
         self.parent = parent
+
+        # Setup toolbar controls
+        openbmp = wx.Bitmap(util.GetResourcePath('folder_image.png'))
+        self.tools = [{'label':"Open Quickly", 'bmp':openbmp,
+                            'shortHelp':"Open DICOM File Quickly...",
+                            'eventhandler':self.pluginMenu}]
 
     def OnImportPrefsChange(self, msg):
         """When the import preferences change, update the values."""
