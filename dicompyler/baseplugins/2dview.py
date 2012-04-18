@@ -171,7 +171,6 @@ class plugin2DView(wx.Panel):
         self.Bind(wx.EVT_RIGHT_UP, self.OnMouseUp)
         self.Bind(wx.EVT_ENTER_WINDOW, self.OnMouseEnter)
         self.Bind(wx.EVT_LEAVE_WINDOW, self.OnMouseLeave)
-        self.Bind(wx.EVT_MOTION, self.OnMouseMotion)
         pub.subscribe(self.OnKeyDown, 'main.key_down')
         pub.subscribe(self.OnMouseWheel, 'main.mousewheel')
 
@@ -348,6 +347,11 @@ class plugin2DView(wx.Panel):
 
     def OnPaint(self, evt):
         """Update the panel when it needs to be refreshed."""
+
+        # Bind motion event when the panel has been painted to avoid a blank
+        # image on Windows if a file is loaded too quickly before the plugin
+        # is initialized
+        self.Bind(wx.EVT_MOTION, self.OnMouseMotion)
 
         # Special case for Windows to account for flickering
         # if and only if images are loaded
