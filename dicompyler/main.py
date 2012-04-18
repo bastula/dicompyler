@@ -268,6 +268,9 @@ class MainFrame(wx.Frame):
         self.preftemplate = [{'General':self.generalpreftemplate}]
         pub.sendMessage('preferences.updated.template', self.preftemplate)
 
+        # Initialize variables
+        self.ptdata = {}
+
         # Set up pubsub
         pub.subscribe(self.OnLoadPatientData, 'patient.updated.raw_data')
         pub.subscribe(self.OnStructureCheck, 'colorcheckbox.checked.structure')
@@ -304,10 +307,11 @@ class MainFrame(wx.Frame):
     def OnLoadPatientData(self, msg):
         """Update and load the patient data."""
 
-        self.ptdata = msg.data
-        if not len(self.ptdata):
+        # Skip loading if the dataset is empty or if the dataset is the same
+        if (not len(msg.data)) or (self.ptdata == msg.data):
             return
         else:
+            self.ptdata = msg.data
             # Delete the previous notebook pages
             self.notebook.DeleteAllPages()
             # Delete the previous toolbar items
@@ -482,8 +486,10 @@ class MainFrame(wx.Frame):
             self.dvhs = patient['dvhs']
         else:
             self.dvhs = {}
-        
-        # publish the parsed data
+
+        # Re-publish the raw data
+        pub.sendMessage('patient.updated.raw_data', self.ptdata)
+        # Publish the parsed data
         pub.sendMessage('patient.updated.parsed_data', patient)
 
     def PopulateStructures(self):
