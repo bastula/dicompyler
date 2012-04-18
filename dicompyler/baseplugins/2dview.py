@@ -128,8 +128,10 @@ class plugin2DView(wx.Panel):
         self.dosepixlut = ([], [])
         if msg.data.has_key('images'):
             self.images = msg.data['images']
-            # Set the first image to the middle of the series
-            self.imagenum = len(self.images)/2
+            self.imagenum = 1
+            # If more than one image, set first image to middle of the series
+            if (len(self.images) > 1):
+                self.imagenum = len(self.images)/2
             image = self.images[self.imagenum-1]
             self.structurepixlut = image.GetPatientToPixelLUT()
             # Determine the default window and level of the series
