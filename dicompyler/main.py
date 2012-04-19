@@ -394,26 +394,23 @@ class MainFrame(wx.Frame):
         # Call the progress function to update the gui
         wx.CallAfter(progressFunc, 0, 0, 'Processing patient data...')
         patient = {}
+
+        if not ptdata.has_key('images'):
+            patient.update(dp(ptdata.values()[0]).GetDemographics())
         if ptdata.has_key('rtss'):
             wx.CallAfter(progressFunc, 20, 100, 'Processing RT Structure Set...')
-            if not patient.has_key('id'):
-                patient = dp(ptdata['rtss']).GetDemographics()
             patient['structures'] = dp(ptdata['rtss']).GetStructures()
         if ptdata.has_key('rtplan'):
             wx.CallAfter(progressFunc, 40, 100, 'Processing RT Plan...')
-            if not patient.has_key('id'):
-                patient = dp(ptdata['rtplan']).GetDemographics()
             patient['plan'] = dp(ptdata['rtplan']).GetPlan()
         if ptdata.has_key('rtdose'):
             wx.CallAfter(progressFunc, 60, 100, 'Processing RT Dose...')
-            if not patient.has_key('id'):
-                patient = dp(ptdata['rtdose']).GetDemographics()
             patient['dvhs'] = dp(ptdata['rtdose']).GetDVHs()
             patient['dose'] = dp(ptdata['rtdose'])
         if ptdata.has_key('images'):
             wx.CallAfter(progressFunc, 80, 100, 'Processing Images...')
             if not patient.has_key('id'):
-                patient = dp(ptdata['images'][0]).GetDemographics()
+                patient.update(dp(ptdata['images'][0]).GetDemographics())
             patient['images'] = []
             for image in ptdata['images']:
                 patient['images'].append(dp(image))
