@@ -457,7 +457,10 @@ class DicomImporterDialog(wx.Dialog):
             if patient.has_key('plans'):
                 for planid, plan in patient['plans'].iteritems():
                     foundstructure = False
-                    name = 'RT Plan: ' + plan['label'] + ' (' + plan['name'] + ')'
+                    planname = ' (' + plan['name'] + ')' if len(plan['name']) else ""
+                    rxdose = plan['rxdose'] if plan['rxdose'] > 0 else "Unknown"
+                    name = 'RT Plan: ' + plan['label'] + planname + \
+                        ' - Dose: ' + str(rxdose) + ' cGy'
                     if patient.has_key('structures'):
                         for structureid, structure in patient['structures'].iteritems():
                             foundstructure = False
@@ -639,10 +642,9 @@ class DicomImporterDialog(wx.Dialog):
             # Show the rxdose text box if no rxdose was found
             # and if it is an RT plan or RT dose file
             self.txtRxDose.SetValue(rxdose)
-            if (rxdose == 0):
-                if (self.tcPatients.GetItemText(item).startswith('RT Plan') or
-                    self.tcPatients.GetItemText(parent).startswith('RT Plan')):
-                    self.EnableRxDose(True)
+            if (self.tcPatients.GetItemText(item).startswith('RT Plan') or
+                self.tcPatients.GetItemText(parent).startswith('RT Plan')):
+                self.EnableRxDose(True)
 
     def EnableRxDose(self, value):
         """Show or hide the prescription dose message."""

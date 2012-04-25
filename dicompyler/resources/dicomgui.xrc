@@ -166,7 +166,7 @@
               </object>
               <object class="sizeritem">
                 <object class="wxStaticText" name="lblRxDose">
-                  <label>Rx dose not found in RT Plan. Please enter Rx dose:</label>
+                  <label>Please verify the Rx dose before continuing:</label>
                 </object>
                 <flag>wxALIGN_CENTRE</flag>
               </object>
