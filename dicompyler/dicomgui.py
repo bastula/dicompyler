@@ -31,6 +31,7 @@ def ImportDicom(parent):
     # Show the dialog and return the result
     if (dlgDicomImporter.ShowModal() == wx.ID_OK):
         value = dlgDicomImporter.GetPatient()
+        pub.sendMessage('patient.updated.raw_data', value)
     else:
         value = {}
     # Block until the thread is done before destroying the dialog
@@ -38,7 +39,6 @@ def ImportDicom(parent):
         dlgDicomImporter.t.join()
         dlgDicomImporter.Destroy()
 
-    pub.sendMessage('patient.updated.raw_data', value)
     return value
 
 class DicomImporterDialog(wx.Dialog):
@@ -175,6 +175,12 @@ class DicomImporterDialog(wx.Dialog):
         # Disable Rx dose controls except on GTK due to control placement oddities
         if not guiutil.IsGtk():
             self.EnableRxDose(False)
+
+        # If a previous search thread exists, block until it is done before
+        # starting a new thread
+        if (hasattr(self, 't')):
+            self.t.join()
+            del self.t
 
         self.t=threading.Thread(target=self.DirectorySearchThread,
             args=(self, self.path, self.import_search_subfolders,
