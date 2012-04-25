@@ -626,5 +626,13 @@ class DicomParser:
                 elif item.DoseReferenceStructureType == 'VOLUME':
                     if 'TargetPrescriptionDose' in item:
                         self.plan['rxdose'] = item.TargetPrescriptionDose * 100
-
+        if (("FractionGroups" in self.ds) and (self.plan['rxdose'] == 0)):
+            fg = self.ds.FractionGroups[0]
+            if ("ReferencedBeams" in fg) and ("NumberofFractionsPlanned" in fg):
+                beams = fg.ReferencedBeams
+                fx = fg.NumberofFractionsPlanned
+                for beam in beams:
+                    if "BeamDose" in beam:
+                        self.plan['rxdose'] += beam.BeamDose * fx * 100
+        self.plan['rxdose'] = int(self.plan['rxdose'])
         return self.plan
