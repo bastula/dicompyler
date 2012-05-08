@@ -72,7 +72,10 @@ class DicomParser:
         else:
             desc='No description'
         study['description'] = desc
-        study['id'] = self.ds.StudyInstanceUID
+        # Don't assume that every dataset includes a study UID
+        study['id'] = self.ds.SeriesInstanceUID
+        if 'StudyInstanceUID' in self.ds:
+            study['id'] = self.ds.StudyInstanceUID
         
         return study
 
@@ -86,7 +89,10 @@ class DicomParser:
             desc='No description'
         series['description'] = desc
         series['id'] = self.ds.SeriesInstanceUID
-        series['study'] = self.ds.StudyInstanceUID
+        # Don't assume that every dataset includes a study UID
+        series['study'] = self.ds.SeriesInstanceUID
+        if 'StudyInstanceUID' in self.ds:
+            series['study'] = self.ds.StudyInstanceUID
         if 'FrameofReferenceUID' in self.ds:
             series['referenceframe'] = self.ds.FrameofReferenceUID
         
