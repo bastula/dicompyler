@@ -138,7 +138,8 @@ class plugin2DView(wx.Panel):
             self.window, self.level = image.GetDefaultImageWindowLevel()
             # Dose display depends on whether we have images loaded or not
             self.isodoses = {}
-            if msg.data.has_key('dose'):
+            if (msg.data.has_key('dose') and \
+                ("PixelData" in msg.data['dose'].ds)):
                 self.dose = msg.data['dose']
                 self.dosedata = self.dose.GetDoseData()
                 # First get the dose grid LUT

@@ -292,6 +292,7 @@ class DicomImporterDialog(wx.Dialog):
                             dose['filename'] = files[n]
                             dose['referenceframe'] = dp.GetFrameofReferenceUID()
                             dose['hasdvh'] = dp.HasDVHs()
+                            dose['hasgrid'] = "PixelData" in dp.ds
                             dose['rtss'] = dp.GetReferencedStructureSet()
                             dose['rtplan'] = dp.GetReferencedRTPlan()
                             patients[h]['doses'][dose['id']] = dose
@@ -500,19 +501,31 @@ class DicomImporterDialog(wx.Dialog):
                             foundplan = False
                             if (planid == dose['rtplan']):
                                 foundplan = True
-                                if dose['hasdvh']:
-                                    name = 'RT Dose with DVH'
+                                if dose['hasgrid']:
+                                    if dose['hasdvh']:
+                                        name = 'RT Dose with DVH'
+                                    else:
+                                        name = 'RT Dose without DVH'
                                 else:
-                                    name = 'RT Dose without DVH'
+                                    if dose['hasdvh']:
+                                        name = 'RT Dose without Dose Grid (DVH only)'
+                                    else:
+                                        name = 'RT Dose without Dose Grid or DVH'
                                 dose['treeid'] = self.tcPatients.AppendItem(plan['treeid'], name, 6)
                                 filearray = [dose['filename']]
                                 self.EnableItemSelection(patient, dose, filearray)
                     # If no plans were found, add the dose to the structure/study instead
                     if not foundplan:
-                        if dose['hasdvh']:
-                            name = 'RT Dose with DVH'
+                        if dose['hasgrid']:
+                            if dose['hasdvh']:
+                                name = 'RT Dose with DVH'
+                            else:
+                                name = 'RT Dose without DVH'
                         else:
-                            name = 'RT Dose without DVH'
+                            if dose['hasdvh']:
+                                name = 'RT Dose without Dose Grid (DVH only)'
+                            else:
+                                name = 'RT Dose without Dose Grid or DVH'
                         foundstructure = False
                         if patient.has_key('structures'):
                             for structureid, structure in patient['structures'].iteritems():

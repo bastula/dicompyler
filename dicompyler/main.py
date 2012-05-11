@@ -429,7 +429,9 @@ class MainFrame(wx.Frame):
                 if ((not (key in patient['dvhs'].keys())) or
                     (self.dvhRecalc == 'Always Recalculate DVH')):
                     # Only calculate DVHs for structures, not applicators
-                    if structure['name'].startswith('Applicator'):
+                    # and only if the dose grid is present
+                    if ((structure['name'].startswith('Applicator')) or
+                        (not "PixelData" in patient['dose'].ds)):
                         continue
                     wx.CallAfter(progressFunc,
                                  10*i/len(patient['structures'])+90, 100,
@@ -513,7 +515,7 @@ class MainFrame(wx.Frame):
         self.cclbIsodoses.Clear()
 
         self.isodoseList={}
-        if (has_images and len(plan)):
+        if (has_images and len(plan) and "PixelData" in dose.ds):
             dosedata = dose.GetDoseData()
             dosemax = int(dosedata['dosemax'] * dosedata['dosegridscaling'] * 10000 / plan['rxdose'])
             self.isodoses = [{'level':dosemax, 'color':wx.Colour(120, 0, 0), 'name':'Max'},
