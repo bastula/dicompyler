@@ -2,7 +2,7 @@
 # -*- coding: ISO-8859-1 -*-
 # dvhcalc.py
 """Calculate dose volume histogram (DVH) from DICOM RT Structure / Dose data."""
-# Copyright (c) 2011 Aditya Panchal
+# Copyright (c) 2011-2012 Aditya Panchal
 # Copyright (c) 2010 Roy Keyes
 # This file is part of dicompyler, released under a BSD license.
 #    See the file license.txt included with this distribution, also

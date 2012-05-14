@@ -1,4 +1,4 @@
-Copyright (c) 2009-2011 Aditya Panchal and dicompyler contributors
+Copyright (c) 2009-2012 Aditya Panchal and dicompyler contributors
 
 All rights reserved.
 
@@ -40,16 +40,8 @@ famfamfam Silk is licensed under the Creative Commons Attribution 2.5 License.
 
 dicompyler uses the following libraries:
 
-elixir
-Copyright (c) 2007, 2008 Jonathan LaCour, Daniel Haus, and Gaetan de Menten.
-SQLAlchemy is a trademark of Michael Bayer.
-
 pydicom
-Copyright (c) 2008-2010 Darcy Mason and pydicom contributors
-
-SQLAlchemy
-Copyright (c) 2005, 2006, 2007, 2008, 2009 Michael Bayer and contributors.
-SQLAlchemy is a trademark of Michael Bayer.
+Copyright (c) 2008-2012 Darcy Mason and pydicom contributors
 
 They are distributed under the MIT License as follows:
 
@@ -106,7 +98,7 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 dicompyler uses matplotlib, which is distributed under the following license:
 
-LICENSE AGREEMENT FOR MATPLOTLIB 1.0.1
+LICENSE AGREEMENT FOR MATPLOTLIB 1.1.0
 --------------------------------------
 
 1. This LICENSE AGREEMENT is between John D. Hunter ("JDH"), and the
@@ -117,30 +109,30 @@ documentation.
 2. Subject to the terms and conditions of this License Agreement, JDH
 hereby grants Licensee a nonexclusive, royalty-free, world-wide license
 to reproduce, analyze, test, perform and/or display publicly, prepare
-derivative works, distribute, and otherwise use matplotlib 1.0.1
+derivative works, distribute, and otherwise use matplotlib 1.1.0
 alone or in any derivative version, provided, however, that JDH's
 License Agreement and JDH's notice of copyright, i.e., "Copyright (c)
-2002-2007 John D. Hunter; All Rights Reserved" are retained in
-matplotlib 1.0.1 alone or in any derivative version prepared by
+2002-2009 John D. Hunter; All Rights Reserved" are retained in
+matplotlib 1.1.0 alone or in any derivative version prepared by
 Licensee.
 
 3. In the event Licensee prepares a derivative work that is based on or
-incorporates matplotlib 1.0.1 or any part thereof, and wants to
+incorporates matplotlib 1.1.0 or any part thereof, and wants to
 make the derivative work available to others as provided herein, then
 Licensee hereby agrees to include in any such work a brief summary of
-the changes made to matplotlib 1.0.1.
+the changes made to matplotlib 1.1.0.
 
-4. JDH is making matplotlib 1.0.1 available to Licensee on an "AS
+4. JDH is making matplotlib 1.1.0 available to Licensee on an "AS
 IS" basis.  JDH MAKES NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR
 IMPLIED.  BY WAY OF EXAMPLE, BUT NOT LIMITATION, JDH MAKES NO AND
 DISCLAIMS ANY REPRESENTATION OR WARRANTY OF MERCHANTABILITY OR FITNESS
-FOR ANY PARTICULAR PURPOSE OR THAT THE USE OF MATPLOTLIB 1.0.1
+FOR ANY PARTICULAR PURPOSE OR THAT THE USE OF MATPLOTLIB 1.1.0
 WILL NOT INFRINGE ANY THIRD PARTY RIGHTS.
 
 5. JDH SHALL NOT BE LIABLE TO LICENSEE OR ANY OTHER USERS OF MATPLOTLIB
-1.0.1 FOR ANY INCIDENTAL, SPECIAL, OR CONSEQUENTIAL DAMAGES OR
+1.1.0 FOR ANY INCIDENTAL, SPECIAL, OR CONSEQUENTIAL DAMAGES OR
 LOSS AS A RESULT OF MODIFYING, DISTRIBUTING, OR OTHERWISE USING
-MATPLOTLIB 1.0.1, OR ANY DERIVATIVE THEREOF, EVEN IF ADVISED OF
+MATPLOTLIB 1.1.0, OR ANY DERIVATIVE THEREOF, EVEN IF ADVISED OF
 THE POSSIBILITY THEREOF.
 
 6. This License Agreement will automatically terminate upon a material
@@ -152,7 +144,7 @@ Licensee.  This License Agreement does not grant permission to use JDH
 trademarks or trade name in a trademark sense to endorse or promote
 products or services of Licensee, or any third party.
 
-8. By copying, installing or otherwise using matplotlib 1.0.1,
+8. By copying, installing or otherwise using matplotlib 1.1.0,
 Licensee agrees to be bound by the terms and conditions of this License
 Agreement.
 
@@ -160,7 +152,7 @@ Agreement.
 
 dicompyler uses NumPy, which is distributed under the New BSD license:
 
-Copyright (c) 2005, NumPy Developers
+Copyright (c) 2005-2012, NumPy Developers
 
 All rights reserved.
 

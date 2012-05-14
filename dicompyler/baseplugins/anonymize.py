@@ -2,8 +2,8 @@
 # -*- coding: ISO-8859-1 -*-
 # anonymize.py
 """dicompyler plugin that anonymizes DICOM / DICOM RT data."""
-# Copyright (c) 2010-2011 Aditya Panchal
-# This file is part of dicompyler, relased under a BSD license.
+# Copyright (c) 2010-2012 Aditya Panchal
+# This file is part of dicompyler, released under a BSD license.
 #    See the file license.txt included with this distribution, also
 #    available at http://code.google.com/p/dicompyler/
 #
@@ -22,7 +22,7 @@ def pluginProperties():
     props['menuname'] = "as Anonymized DICOM"
     props['description'] = "Anonymizes DICOM / DICOM RT data"
     props['author'] = 'Aditya Panchal'
-    props['version'] = 0.4
+    props['version'] = "0.4.2"
     props['plugin_type'] = 'export'
     props['plugin_version'] = 1
     props['min_dicom'] = []

@@ -4,7 +4,7 @@
 """Class that imports and returns DICOM data via a wxPython GUI dialog."""
 # Copyright (c) 2009-2012 Aditya Panchal
 # Copyright (c) 2009 Roy Keyes
-# This file is part of dicompyler, relased under a BSD license.
+# This file is part of dicompyler, released under a BSD license.
 #    See the file license.txt included with this distribution, also
 #    available at http://code.google.com/p/dicompyler/
 #
