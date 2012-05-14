@@ -624,7 +624,9 @@ class DicomParser:
         if "DoseReferences" in self.ds:
             for item in self.ds.DoseReferences:
                 if item.DoseReferenceStructureType == 'SITE':
-                    self.plan['name'] = item.DoseReferenceDescription
+                    self.plan['name'] = "N/A"
+                    if "DoseReferenceDescription" in item:
+                        self.plan['name'] = item.DoseReferenceDescription
                     if item.has_key('TargetPrescriptionDose'):
                         rxdose = item.TargetPrescriptionDose * 100
                         if (rxdose > self.plan['rxdose']):
