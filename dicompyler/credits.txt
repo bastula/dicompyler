@@ -3,7 +3,7 @@ The dicompyler Team
 Lead Developer
     Aditya Panchal
 
-Developers
+Contributors
     Roy Keyes
 
 Artists

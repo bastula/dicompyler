@@ -26,7 +26,7 @@ from dicompyler import dicomgui, dvhdata, dvhdoses, dvhcalc
 from dicompyler.dicomparser import DicomParser as dp
 from dicompyler import plugin, preferences
 
-__version__ = "0.4.1-1"
+__version__ = "0.4.2"
 
 class MainFrame(wx.Frame):
     def __init__(self, parent, id, title, res):

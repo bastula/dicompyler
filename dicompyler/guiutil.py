@@ -2,8 +2,8 @@
 # -*- coding: ISO-8859-1 -*-
 # guiutil.py
 """Several GUI utility functions that don't really belong anywhere."""
-# Copyright (c) 2009-2011 Aditya Panchal
-# This file is part of dicompyler, relased under a BSD license.
+# Copyright (c) 2009-2012 Aditya Panchal
+# This file is part of dicompyler, released under a BSD license.
 #    See the file license.txt included with this distribution, also
 #    available at http://code.google.com/p/dicompyler/
 

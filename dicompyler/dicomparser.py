@@ -2,9 +2,9 @@
 # -*- coding: ISO-8859-1 -*-
 # dicomparser.py
 """Class that parses and returns formatted DICOM RT data."""
-# Copyright (c) 2009-2011 Aditya Panchal
+# Copyright (c) 2009-2012 Aditya Panchal
 # Copyright (c) 2009-2010 Roy Keyes
-# This file is part of dicompyler, relased under a BSD license.
+# This file is part of dicompyler, released under a BSD license.
 #    See the file license.txt included with this distribution, also
 #    available at http://code.google.com/p/dicompyler/
 
