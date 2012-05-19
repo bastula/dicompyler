@@ -609,6 +609,20 @@ class DicomParser:
 
         return data
 
+    def GetReferencedBeamNumber(self):
+        """Return the referenced beam number (if it exists) from RT Dose."""
+
+        beam = None
+        if "ReferencedRTPlans" in self.ds:
+            rp = self.ds.ReferencedRTPlans[0]
+            if "ReferencedFractionGroups" in rp:
+                rf = rp.ReferencedFractionGroups[0]
+                if "ReferencedBeams" in rf:
+                    if "ReferencedBeamNumber" in rf.ReferencedBeams[0]:
+                        beam = rf.ReferencedBeams[0].ReferencedBeamNumber
+
+        return beam
+
 ############################### RT Plan Methods ###############################
 
     def GetPlan(self):
@@ -644,3 +658,34 @@ class DicomParser:
                         self.plan['rxdose'] += beam.BeamDose * fx * 100
         self.plan['rxdose'] = int(self.plan['rxdose'])
         return self.plan
+
+    def GetReferencedBeamsInFraction(self, fx = 0):
+        """Return the referenced beams from the specified fraction."""
+
+        beams = {}
+        if ("Beams" in self.ds):
+            bdict = self.ds.Beams
+        elif ("IonBeams" in self.ds):
+            bdict = self.ds.IonBeams
+        else:
+            return beams
+
+        # Obtain the beam information
+        for b in bdict:
+            beam = {}
+            beam['name'] = b.BeamName if "BeamName" in b else ""
+            beam['description'] = b.BeamDescription \
+                if "BeamDescription" in b else ""
+            beams[b.BeamNumber] = beam
+
+        # Obtain the referenced beam info from the fraction info
+        if ("FractionGroups" in self.ds):
+            fg = self.ds.FractionGroups[fx]
+            if ("ReferencedBeams" in fg):
+                rb = fg.ReferencedBeams
+                nfx = fg.NumberofFractionsPlanned
+                for b in rb:
+                    if "BeamDose" in b:
+                        beams[b.ReferencedBeamNumber]['dose'] = \
+                            b.BeamDose * nfx * 100
+        return beams

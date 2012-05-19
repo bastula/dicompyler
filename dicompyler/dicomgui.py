@@ -281,6 +281,7 @@ class DicomImporterDialog(wx.Dialog):
                             plan['filename'] = files[n]
                             plan['series'] = dp.ds.SeriesInstanceUID
                             plan['referenceframe'] = dp.GetFrameofReferenceUID()
+                            plan['beams'] = dp.GetReferencedBeamsInFraction()
                             plan['rtss'] = dp.GetReferencedStructureSet()
                             patients[h]['plans'][plan['id']] = plan
                         # Create each RT Dose
@@ -293,6 +294,8 @@ class DicomImporterDialog(wx.Dialog):
                             dose['referenceframe'] = dp.GetFrameofReferenceUID()
                             dose['hasdvh'] = dp.HasDVHs()
                             dose['hasgrid'] = "PixelData" in dp.ds
+                            dose['summationtype'] = dp.ds.DoseSummationType
+                            dose['beam'] = dp.GetReferencedBeamNumber()
                             dose['rtss'] = dp.GetReferencedStructureSet()
                             dose['rtplan'] = dp.GetReferencedRTPlan()
                             patients[h]['doses'][dose['id']] = dose
@@ -501,6 +504,7 @@ class DicomImporterDialog(wx.Dialog):
                             foundplan = False
                             if (planid == dose['rtplan']):
                                 foundplan = True
+                                rxdose = None
                                 if dose['hasgrid']:
                                     if dose['hasdvh']:
                                         name = 'RT Dose with DVH'
@@ -511,9 +515,20 @@ class DicomImporterDialog(wx.Dialog):
                                         name = 'RT Dose without Dose Grid (DVH only)'
                                     else:
                                         name = 'RT Dose without Dose Grid or DVH'
+                                if (dose['summationtype'] == "BEAM"):
+                                    name += " (Beam " + str(dose['beam']) + ": "
+                                    if dose['beam'] in plan['beams']:
+                                        b = plan['beams'][dose['beam']]
+                                        name += b['name']
+                                        if len(b['description']):
+                                            name += " - " + b['description']
+                                        name += ")"
+                                        if "dose" in b:
+                                            name += " - Dose: " + str(int(b['dose'])) + " cGy"
+                                            rxdose = int(b['dose'])
                                 dose['treeid'] = self.tcPatients.AppendItem(plan['treeid'], name, 6)
                                 filearray = [dose['filename']]
-                                self.EnableItemSelection(patient, dose, filearray)
+                                self.EnableItemSelection(patient, dose, filearray, rxdose)
                     # If no plans were found, add the dose to the structure/study instead
                     if not foundplan:
                         if dose['hasgrid']:
@@ -650,10 +665,10 @@ class DicomImporterDialog(wx.Dialog):
             data = self.tcPatients.GetPyData(item)
             self.btnSelect.Enable()
             rxdose = 0
+            parent = self.tcPatients.GetItemParent(item)
             if data.has_key('rxdose'):
                 rxdose = data['rxdose']
             else:
-                parent = self.tcPatients.GetItemParent(item)
                 parentdata = self.tcPatients.GetPyData(parent)
                 if not (parentdata == None):
                     if parentdata.has_key('rxdose'):
