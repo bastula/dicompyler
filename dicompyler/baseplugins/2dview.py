@@ -229,9 +229,20 @@ class plugin2DView(wx.Panel):
     def DrawStructure(self, structure, gc, position, prone, feetfirst):
         """Draw the given structure on the panel."""
 
+        # Create an indexing array of z positions of the structure data
+        # to compare with the image z position
+        if not "zarray" in structure:
+            structure['zarray'] = np.array(
+                    structure['planes'].keys(), dtype=np.float32)
+            structure['zkeys'] = structure['planes'].keys()
+
+        # Determine the closest z plane to the given position
+        zmin = np.amin(np.abs(structure['zarray'] - float(position)))
+        index = np.argmin(np.abs(structure['zarray'] - float(position)))
+
         # Draw the structure only if the structure has contours
-        # on the current image position
-        if structure['planes'].has_key(position):
+        # on the closest plane, within a threshold
+        if (zmin < 0.5):
             # Set the color of the contour
             color = wx.Colour(structure['color'][0], structure['color'][1],
                 structure['color'][2], int(self.structure_fill_opacity*255/100))
@@ -244,7 +255,7 @@ class plugin2DView(wx.Panel):
                 style=self.GetLineDrawingStyle(self.structure_line_style)))
             # Create the path for the contour
             path = gc.CreatePath()
-            for contour in structure['planes'][position]:
+            for contour in structure['planes'][structure['zkeys'][index]]:
                 if (contour['geometricType'] == u"CLOSED_PLANAR"):
                     # Convert the structure data to pixel data
                     pixeldata = self.GetContourPixelData(
