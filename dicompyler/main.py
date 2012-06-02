@@ -292,10 +292,13 @@ class MainFrame(wx.Frame):
 
         # Load and initialize plugins
         self.plugins = []
+        self.pluginsDisabled = []
         pub.sendMessage('preferences.requested.value',
                         'general.plugins.user_plugins_location')
         pub.sendMessage('preferences.requested.value',
                         'general.calculation.dvh_recalc')
+        pub.sendMessage('preferences.requested.value',
+                        'general.plugins.disabled_list')
 
 ########################### Patient Loading Functions ##########################
 
@@ -334,7 +337,13 @@ class MainFrame(wx.Frame):
             # Reset the preferences template
             self.preftemplate = [{'General':self.generalpreftemplate}]
             # Set up the plugins for each plugin entry point of dicompyler
-            for i, p in enumerate(self.plugins):
+            for i, plugin in enumerate(self.plugins):
+                # Skip plugin if it doesn't contain the required dictionary
+                # or actually is a proper Python module
+                p = plugin['plugin']
+                if not hasattr(p, 'pluginProperties') or \
+                    (p.__name__ in self.pluginsDisabled):
+                    continue
                 props = p.pluginProperties()
                 # Only load plugin versions that are qualified
                 if (props['plugin_version'] == 1):
@@ -716,6 +725,8 @@ class MainFrame(wx.Frame):
                         self.fh.setLevel(logging.WARNING)
                         if not util.main_is_frozen():
                             self.ch.setLevel(logging.WARNING)
+        elif (msg.topic[1] == 'plugins') and (msg.topic[2] == 'disabled_list'):
+            self.pluginsDisabled = msg.data
 
     def OnUpdatePlugins(self, msg):
         """Update the location of the user plugins and load all plugins."""
@@ -728,7 +739,13 @@ class MainFrame(wx.Frame):
             self.menuImportDict = {}
             self.menuExportDict = {}
             # Set up the import plugins for dicompyler
-            for i, p in enumerate(self.plugins):
+            for i, pg in enumerate(self.plugins):
+                # Skip plugin if it doesn't contain the required dictionary
+                # or actually is a proper Python module or is disabled
+                p = pg['plugin']
+                if not hasattr(p, 'pluginProperties') or \
+                    (p.__name__ in self.pluginsDisabled):
+                    continue
                 props = p.pluginProperties()
                 # Only load plugin versions that are qualified
                 if ((props['plugin_version'] == 1) and
@@ -750,7 +767,6 @@ class MainFrame(wx.Frame):
                                         tool['bmp'], shortHelp=tool['shortHelp'])
                             self.Bind(wx.EVT_TOOL, tool['eventhandler'], id=(300+i)*10+t)
                         self.toolbar.Realize()
-
     def OnUpdateStatusBar(self, msg):
         """Update the status bar text."""
 
@@ -815,7 +831,7 @@ class MainFrame(wx.Frame):
     def OnPluginManager(self, evt):
         """Load and show the Plugin Manager dialog box."""
 
-        self.pm = plugin.PluginManager(self, self.plugins)
+        self.pm = plugin.PluginManager(self, self.plugins, self.pluginsDisabled)
 
     def OnAbout(self, evt):
         # First we create and fill the info object
