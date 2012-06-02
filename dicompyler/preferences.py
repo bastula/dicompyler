@@ -115,6 +115,7 @@ class PreferencesManager():
 
         SetValue(self.values, msg.data.keys()[0], msg.data.values()[0])
         pub.sendMessage('preferences.updated.values', self.values)
+        pub.sendMessage(msg.data.keys()[0], msg.data.values()[0])
 
 ############################## Preferences Dialog ##############################
 

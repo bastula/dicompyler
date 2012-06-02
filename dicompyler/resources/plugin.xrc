@@ -2,27 +2,159 @@
 <resource>
   <object class="wxDialog" name="PluginManagerDialog" subclass="dicompyler.plugin.PluginManagerDialog">
     <object class="wxBoxSizer">
-      <orient>wxHORIZONTAL</orient>
       <object class="sizeritem">
         <object class="wxBoxSizer">
+          <object class="spacer">
+            <size>5,5</size>
+          </object>
           <object class="sizeritem">
-            <object class="wxStaticBoxSizer">
+            <object class="wxBoxSizer">
+              <object class="spacer">
+                <size>5,5</size>
+              </object>
               <object class="sizeritem">
-                <object class="wxListCtrl" name="lcPlugins">
-                  <size>750,200</size>
-                  <style>wxLC_REPORT</style>
+                <object class="wxPanel" name="panelTreeView">
+                  <object class="wxTreeCtrl" name="tcPlugins">
+                    <size>250,250</size>
+                    <style>wxNO_BORDER|wxTR_NO_BUTTONS|wxTR_NO_LINES|wxTR_FULL_ROW_HIGHLIGHT|wxTR_HIDE_ROOT</style>
+                  </object>
+                  <bg>#FFFFFF</bg>
+                  <style>wxSUNKEN_BORDER</style>
+                </object>
+                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+              </object>
+              <object class="spacer">
+                <size>10,0</size>
+              </object>
+              <orient>wxHORIZONTAL</orient>
+              <object class="sizeritem">
+                <object class="wxPanel" name="panelProperties">
+                  <object class="wxBoxSizer">
+                    <object class="spacer">
+                      <size>0,3</size>
+                    </object>
+                    <object class="sizeritem">
+                      <object class="wxBoxSizer">
+                        <object class="sizeritem">
+                          <object class="wxStaticText" name="lblName">
+                            <label>Plugin Name</label>
+                          </object>
+                        </object>
+                        <object class="spacer">
+                          <size>4,0</size>
+                        </object>
+                        <object class="sizeritem">
+                          <object class="wxStaticText">
+                            <label>by</label>
+                          </object>
+                        </object>
+                        <object class="spacer">
+                          <size>2,0</size>
+                        </object>
+                        <object class="sizeritem">
+                          <object class="wxStaticText" name="lblAuthor">
+                            <label>Plugin Author</label>
+                          </object>
+                        </object>
+                        <object class="spacer">
+                          <size>5,0</size>
+                          <option>1</option>
+                          <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                        </object>
+                        <object class="sizeritem">
+                          <object class="wxStaticText" name="lblVersion">
+                            <label>Version</label>
+                          </object>
+                        </object>
+                        <object class="spacer">
+                          <size>2,0</size>
+                        </object>
+                        <object class="sizeritem">
+                          <object class="wxStaticText" name="lblVersionNumber">
+                            <label>Version Number</label>
+                          </object>
+                        </object>
+                        <orient>wxHORIZONTAL</orient>
+                      </object>
+                      <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                    </object>
+                    <object class="spacer">
+                      <size>0,7</size>
+                    </object>
+                    <object class="sizeritem">
+                      <object class="wxBoxSizer">
+                        <object class="spacer">
+                          <size>10,0</size>
+                        </object>
+                        <object class="sizeritem">
+                          <object class="wxStaticText" name="lblPluginType">
+                            <label>Plugin Type</label>
+                          </object>
+                        </object>
+                        <object class="spacer">
+                          <size>3,0</size>
+                        </object>
+                        <object class="sizeritem">
+                          <object class="wxStaticText">
+                            <label>Plugin</label>
+                          </object>
+                        </object>
+                        <object class="spacer">
+                          <size>5,0</size>
+                          <option>1</option>
+                          <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                        </object>
+                        <object class="sizeritem">
+                          <object class="wxCheckBox" name="checkEnabled">
+                            <label>&amp;Enabled</label>
+                          </object>
+                        </object>
+                        <orient>wxHORIZONTAL</orient>
+                      </object>
+                      <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                    </object>
+                    <object class="spacer">
+                      <size>0,5</size>
+                    </object>
+                    <orient>wxVERTICAL</orient>
+                    <object class="sizeritem">
+                      <object class="wxBoxSizer">
+                        <object class="sizeritem">
+                          <object class="wxBoxSizer">
+                            <object class="spacer">
+                              <size>10,0</size>
+                            </object>
+                            <object class="sizeritem">
+                              <object class="wxStaticText" name="lblDescription">
+                                <label>Description</label>
+                              </object>
+                              <option>1</option>
+                              <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                            </object>
+                            <orient>wxHORIZONTAL</orient>
+                          </object>
+                          <option>1</option>
+                          <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                        </object>
+                        <orient>wxVERTICAL</orient>
+                      </object>
+                      <option>1</option>
+                      <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                    </object>
+                  </object>
                 </object>
                 <option>1</option>
                 <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
               </object>
-              <label>Installed Plugins</label>
-              <orient>wxVERTICAL</orient>
+              <object class="spacer">
+                <size>5,5</size>
+              </object>
             </object>
-            <option>3</option>
+            <option>1</option>
             <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
           </object>
           <object class="spacer">
-            <size>5,5</size>
+            <size>0,5</size>
           </object>
           <orient>wxVERTICAL</orient>
         </object>
@@ -30,9 +162,50 @@
         <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
         <border>3</border>
       </object>
+      <object class="sizeritem">
+        <object class="wxBoxSizer">
+          <object class="spacer">
+            <size>0,5</size>
+            <option>1</option>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+          </object>
+          <object class="sizeritem">
+            <object class="wxStaticText" name="lblMessage">
+              <label>* Plugins will be enabled/disabled when DICOM data is reloaded.</label>
+              <style>wxALIGN_CENTRE</style>
+            </object>
+            <flag>wxALIGN_CENTRE</flag>
+          </object>
+          <object class="spacer">
+            <size>0,5</size>
+            <option>1</option>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+          </object>
+          <object class="sizeritem">
+            <object class="wxButton" name="wxID_OK">
+              <label>&amp;Close</label>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+            <border>3</border>
+          </object>
+          <object class="spacer">
+            <size>0,5</size>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+            <border>3</border>
+          </object>
+          <orient>wxHORIZONTAL</orient>
+        </object>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+      </object>
+      <orient>wxVERTICAL</orient>
+      <object class="spacer">
+        <size>10,10</size>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+      </object>
     </object>
+    <size>600,400</size>
     <title>Plugin Manager</title>
     <centered>1</centered>
-    <style>wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER</style>
+    <style>wxDEFAULT_DIALOG_STYLE</style>
   </object>
 </resource>
