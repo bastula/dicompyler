@@ -336,6 +336,8 @@ class MainFrame(wx.Frame):
                 self.menuExportDict = {}
             # Reset the preferences template
             self.preftemplate = [{'General':self.generalpreftemplate}]
+            # Initialize the list of subplugins
+            subplugins = []
             # Set up the plugins for each plugin entry point of dicompyler
             for i, plugin in enumerate(self.plugins):
                 # Skip plugin if it doesn't contain the required dictionary
@@ -368,7 +370,7 @@ class MainFrame(wx.Frame):
                             plugin = p.pluginLoader(self.notebook)
                             self.notebook.AddPage(plugin, props['name'])
                         # Load the menu plugins
-                        if (props['plugin_type'] == 'menu'):
+                        elif (props['plugin_type'] == 'menu'):
                             if not len(self.menuDict):
                                 self.menuPlugins.AppendSeparator()
                             self.menuDict[100+i] = self.menuPlugins.Append(
@@ -376,17 +378,27 @@ class MainFrame(wx.Frame):
                             plugin = p.plugin(self)
                             wx.EVT_MENU(self, 100+i, plugin.pluginMenu)
                         # Load the export menu plugins
-                        if (props['plugin_type'] == 'export'):
+                        elif (props['plugin_type'] == 'export'):
                             if not len(self.menuExportDict):
                                 self.menuExportItem.Enable(True)
                             self.menuExportDict[200+i] = self.menuExport.Append(
                                                 200+i, props['menuname'])
                             plugin = p.plugin(self)
                             wx.EVT_MENU(self, 200+i, plugin.pluginMenu)
+                        # If a sub-plugin, mark it to be initialized later
+                        else:
+                            subplugins.append(p)
+                            continue
                         # Add the plugin preferences if they exist
                         if hasattr(plugin, 'preferences'):
                             self.preftemplate.append({props['name']:plugin.preferences})
             pub.sendMessage('preferences.updated.template', self.preftemplate)
+
+            # Load the subplugins and notify the parent plugins
+            for s in subplugins:
+                props = s.pluginProperties()
+                msg = 'plugin.loaded.' + props['plugin_type'] + '.' +s.__name__
+                pub.sendMessage(msg, s)
 
         dlgProgress = guiutil.get_progress_dialog(self, "Loading Patient Data...")
         self.t=threading.Thread(target=self.LoadPatientDataThread,

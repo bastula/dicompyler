@@ -67,12 +67,15 @@ class plugin2DView(wx.Panel):
         self.pan = [0, 0]
         self.bwidth = 0
         self.bheight = 0
+        self.xpos = 0
+        self.ypos = 0
         self.mousepos = wx.Point(-10000, -10000)
         self.mouse_in_window = False
         self.isodose_line_style = 'Solid'
         self.isodose_fill_opacity = 25
         self.structure_line_style = 'Solid'
         self.structure_fill_opacity = 50
+        self.plugins = {}
 
         # Setup toolbar controls
         if guiutil.IsGtk():
@@ -81,9 +84,11 @@ class plugin2DView(wx.Panel):
             drawingstyles = ['Solid', 'Transparent', 'Dot', 'Dash', 'Dot Dash']
         zoominbmp = wx.Bitmap(util.GetResourcePath('magnifier_zoom_in.png'))
         zoomoutbmp = wx.Bitmap(util.GetResourcePath('magnifier_zoom_out.png'))
+        toolsbmp = wx.Bitmap(util.GetResourcePath('cog.png'))
         self.tools = []
         self.tools.append({'label':"Zoom In", 'bmp':zoominbmp, 'shortHelp':"Zoom In", 'eventhandler':self.OnZoomIn})
         self.tools.append({'label':"Zoom Out", 'bmp':zoomoutbmp, 'shortHelp':"Zoom Out", 'eventhandler':self.OnZoomOut})
+        self.tools.append({'label':"Tools", 'bmp':toolsbmp, 'shortHelp':"Tools", 'eventhandler':self.OnToolsMenu})
 
         # Set up preferences
         self.preferences = [
@@ -118,6 +123,7 @@ class plugin2DView(wx.Panel):
         pub.subscribe(self.OnIsodoseCheck, 'isodoses.checked')
         pub.subscribe(self.OnRefresh, '2dview.refresh')
         pub.subscribe(self.OnDrawingPrefsChange, '2dview.drawingprefs')
+        pub.subscribe(self.OnPluginLoaded, 'plugin.loaded.2dview')
         pub.sendMessage('preferences.requested.values', '2dview.drawingprefs')
 
     def OnUpdatePatient(self, msg):
@@ -197,6 +203,7 @@ class plugin2DView(wx.Panel):
         pub.unsubscribe(self.OnStructureCheck)
         pub.unsubscribe(self.OnIsodoseCheck)
         pub.unsubscribe(self.OnDrawingPrefsChange)
+        pub.unsubscribe(self.OnPluginLoaded)
         self.OnUnfocus()
 
     def OnStructureCheck(self, msg):
@@ -225,6 +232,12 @@ class plugin2DView(wx.Panel):
         elif (msg.topic[2] == 'structure_fill_opacity'):
             self.structure_fill_opacity = msg.data
         self.Refresh()
+
+    def OnPluginLoaded(self, msg):
+        """When a 2D View-dependent plugin is loaded, initialize the plugin."""
+
+        name = msg.data.pluginProperties()['name']
+        self.plugins[name] = msg.data.plugin(self)
 
     def DrawStructure(self, structure, gc, position, prone, feetfirst):
         """Draw the given structure on the panel."""
@@ -510,6 +523,10 @@ class plugin2DView(wx.Panel):
         ypos = int(pos[1]/self.zoom-self.pan[1]-(h-self.bheight*self.zoom)/
                 (2*self.zoom))
 
+        # Save the coordinates so they can be used by the 2dview plugins
+        self.xpos = xpos
+        self.ypos = ypos
+
         # Set an empty text placeholder if the coordinates are not within range
         text = ""
         value = ""
@@ -623,6 +640,17 @@ class plugin2DView(wx.Panel):
         """Get the initial position of the mouse when dragging."""
 
         self.mousepos = evt.GetPosition()
+        # Publish the coordinates of the cursor position based
+        # on the scaled image size range
+        if ((0 <= self.xpos < len(self.structurepixlut[0])) and
+            (0 <= self.ypos < len(self.structurepixlut[1])) and
+            (self.mouse_in_window) and
+            (evt.LeftDown())):
+            pub.sendMessage('2dview.mousedown',
+                        {'x':self.xpos,
+                         'y':self.ypos,
+                         'xmm':self.structurepixlut[0][self.xpos],
+                         'ymm':self.structurepixlut[1][self.ypos]})
 
     def OnMouseUp(self, evt):
         """Reset the cursor when the mouse is released."""
@@ -674,3 +702,20 @@ class plugin2DView(wx.Panel):
         self.window -= delta[0]
         self.level -= delta[1]
         self.Refresh()
+
+    def OnToolsMenu(self, evt):
+        """Show a context menu for the loaded 2D View plugins when the
+            'Tools' toolbar item is selected."""
+
+        menu = wx.Menu()
+        if len(self.plugins):
+            for name, p in self.plugins.iteritems():
+                id = wx.NewId()
+                self.Bind(wx.EVT_MENU, p.pluginMenu, id=id)
+                menu.Append(id, name)
+        else:
+            id = wx.NewId()
+            menu.Append(id, "No tools found")
+            menu.Enable(id, False)
+        self.PopupMenu(menu)
+        menu.Destroy()
