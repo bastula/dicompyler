@@ -195,6 +195,7 @@ class MainFrame(wx.Frame):
 
         # Bind interface events to the proper methods
         wx.EVT_CHOICE(self, XRCID('choiceStructure'), self.OnStructureSelect)
+        self.Bind(wx.EVT_ACTIVATE, self.OnActivate)
         self.Bind(wx.EVT_CLOSE, self.OnClose)
         self.notebook.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.OnPageChanged)
         # Events to work around a focus bug in Windows
@@ -280,6 +281,7 @@ class MainFrame(wx.Frame):
         pub.subscribe(self.OnUpdatePlugins, 'general.plugins.user_plugins_location')
         pub.subscribe(self.OnUpdatePreferences, 'general')
         pub.subscribe(self.OnUpdateStatusBar, 'main.update_statusbar')
+        pub.subscribe(self.OnOpenPatient, 'dicomgui.show')
 
         # Send a message to the logging system to turn on/off detailed logging
         pub.sendMessage('preferences.requested.value',
@@ -885,6 +887,20 @@ class MainFrame(wx.Frame):
 
         dlg.ShowModal()
         dlg.Destroy()
+
+    def OnActivate(self, evt):
+        """Show the import dialog if command-line arguments have been passed."""
+
+        # Check if a folder is provided via command-line arguments
+        if (len(sys.argv) == 2):
+            path = sys.argv[1]
+            if not os.path.isdir(path):
+                path = os.path.split(path)[0]
+            pub.sendMessage('preferences.updated.value',
+                        {'general.dicom.import_location':path})
+            sys.argv.pop()
+            self.OnOpenPatient(None)
+        evt.Skip()
 
     def OnClose(self, _):
         self.Destroy()
