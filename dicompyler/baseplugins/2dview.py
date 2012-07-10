@@ -362,11 +362,12 @@ class plugin2DView(wx.Panel):
         # Determine if the patient is prone or supine
         imdata = self.images[self.imagenum-1].GetImageData()
         prone = -1 if 'p' in imdata['patientposition'].lower() else 1
+        feetfirst = -1 if 'ff' in imdata['patientposition'].lower() else 1
         # Get the pixel spacing
         spacing = imdata['pixelspacing']
 
         # Transpose the dose grid LUT onto the image grid LUT
-        x = (np.array(doselut[0]) - pixlut[0][0]) * prone / spacing[0]
+        x = (np.array(doselut[0]) - pixlut[0][0]) * prone * feetfirst / spacing[0]
         y = (np.array(doselut[1]) - pixlut[1][0]) * prone / spacing[1]
         return (x, y)
 

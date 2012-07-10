@@ -514,9 +514,11 @@ class DicomParser:
             z = float(z)
             # Get the initial dose grid position (z) in patient coordinates
             imagepatpos = self.ds.ImagePositionPatient[2]
+            orientation = self.ds.ImageOrientationPatient[0]
             # Add the position to the offset vector to determine the
             # z coordinate of each dose plane
-            planes = np.array(self.ds.GridFrameOffsetVector)+imagepatpos
+            planes = orientation * np.array(self.ds.GridFrameOffsetVector) + \
+                    imagepatpos
             frame = -1
             # Check to see if the requested plane exists in the array
             if (np.amin(np.fabs(planes - z)) < threshold):
