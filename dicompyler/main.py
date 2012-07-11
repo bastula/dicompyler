@@ -301,6 +301,8 @@ class MainFrame(wx.Frame):
                         'general.calculation.dvh_recalc')
         pub.sendMessage('preferences.requested.value',
                         'general.plugins.disabled_list')
+        pub.sendMessage('preferences.requested.values',
+                        'general.window')
 
 ########################### Patient Loading Functions ##########################
 
@@ -741,6 +743,15 @@ class MainFrame(wx.Frame):
                             self.ch.setLevel(logging.WARNING)
         elif (msg.topic[1] == 'plugins') and (msg.topic[2] == 'disabled_list'):
             self.pluginsDisabled = msg.data
+        elif (msg.topic[1] == 'window'):
+            if msg.topic[2] == 'maximized':
+                self.Maximize(msg.data)
+            elif msg.topic[2] == 'size':
+                if not self.IsMaximized():
+                    self.SetSize(tuple(msg.data))
+            elif msg.topic[2] == 'position':
+                if not self.IsMaximized():
+                    self.SetPosition(tuple(msg.data))
 
     def OnUpdatePlugins(self, msg):
         """Update the location of the user plugins and load all plugins."""
@@ -903,6 +914,13 @@ class MainFrame(wx.Frame):
         evt.Skip()
 
     def OnClose(self, _):
+        pub.sendMessage('preferences.updated.value',
+                {'general.window.maximized':self.IsMaximized()})
+        if not self.IsMaximized():
+            pub.sendMessage('preferences.updated.value',
+                    {'general.window.size':tuple(self.GetSize())})
+            pub.sendMessage('preferences.updated.value',
+                    {'general.window.position':tuple(self.GetPosition())})
         self.Destroy()
 
 class dicompyler(wx.App):
@@ -919,7 +937,6 @@ class dicompyler(wx.App):
 
         dicompylerFrame = MainFrame(None, -1, "dicompyler", self.res)
         self.SetTopWindow(dicompylerFrame)
-        dicompylerFrame.Centre()
         dicompylerFrame.Show()
         return 1
 
