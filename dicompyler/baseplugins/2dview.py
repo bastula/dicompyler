@@ -249,6 +249,10 @@ class plugin2DView(wx.Panel):
                     structure['planes'].keys(), dtype=np.float32)
             structure['zkeys'] = structure['planes'].keys()
 
+        # Return if there are no z positions in the structure data
+        if not len(structure['zarray']):
+            return
+
         # Determine the closest z plane to the given position
         zmin = np.amin(np.abs(structure['zarray'] - float(position)))
         index = np.argmin(np.abs(structure['zarray'] - float(position)))
