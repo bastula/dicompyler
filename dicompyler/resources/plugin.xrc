@@ -14,12 +14,20 @@
               </object>
               <object class="sizeritem">
                 <object class="wxPanel" name="panelTreeView">
-                  <object class="wxTreeCtrl" name="tcPlugins">
-                    <size>250,250</size>
-                    <style>wxNO_BORDER|wxTR_NO_BUTTONS|wxTR_NO_LINES|wxTR_FULL_ROW_HIGHLIGHT|wxTR_HIDE_ROOT</style>
-                  </object>
+                  
                   <bg>#FFFFFF</bg>
                   <style>wxSUNKEN_BORDER</style>
+                  <object class="wxBoxSizer">
+                    <orient>wxVERTICAL</orient>
+                    <object class="sizeritem">
+                      <object class="wxTreeCtrl" name="tcPlugins">
+                        <size>250,250</size>
+                        <style>wxNO_BORDER|wxTR_NO_BUTTONS|wxTR_NO_LINES|wxTR_FULL_ROW_HIGHLIGHT|wxTR_HIDE_ROOT</style>
+                      </object>
+                      <option>1</option>
+                      <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                    </object>
+                  </object>
                 </object>
                 <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
               </object>
