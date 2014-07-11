@@ -2,7 +2,7 @@
 # -*- coding: ISO-8859-1 -*-
 # main.py
 """Main file for dicompyler."""
-# Copyright (c) 2009-2012 Aditya Panchal
+# Copyright (c) 2009-2014 Aditya Panchal
 # Copyright (c) 2009 Roy Keyes
 # This file is part of dicompyler, released under a BSD license.
 #    See the file license.txt included with this distribution, also
@@ -863,7 +863,7 @@ class MainFrame(wx.Frame):
         info = wx.AboutDialogInfo()
         info.Name = "dicompyler"
         info.Version = __version__
-        info.Copyright = u"© 2009-2012 Aditya Panchal"
+        info.Copyright = u"© 2009-2014 Aditya Panchal"
         credits = util.get_credits()
         info.Developers = credits['developers']
         info.Artists = credits['artists']
