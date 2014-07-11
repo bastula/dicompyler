@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# dicompyler.py
+# setup.py
 """Setup script for dicompyler."""
-# Copyright (c) 2012 Aditya Panchal
+# Copyright (c) 2012-2014 Aditya Panchal
 # This file is part of dicompyler, relased under a BSD license.
 #    See the file license.txt included with this distribution, also
 #    available at http://code.google.com/p/dicompyler/
@@ -14,10 +14,10 @@ from setuptools import setup, find_packages
 import sys
 
 requires = [
-    'matplotlib>=0.99',
+    'matplotlib>=0.99, <=1.1.0',
     'numpy>=1.2.1',
     'pil>=1.1.7',
-    'pydicom>=0.9.5',]
+    'pydicom>=0.9.5, <0.9.7']
 
 if sys.version_info[0] == 2 and sys.version_info[1] < 6:
     requires.append('simplejson')
@@ -32,6 +32,7 @@ setup(
         'baseplugins/*.py', 'baseplugins/*.xrc']},
     zip_safe = False,
     install_requires = requires,
+    dependency_links=['https://pydicom.googlecode.com/files/pydicom-0.9.6.zip'],
     entry_points={'console_scripts':['dicompyler = dicompyler.main:start']},
 
     # metadata for upload to PyPI
@@ -84,10 +85,10 @@ setup(
     dicompyler requires the following packages to run from source:
     
     - Python 2.5 or higher (not tested on Python 3)
-    - wxPython 2.8.8.1 or higher
-    - matplotlib 0.99 or higher
+    - wxPython 2.8.8.1 to 2.8.10.1
+    - matplotlib 0.99 to 1.10
     - numpy 1.2.1 or higher
-    - PIL 1.1.7 or higher
-    - pydicom 0.9.5 or higher
+    - PIL 1.1.7 or any version of Pillow
+    - pydicom 0.9.5 or 0.9.6
     - simplejson (only for Python 2.5, Python 2.6+ includes JSON support)""",
 )
