@@ -4,14 +4,13 @@ dicompyler Readme
 dicompyler is an extensible radiation therapy research platform and viewer for
 DICOM and DICOM RT.
 
-dicompyler is released under a BSD license. See the included license.txt file,
-or available online at: http://code.google.com/p/dicompyler/
-
-Full documentation and source code for dicompyler is available online at:
-http://code.google.com/p/dicompyler/
+Documentation and source code for dicompyler is available online at:
+http://www.dicompyler.com
 
 Release notes for this version can be found online at:
-http://code.google.com/p/dicompyler/wiki/ReleaseNotes
+https://github.com/bastula/dicompyler/wiki/ReleaseNotes
+
+dicompyler is released under a BSD license.
 
 Features
 ========
@@ -58,9 +57,6 @@ Once the DICOM data has been loaded, the main window will show the patient and
 plan information. Additionally it will show a list of structures and isodoses
 that are associated with the plan.
 
-Example DICOM-RT data is provided in the downloads tab on the project homepage:
-http://code.google.com/p/dicompyler/downloads/list
-
 Included Plugins
 ================
 
@@ -75,9 +71,9 @@ Custom Plugins
 
 Since dicompyler is based on a plugin architecture, users can write their own
 plugins with ease. For more information see the Plugin Development Guide on the
-dicompyler wiki: http://code.google.com/p/dicompyler/wiki/PluginDevelopmentGuide
+dicompyler wiki: https://github.com/bastula/dicompyler/wiki/PluginDevelopmentGuide
 
-3rd-party plugins can be found at http://code.google.com/p/dicompyler-plugins/
+3rd-party plugins can be found at https://github.com/dicompyler/dicompyler-plugins
 
 Bugs and Feedback
 =================
