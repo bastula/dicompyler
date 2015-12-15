@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/bastula/dicompyler.png?label=ready&title=Ready)](https://waffle.io/bastula/dicompyler)
 dicompyler
 ============
 
