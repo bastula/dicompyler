@@ -606,7 +606,7 @@ class DicomParser:
         data['doseunits'] = self.ds.DoseUnits
         data['dosetype'] = self.ds.DoseType
         data['dosesummationtype'] = self.ds.DoseSummationType
-        data['dosegridscaling'] = self.ds.DoseGridScaling
+        data['dosegridscaling'] = float(self.ds.DoseGridScaling)
         data['dosemax'] = float(self.ds.pixel_array.max())
 
         return data
