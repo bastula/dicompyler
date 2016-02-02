@@ -12,7 +12,7 @@ import logging
 logger = logging.getLogger('dicompyler.dvhcalc')
 import numpy as np
 import numpy.ma as ma
-import matplotlib.nxutils as nx
+from matplotlib import path
 
 def get_dvh(structure, dose, limit=None, callback=None):
     """Get a calculated cumulative DVH along with the associated parameters."""
@@ -100,8 +100,8 @@ def calculate_dvh(structure, dose, limit=None, callback=None):
             else:
                 contour['inside'] = False
                 for point in contour['data']:
-                    if nx.pnpoly(point[0], point[1],
-                                 np.array(contours[largestIndex]['data'])):
+                    p = path.Path(np.array(contours[largestIndex]['data']))
+                    if p.contains_point(point, transform=None, radius=0.0):
                         contour['inside'] = True
                         # Assume if one point is inside, all will be inside
                         break
@@ -161,7 +161,8 @@ def calculate_contour_areas(plane):
 def get_contour_mask(doselut, dosegridpoints, contour):
     """Get the mask for the contour with respect to the dose plane."""
 
-    grid = nx.points_inside_poly(dosegridpoints, contour)
+    p = path.Path(contour)
+    grid = p.contains_points(dosegridpoints, transform=None, radius=0.0)
     grid = grid.reshape((len(doselut[1]), len(doselut[0])))
 
     return grid
