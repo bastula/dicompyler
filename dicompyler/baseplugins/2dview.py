@@ -371,6 +371,7 @@ class plugin2DView(wx.Panel):
         spacing = imdata['pixelspacing']
 
         # Transpose the dose grid LUT onto the image grid LUT
+        spacing = [float(x) for x in spacing]
         x = (np.array(doselut[0]) - pixlut[0][0]) * prone * feetfirst / spacing[0]
         y = (np.array(doselut[1]) - pixlut[1][0]) * prone / spacing[1]
         return (x, y)
