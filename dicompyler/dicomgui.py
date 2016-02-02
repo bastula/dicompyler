@@ -260,7 +260,7 @@ class DicomImporterDialog(wx.Dialog):
                             image['series'] = seinfo['id']
                             image['referenceframe'] = dp.GetFrameofReferenceUID()
                             patients[h]['series'][seinfo['id']]['numimages'] = \
-                                patients[h]['series'][seinfo['id']]['numimages'] + 1 
+                                patients[h]['series'][seinfo['id']]['numimages'] + 1
                             patients[h]['images'][image['id']] = image
                         # Create each RT Structure Set
                         elif dp.ds.Modality in ['RTSTRUCT']:

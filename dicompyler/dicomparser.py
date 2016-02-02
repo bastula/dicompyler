@@ -467,7 +467,7 @@ class DicomParser:
         """Generate a cumulative DVH (cDVH) from a differential DVH (dDVH)"""
 
         dDVH = np.array(data)
-        # Separate the dose and volume values into distinct arrays 
+        # Separate the dose and volume values into distinct arrays
         dose = data[0::2]
         volume = data[1::2]
 

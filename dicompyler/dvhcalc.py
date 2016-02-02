@@ -178,8 +178,8 @@ def calculate_contour_dvh(mask, doseplane, maxdose, dd, id, structure):
 
     # Calculate the volume for the contour for the given dose plane
     vol = sum(hist) * ((id['pixelspacing'][0]) *
-                      (id['pixelspacing'][1]) *
-                      (structure['thickness']))
+                       (id['pixelspacing'][1]) *
+                       (structure['thickness']))
     return hist, vol
 
 def get_cdvh(ddvh):
