@@ -32,13 +32,17 @@ class DVH:
         """ Return the volume (in cc) of the structure that receives at least a
             specific dose in cGy. i.e. V100, V150."""
 
-        volumepercent = self.GetVolumeConstraint(dose)
+        volumepercent = float(self.GetVolumeConstraint(dose))
+        volumecc = float(volumecc)
 
         return volumepercent * volumecc / 100
 
     def GetDoseConstraint(self, volume):
         """ Return the maximum dose (in cGy) that a specific volume (in percent)
             receives. i.e. D90, D20."""
+
+        self.dvh = np.array(self.dvh, dtype=float)
+        volume = float(volume)
 
         return np.argmin(np.fabs(self.dvh - volume))*self.scaling
 
