@@ -732,7 +732,7 @@ class DicomImporterDialog(wx.Dialog):
                 if (i > 0):
                     iop0 = np.array(item.ImageOrientationPatient)
                     iop1 = np.array(images[i-1].ImageOrientationPatient)
-                    if (np.any(np.array(np.round(iop0 - iop1),
+                    if (np.any(np.array(np.round((iop0 - iop1).astype(np.int32)),
                     dtype=np.int32))):
                         parallel = False
                         break
@@ -740,7 +740,7 @@ class DicomImporterDialog(wx.Dialog):
                     # use the same patient position for every slice
                     ipp0 = np.array(item.ImagePositionPatient)
                     ipp1 = np.array(images[i-1].ImagePositionPatient)
-                    if not (np.any(np.array(np.round(ipp0 - ipp1),
+                    if not (np.any(np.array(np.round((ipp0 - ipp1).astype(np.int32)),
                     dtype=np.int32))):
                         parallel = False
                         break
