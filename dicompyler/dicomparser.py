@@ -264,6 +264,11 @@ class DicomParser:
         orientation = self.ds.ImageOrientationPatient
         position = self.ds.ImagePositionPatient
 
+        di = float(di)
+        dj = float(dj)
+        orientation = [float(x) for x in orientation]
+        position = [float(x) for x in position]
+
         m = np.matrix(
             [[orientation[0]*di, orientation[3]*dj, 0, position[0]],
             [orientation[1]*di, orientation[4]*dj, 0, position[1]],
