@@ -201,8 +201,10 @@ class DicomParser:
         # Rescale the slope and intercept of the image if present
         if (self.ds.has_key('RescaleIntercept') and
             self.ds.has_key('RescaleSlope')):
-            rescaled_image = self.ds.pixel_array*self.ds.RescaleSlope + \
-                             self.ds.RescaleIntercept
+            rescale_slope = int(self.ds.RescaleSlope)
+            rescale_intercept = int(self.ds.RescaleIntercept)
+            rescaled_image = self.ds.pixel_array*rescale_slope + \
+                            rescale_intercept
         else:
             rescaled_image = self.ds.pixel_array
         image = self.GetLUTValue(rescaled_image, window, level)
@@ -230,8 +232,10 @@ class DicomParser:
             # Rescale the slope and intercept of the image if present
             if (self.ds.has_key('RescaleIntercept') and
                 self.ds.has_key('RescaleSlope')):
-                pixel_array = self.ds.pixel_array*self.ds.RescaleSlope + \
-                              self.ds.RescaleIntercept
+                rescale_slope = int(self.ds.RescaleSlope)
+                rescale_intercept = int(self.ds.RescaleIntercept)
+                pixel_array = self.ds.pixel_array*rescale_slope + \
+                              rescale_intercept
             else:
                 pixel_array = self.ds.pixel_array
             if (pixel_array.max() > wmax):
