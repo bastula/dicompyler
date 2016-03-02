@@ -219,7 +219,7 @@ class pluginDVH(wx.Panel):
             self.lblConstraintTypeUnits.SetLabel('%  ')
             self.lblResultType.SetLabel('Volume:')
             rxDose = float(self.plan['rxdose'])
-            dvhdata = (len(dvh['data'])-1)*dvh['scaling']
+            dvhdata = float((len(dvh['data'])-1)*dvh['scaling'])
             constraintrange = int(dvhdata*100/rxDose)
             # never go over the max dose as data does not exist
             if (constraintrange > int(dvh['max'])):
@@ -234,6 +234,13 @@ class pluginDVH(wx.Panel):
             # never go over the max dose as data does not exist
             if (constraintrange*100 > maxdose):
                 constraintrange = maxdose
+            dvhdata = float((len(dvh['data'])-1)*dvh['scaling'])
+
+            if (constraintrange*100 > dvhdata):
+                print "Scaling could have been set improperly. Possible mistake in DICOM file."
+                new_scaling = constraintrange*100/dvhdat
+                self.dvhdata[self.structureid].scaling = new_scaling
+
         # Dose constraint
         elif (constrainttype == 2):
             self.lblConstraintType.SetLabel('Volume:')

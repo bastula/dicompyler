@@ -371,6 +371,7 @@ class plugin2DView(wx.Panel):
         spacing = imdata['pixelspacing']
 
         # Transpose the dose grid LUT onto the image grid LUT
+        spacing = [float(x) for x in spacing]
         x = (np.array(doselut[0]) - pixlut[0][0]) * prone * feetfirst / spacing[0]
         y = (np.array(doselut[1]) - pixlut[1][0]) * prone / spacing[1]
         return (x, y)
@@ -548,8 +549,10 @@ class plugin2DView(wx.Panel):
             # Rescale the slope and intercept of the image if present
             if (image.ds.has_key('RescaleIntercept') and
                 image.ds.has_key('RescaleSlope')):
-                pixel_array = image.ds.pixel_array*image.ds.RescaleSlope + \
-                              image.ds.RescaleIntercept
+                rescale_slope = int(image.ds.RescaleSlope)
+                rescale_intercept = int(image.ds.RescaleIntercept)
+                pixel_array = image.ds.pixel_array*rescale_slope + \
+                              rescale_intercept
             else:
                 pixel_array = image.ds.pixel_array
             value = "Value: " + unicode(pixel_array[ypos, xpos])

@@ -201,8 +201,10 @@ class DicomParser:
         # Rescale the slope and intercept of the image if present
         if (self.ds.has_key('RescaleIntercept') and
             self.ds.has_key('RescaleSlope')):
-            rescaled_image = self.ds.pixel_array*self.ds.RescaleSlope + \
-                             self.ds.RescaleIntercept
+            rescale_slope = int(self.ds.RescaleSlope)
+            rescale_intercept = int(self.ds.RescaleIntercept)
+            rescaled_image = self.ds.pixel_array*rescale_slope + \
+                            rescale_intercept
         else:
             rescaled_image = self.ds.pixel_array
         image = self.GetLUTValue(rescaled_image, window, level)
@@ -230,8 +232,10 @@ class DicomParser:
             # Rescale the slope and intercept of the image if present
             if (self.ds.has_key('RescaleIntercept') and
                 self.ds.has_key('RescaleSlope')):
-                pixel_array = self.ds.pixel_array*self.ds.RescaleSlope + \
-                              self.ds.RescaleIntercept
+                rescale_slope = int(self.ds.RescaleSlope)
+                rescale_intercept = int(self.ds.RescaleIntercept)
+                pixel_array = self.ds.pixel_array*rescale_slope + \
+                              rescale_intercept
             else:
                 pixel_array = self.ds.pixel_array
             if (pixel_array.max() > wmax):
@@ -263,6 +267,11 @@ class DicomParser:
         dj = self.ds.PixelSpacing[1]
         orientation = self.ds.ImageOrientationPatient
         position = self.ds.ImagePositionPatient
+
+        di = float(di)
+        dj = float(dj)
+        orientation = [float(x) for x in orientation]
+        position = [float(x) for x in position]
 
         m = np.matrix(
             [[orientation[0]*di, orientation[3]*dj, 0, position[0]],
@@ -467,7 +476,7 @@ class DicomParser:
         """Generate a cumulative DVH (cDVH) from a differential DVH (dDVH)"""
 
         dDVH = np.array(data)
-        # Separate the dose and volume values into distinct arrays 
+        # Separate the dose and volume values into distinct arrays
         dose = data[0::2]
         volume = data[1::2]
 
@@ -513,12 +522,12 @@ class DicomParser:
         if 'GridFrameOffsetVector' in self.ds:
             z = float(z)
             # Get the initial dose grid position (z) in patient coordinates
-            imagepatpos = self.ds.ImagePositionPatient[2]
-            orientation = self.ds.ImageOrientationPatient[0]
+            imagepatpos = float(self.ds.ImagePositionPatient[2])
+            orientation = float(self.ds.ImageOrientationPatient[0])
             # Add the position to the offset vector to determine the
             # z coordinate of each dose plane
-            planes = orientation * np.array(self.ds.GridFrameOffsetVector) + \
-                    imagepatpos
+            planes = (orientation * np.array(self.ds.GridFrameOffsetVector, dtype=float) + \
+                    imagepatpos)
             frame = -1
             # Check to see if the requested plane exists in the array
             if (np.amin(np.fabs(planes - z)) < threshold):
@@ -606,7 +615,7 @@ class DicomParser:
         data['doseunits'] = self.ds.DoseUnits
         data['dosetype'] = self.ds.DoseType
         data['dosesummationtype'] = self.ds.DoseSummationType
-        data['dosegridscaling'] = self.ds.DoseGridScaling
+        data['dosegridscaling'] = float(self.ds.DoseGridScaling)
         data['dosemax'] = float(self.ds.pixel_array.max())
 
         return data
