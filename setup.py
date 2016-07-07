@@ -14,10 +14,10 @@ from setuptools import setup, find_packages
 import sys
 
 requires = [
-    'matplotlib>=0.99, <=1.1.0',
+    'matplotlib>=0.99',
     'numpy>=1.2.1',
     'pil>=1.1.7',
-    'pydicom>=0.9.5, <0.9.7']
+    'pydicom>=0.9.5']
 
 if sys.version_info[0] == 2 and sys.version_info[1] < 6:
     requires.append('simplejson')
@@ -60,33 +60,33 @@ setup(
     long_description = """
     dicompyler
     ==========
-    
-    dicompyler is an extensible open source radiation therapy research 
-    platform based on the DICOM standard. It also functions as a 
+
+    dicompyler is an extensible open source radiation therapy research
+    platform based on the DICOM standard. It also functions as a
     cross-platform DICOM RT viewer.
-    
-    dicompyler runs on Windows, Mac and Linux systems and is available in 
-    source and binary versions. Since dicompyler is based on modular 
+
+    dicompyler runs on Windows, Mac and Linux systems and is available in
+    source and binary versions. Since dicompyler is based on modular
     architecture, it is easy to extend it with 3rd party plugins.
-    
+
     Visit the dicompyler _`home page`:
     http://code.google.com/p/dicompyler/ for how-to information and guides.
 
     Getting Help
     ============
 
-    To get help with dicompyler, visit the _`mailing list`: 
-    http://groups.google.com/group/dicompyler/ or follow us on _`twitter`: 
+    To get help with dicompyler, visit the _`mailing list`:
+    http://groups.google.com/group/dicompyler/ or follow us on _`twitter`:
     http://twitter.com/dicompyler
 
     Requirements
     ============
-    
+
     dicompyler requires the following packages to run from source:
-    
+
     - Python 2.5 or higher (not tested on Python 3)
     - wxPython 2.8.8.1 to 2.8.10.1
-    - matplotlib 0.99 to 1.10
+    - matplotlib 0.99 or higher
     - numpy 1.2.1 or higher
     - PIL 1.1.7 or any version of Pillow
     - pydicom 0.9.5 or 0.9.6

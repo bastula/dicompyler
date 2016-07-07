@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<resource>
+  <object class="wxDialog" name="ScaleDoseDialog" subclass="scaledose.scaledose.ScaleDoseDialog">
+    <object class="wxBoxSizer">
+      <orient>wxVERTICAL</orient>
+      <object class="sizeritem">
+        <object class="wxStaticBoxSizer">
+          <object class="sizeritem">
+            <object class="wxBoxSizer">
+              <object class="sizeritem">
+                <object class="wxStaticText" name="lblOriginalRxDose">
+                  <label>Original Rx Dose:</label>
+                  <style>wxALIGN_RIGHT</style>
+                </object>
+                <flag>wxALIGN_CENTRE</flag>
+              </object>
+              <object class="spacer">
+                <size>5,0</size>
+              </object>
+              <object class="sizeritem">
+                <object class="wxTextCtrl" name="txtOriginalRxDose">
+                  <enabled>0</enabled>
+                </object>
+                <option>2</option>
+                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+              </object>
+              <object class="sizeritem">
+                <object class="wxStaticText">
+                  <label> cGy</label>
+                  <style>wxALIGN_RIGHT</style>
+                </object>
+                <flag>wxALIGN_CENTRE</flag>
+              </object>
+              <object class="spacer">
+                <size>7,0</size>
+              </object>
+              <object class="sizeritem">
+                <object class="wxStaticText" name="lblNewRxDose">
+                  <label>New Rx Dose:</label>
+                  <style>wxALIGN_RIGHT</style>
+                </object>
+                <flag>wxALIGN_CENTRE</flag>
+              </object>
+              <object class="spacer">
+                <size>5,0</size>
+              </object>
+              <object class="sizeritem">
+                <object class="wxTextCtrl" name="txtNewRxDose"/>
+                <option>2</option>
+                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+              </object>
+              <object class="sizeritem">
+                <object class="wxStaticText">
+                  <label> cGy</label>
+                  <style>wxALIGN_RIGHT</style>
+                </object>
+                <flag>wxALIGN_CENTRE</flag>
+              </object>
+              <orient>wxHORIZONTAL</orient>
+            </object>
+            <option>1</option>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+          </object>
+          <label>Choose a new Rx Dose to scale to:</label>
+          <orient>wxVERTICAL</orient>
+        </object>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+        <border>3</border>
+      </object>
+      <object class="spacer">
+        <size>0,5</size>
+      </object>
+      <object class="sizeritem">
+        <object class="wxStdDialogButtonSizer">
+          <object class="button">
+            <object class="wxButton" name="wxID_CANCEL">
+              <label/>
+              <label>&amp;Cancel</label>
+            </object>
+          </object>
+          <object class="button">
+            <object class="wxButton" name="wxID_OK">
+              <label>Scale Dose</label>
+              <default>1</default>
+              <focused>1</focused>
+            </object>
+          </object>
+        </object>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+        <border>3</border>
+      </object>
+      <object class="spacer">
+        <size>0,5</size>
+      </object>
+    </object>
+    <title>Scale Dose</title>
+    <centered>1</centered>
+    <style>wxDEFAULT_DIALOG_STYLE</style>
+  </object>
+</resource>

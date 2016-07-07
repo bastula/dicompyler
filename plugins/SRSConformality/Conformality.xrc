@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<resource>
+  <object class="wxDialog" name="ConformalityPanel" subclass="SRSConformality.Conformality.ConformalityPanel">
+    <object class="wxBoxSizer">
+      <object class="sizeritem">
+        <object class="wxBoxSizer">
+          <object class="sizeritem">
+            <object class="wxStaticBoxSizer">
+              <label>Conformality Constraints</label>
+              <orient>wxHORIZONTAL</orient>
+              <object class="spacer">
+                <size>3,0</size>
+              </object>
+              <object class="sizeritem">
+                <object class="wxChoice" name="choiceConformalityStructure">
+                  <content>
+                  </content>
+                  <selection>0</selection>
+                </object>
+                <flag>wxALIGN_LEFT|wxALIGN_CENTRE_VERTICAL</flag>
+              </object>
+              <object class="spacer">
+                <size>5,0</size>
+                <option>1</option>
+              </object>
+              <object class="sizeritem">
+                <object class="wxStaticText" name="lblConstraintType">
+                  <label>   Isodose Level:</label>
+                </object>
+                <flag>wxALIGN_RIGHT|wxALIGN_CENTRE_VERTICAL</flag>
+              </object>
+              <object class="spacer">
+                <size>3,0</size>
+              </object>
+              <object class="spacer">
+                <size>3,0</size>
+              </object>
+			 <object class="sizeritem">
+              <object class="wxChoice" name="choiceConformalityDose">
+                  <content>
+                  <item>   -</item>
+                  <item>100%</item>
+                  <item> 90%</item>
+                  <item> 80%</item>
+                  <item> 70%</item>
+                  <item> 60%</item>
+                  <item> 50%</item>
+                  </content>
+                  <selection>0</selection>
+                </object>
+                <flag>wxALIGN_LEFT|wxALIGN_CENTRE_VERTICAL</flag>
+              </object>
+              <object class="spacer">
+                <size>3,0</size>
+              </object>
+            </object>
+            <option>2</option>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+          </object>
+          <orient>wxHORIZONTAL</orient>
+        </object>
+        <option>0</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+      </object>
+<object class="sizeritem">
+                <object class="wxFlexGridSizer">
+                  <object class="sizeritem">
+                    <object class="wxStaticText">
+                      <label>Conformality Index:</label>
+                    </object>
+                    <flag>wxALIGN_RIGHT|wxALIGN_CENTRE_VERTICAL</flag>
+                  </object>
+                  <object class="sizeritem">
+                    <object class="wxStaticText" name="lblConformalityIndex">
+                      <label>-</label>
+                    </object>
+                  </object>
+                  <object class="sizeritem">
+                    <object class="wxStaticText">
+                      <label>%</label>
+                    </object>
+                  </object>
+                  <object class="sizeritem">
+                    <object class="wxStaticText">
+                      <label>Underdose Ratio:</label>
+                    </object>
+                    <flag>wxALIGN_RIGHT|wxALIGN_CENTRE_VERTICAL</flag>
+                  </object>
+                  <object class="sizeritem">
+                    <object class="wxStaticText" name="lblUnderdoseRatio">
+                      <label>-</label>
+                    </object>
+                    <option>1</option>
+                  </object>
+                  <object class="sizeritem">
+                    <object class="wxStaticText">
+                      <label>%</label>
+                    </object>
+                  </object>
+                  <object class="sizeritem">
+                    <object class="wxStaticText">
+                      <label>Overdose Ratio:</label>
+                    </object>
+                    <flag>wxALIGN_RIGHT</flag>
+                  </object>
+                  <object class="sizeritem">
+                    <object class="wxStaticText" name="lblOverdoseRatio">
+                      <label>-</label>
+                    </object>
+                    <option>1</option>
+                  </object>
+                  <object class="sizeritem">
+                    <object class="wxStaticText">
+                      <label>%</label>
+                    </object>
+                  </object>
+                  <object class="sizeritem">
+                    <object class="wxStaticText">
+                      <label>Target Volume:</label>
+                    </object>
+					<flag>wxALIGN_RIGHT</flag>
+                  </object>
+                  <object class="sizeritem">
+                    <object class="wxStaticText" name="lblTargetVolume">
+                      <label>-</label>
+                    </object>
+                  </object>
+                  <object class="sizeritem">
+                    <object class="wxStaticText">
+                      <label>cc</label>
+                    </object>
+                  </object>
+                  <object class="sizeritem">
+                    <object class="wxStaticText">
+                      <label>Rx Isodose Volume:</label>
+                    </object>
+					<flag>wxALIGN_RIGHT</flag>
+                  </object>
+                  <object class="sizeritem">
+                    <object class="wxStaticText" name="lblIsodoseVolume">
+                      <label>-</label>
+                    </object>
+                  </object>
+                  <object class="sizeritem">
+                    <object class="wxStaticText">
+                      <label>cc</label>
+                    </object>
+                  </object>
+                  <object class="sizeritem">
+                    <object class="wxStaticText">
+                      <label>Coverage Volume:</label>
+                    </object>
+					<flag>wxALIGN_RIGHT</flag>
+                  </object>
+                  <object class="sizeritem">
+                    <object class="wxStaticText" name="lblCoverageVolume">
+                      <label>-</label>
+                    </object>
+                  </object>
+                  <object class="sizeritem">
+                    <object class="wxStaticText">
+                      <label>cc</label>
+                    </object>
+                  </object>
+                  <cols>3</cols>
+                  <rows>1</rows>
+                  <vgap>5</vgap>
+                  <hgap>5</hgap>
+                  <growablecols>1</growablecols>
+                </object>
+                <option>1</option>
+                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+              </object>
+              <label>Structure Information</label>
+      <orient>wxVERTICAL</orient>
+    </object>
+  </object>
+</resource>
