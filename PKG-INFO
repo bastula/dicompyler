@@ -1,0 +1,57 @@
+Metadata-Version: 1.1
+Name: dicompyler
+Version: 0.4.2
+Summary: Extensible radiation therapy research platform and viewer for DICOM and DICOM RT.
+Home-page: http://code.google.com/p/dicompyler/
+Author: Aditya Panchal
+Author-email: apanchal@bastula.org
+License: BSD License
+Description: 
+            dicompyler
+            ==========
+            
+            dicompyler is an extensible open source radiation therapy research 
+            platform based on the DICOM standard. It also functions as a 
+            cross-platform DICOM RT viewer.
+            
+            dicompyler runs on Windows, Mac and Linux systems and is available in 
+            source and binary versions. Since dicompyler is based on modular 
+            architecture, it is easy to extend it with 3rd party plugins.
+            
+            Visit the dicompyler _`home page`:
+            http://code.google.com/p/dicompyler/ for how-to information and guides.
+        
+            Getting Help
+            ============
+        
+            To get help with dicompyler, visit the _`mailing list`: 
+            http://groups.google.com/group/dicompyler/ or follow us on _`twitter`: 
+            http://twitter.com/dicompyler
+        
+            Requirements
+            ============
+            
+            dicompyler requires the following packages to run from source:
+            
+            - Python 2.5 or higher (not tested on Python 3)
+            - wxPython 2.8.8.1 to 2.8.10.1
+            - matplotlib 0.99 to 1.10
+            - numpy 1.2.1 or higher
+            - PIL 1.1.7 or any version of Pillow
+            - pydicom 0.9.5 or 0.9.6
+            - simplejson (only for Python 2.5, Python 2.6+ includes JSON support)
+Keywords: radiation therapy research python dicom dicom-rt
+Platform: UNKNOWN
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Healthcare Industry
+Classifier: Intended Audience :: Science/Research
+Classifier: Development Status :: 4 - Beta
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 2.5
+Classifier: Programming Language :: Python :: 2.6
+Classifier: Programming Language :: Python :: 2.7
+Classifier: Operating System :: OS Independent
+Classifier: Topic :: Scientific/Engineering :: Medical Science Apps.
+Classifier: Topic :: Scientific/Engineering :: Physics
+Classifier: Topic :: Scientific/Engineering :: Visualization
