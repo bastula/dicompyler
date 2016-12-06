@@ -12,7 +12,12 @@ logger = logging.getLogger('dicompyler.plugin')
 import imp, os
 import wx
 from wx.xrc import *
-from wx.lib.pubsub import Publisher as pub
+try:
+    from wx.lib.pubsub import Publisher as pub
+except ImportError:     # pheonixwx moved this library
+    from wx.lib.pubsub.core import publisher as pub
+from six import u as six_unicode # 2to3 compatibility
+
 from dicompyler import guiutil, util
 
 def import_plugins(userpath=None):

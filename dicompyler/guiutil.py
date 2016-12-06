@@ -6,11 +6,15 @@
 # This file is part of dicompyler, released under a BSD license.
 #    See the file license.txt included with this distribution, also
 #    available at http://code.google.com/p/dicompyler/
-
-import util
+from __future__ import absolute_import
+from dicompyler import util
 import wx
 from wx.xrc import XmlResource, XRCCTRL, XRCID
-from wx.lib.pubsub import Publisher as pub
+try:
+    from wx.lib.pubsub import Publisher as pub
+except ImportError:     # pheonixwx moved this library
+    from wx.lib.pubsub.core import publisher as pub
+
 
 def IsMSWindows():
     """Are we running on Windows?

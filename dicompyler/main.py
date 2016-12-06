@@ -21,7 +21,11 @@ from wx.xrc import *
 import wx.lib.dialogs, webbrowser
 # Uncomment line to setup pubsub for frozen targets on wxPython 2.8.11 and above
 # from wx.lib.pubsub import setupv1
-from wx.lib.pubsub import Publisher as pub
+try:
+    from wx.lib.pubsub import Publisher as pub
+except ImportError:     # pheonixwx moved this library
+    from wx.lib.pubsub.core import publisher as pub
+
 from dicompyler import guiutil, util
 from dicompyler import dicomgui, dvhdata, dvhdoses, dvhcalc
 from dicompyler.dicomparser import DicomParser as dp

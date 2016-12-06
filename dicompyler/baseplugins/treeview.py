@@ -20,8 +20,15 @@ except ImportError:
 
 import wx
 from wx.xrc import XmlResource, XRCCTRL, XRCID
-from wx.lib.pubsub import Publisher as pub
-from wx.gizmos import TreeListCtrl as tlc
+try:
+    from wx.lib.pubsub import Publisher as pub
+except ImportError:     # pheonixwx moved this library
+    from wx.lib.pubsub.core import publisher as pub
+try:
+    from wx.gizmos import TreeListCtrl as tlc
+except ImportError:     # pheonixwx moved this library
+    from wx.dataview import TreeListCtrl as tlc
+
 from dicompyler import guiutil, util
 import dicom
 

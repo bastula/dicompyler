@@ -12,7 +12,7 @@
 
 import wx
 from wx.xrc import XmlResource, XRCCTRL, XRCID
-from wx.lib.pubsub import Publisher as pub
+try:     from wx.lib.pubsub import Publisher as pub except:     # pheonixwx moved this library     from wx.lib.pubsub.core import publisher as pub
 from dicompyler import guiutil, util
 from dicompyler import dvhdata, guidvh
 from dicompyler import wxmpl

@@ -15,7 +15,10 @@ logger = logging.getLogger('dicompyler.dicomgui')
 import hashlib, os, threading
 import wx
 from wx.xrc import *
-from wx.lib.pubsub import Publisher as pub
+try:
+    from wx.lib.pubsub import Publisher as pub
+except ImportError:     # pheonixwx moved this library
+    from wx.lib.pubsub.core import publisher as pub
 import numpy as np
 from dicompyler import dicomparser, dvhdoses, guiutil, util
 

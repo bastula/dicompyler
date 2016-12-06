@@ -11,7 +11,7 @@
 import logging
 logger = logging.getLogger('dicompyler.quickimport')
 import wx
-from wx.lib.pubsub import Publisher as pub
+try:     from wx.lib.pubsub import Publisher as pub except:     # pheonixwx moved this library     from wx.lib.pubsub.core import publisher as pub
 from dicompyler import dicomparser, util
 import dicom
 
