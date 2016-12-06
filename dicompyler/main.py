@@ -9,6 +9,7 @@
 #    available at http://code.google.com/p/dicompyler/
 
 # Configure logging for dicompyler
+from __future__ import print_function, division, absolute_import
 import logging, logging.handlers
 logger = logging.getLogger('dicompyler')
 logger.setLevel(logging.DEBUG)
@@ -20,7 +21,11 @@ from wx.xrc import *
 import wx.lib.dialogs, webbrowser
 # Uncomment line to setup pubsub for frozen targets on wxPython 2.8.11 and above
 # from wx.lib.pubsub import setupv1
-from wx.lib.pubsub import Publisher as pub
+try:
+    from wx.lib.pubsub import Publisher as pub
+except ImportError:     # pheonixwx moved this library
+    from wx.lib.pubsub.core import publisher as pub
+
 from dicompyler import guiutil, util
 from dicompyler import dicomgui, dvhdata, dvhdoses, dvhcalc
 from dicompyler.dicomparser import DicomParser as dp
@@ -329,13 +334,13 @@ class MainFrame(wx.Frame):
             # Delete the previous plugin menus
             if len(self.menuDict):
                 self.menuPlugins.Delete(wx.ID_SEPARATOR)
-                for menuid, menu in self.menuDict.iteritems():
+                for menuid, menu in self.menuDict.items():
                     self.menuPlugins.Delete(menuid)
                 self.menuDict = {}
             # Delete the previous export menus
             if len(self.menuExportDict):
                 self.menuExportItem.Enable(False)
-                for menuid, menu in self.menuExportDict.iteritems():
+                for menuid, menu in self.menuExportDict.items():
                     self.menuExport.Delete(menuid)
                 self.menuExportDict = {}
             # Reset the preferences template
@@ -448,7 +453,7 @@ class MainFrame(wx.Frame):
         if ('dvhs' in patient) and ('structures' in patient):
             # If the DVHs are not present, calculate them
             i = 0
-            for key, structure in patient['structures'].iteritems():
+            for key, structure in patient['structures'].items():
                 # Only calculate DVHs if they are not present for the structure
                 # or recalc all DVHs if the preference is set
                 if ((not (key in patient['dvhs'].keys())) or
@@ -467,7 +472,7 @@ class MainFrame(wx.Frame):
                     if len(dvh['data']):
                         patient['dvhs'][key] = dvh
                     i += 1
-            for key, dvh in patient['dvhs'].iteritems():
+            for key, dvh in patient['dvhs'].items():
                 self.CalculateDoseStatistics(dvh, ptdata['rxdose'])
         wx.CallAfter(progressFunc, 100, 100, 'Done')
         wx.CallAfter(updateFunc, patient)
@@ -479,7 +484,7 @@ class MainFrame(wx.Frame):
                   'mean':dvhdoses.get_dvh_mean,
                   'max':dvhdoses.get_dvh_max}
 
-        for stat, func in sfdict.iteritems():
+        for stat, func in sfdict.items():
             # Only calculate stat if the stat was not calculated previously (-1)
             if dvh[stat] == -1:
                 dvh[stat] = 100*func(dvh['data']*dvh['scaling'])/rxdose
@@ -522,7 +527,7 @@ class MainFrame(wx.Frame):
         self.cclbStructures.Clear()
 
         self.structureList = {}
-        for id, structure in iter(sorted(self.structures.iteritems())):
+        for id, structure in iter(sorted(self.structures.items())):
             # Only append structures, don't include applicators
             if not(structure['name'].startswith('Applicator')):
                 self.cclbStructures.Append(structure['name'], structure, structure['color'],
@@ -795,7 +800,7 @@ class MainFrame(wx.Frame):
     def OnUpdateStatusBar(self, msg):
         """Update the status bar text."""
 
-        for k, v in msg.data.iteritems():
+        for k, v in msg.data.items():
             self.sb.SetStatusText(unicode(v), k)
 
     def OnPageChanged(self, evt):

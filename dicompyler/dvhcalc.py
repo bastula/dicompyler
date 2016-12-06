@@ -7,12 +7,23 @@
 # This file is part of dicompyler, released under a BSD license.
 #    See the file license.txt included with this distribution, also
 #    available at http://code.google.com/p/dicompyler/
-
+from __future__ import absolute_import, print_function
 import logging
 logger = logging.getLogger('dicompyler.dvhcalc')
 import numpy as np
 import numpy.ma as ma
-import matplotlib.nxutils as nx
+
+try:
+    import matplotlib.nxutils as nx
+except:
+    from matplotlib.path import Path
+
+    # nxutils have been removed after matplotlib 1.2
+    class nx(object):
+        @staticmethod
+        def pnpoly(x, y, xyverts):
+            p = Path(xyverts)
+            return p.contains_point(x,y)
 
 def get_dvh(structure, dose, limit=None, callback=None):
     """Get a calculated cumulative DVH along with the associated parameters."""
@@ -74,7 +85,7 @@ def calculate_dvh(structure, dose, limit=None, callback=None):
 
     plane = 0
     # Iterate over each plane in the structure
-    for z, sPlane in sPlanes.iteritems():
+    for z, sPlane in sPlanes.items():
 
         # Get the contours with calculated areas and the largest contour index
         contours, largestIndex = calculate_contour_areas(sPlane)
@@ -199,7 +210,7 @@ def get_cdvh(ddvh):
 
 def main():
 
-    import dicomparser
+    from dicompyler import dicomparser
     import string
 
     has_pylab = True
@@ -219,27 +230,27 @@ def main():
 
     # Generate the calculated DVHs
     calcdvhs = {}
-    for key, structure in structures.iteritems():
+    for key, structure in structures.items():
         calcdvhs[key] = get_dvh(structure, rtdose)
 
     # Compare the calculated and original DVH volume for each structure
-    print '\nStructure Name\t\t' + 'Original Volume\t\t' + \
-          'Calculated Volume\t' + 'Percent Difference'
-    print '--------------\t\t' + '---------------\t\t' + \
-          '-----------------\t' + '------------------'
-    for key, structure in structures.iteritems():
+    print('\nStructure Name\t\t' + 'Original Volume\t\t' + \
+          'Calculated Volume\t' + 'Percent Difference')
+    print('--------------\t\t' + '---------------\t\t' + \
+          '-----------------\t' + '------------------')
+    for key, structure in structures.items():
         if (key in calcdvhs) and (len(calcdvhs[key]['data'])):
             if key in dvhs:
                 ovol = dvhs[key]['data'][0]
                 cvol = calcdvhs[key]['data'][0]
-                print string.ljust(structure['name'], 18) + '\t' + \
+                print(string.ljust(structure['name'], 18) + '\t' + \
                       string.ljust(str(ovol), 18) + '\t' + \
                       string.ljust(str(cvol), 18) + '\t' + \
-                      "%.3f" % float((100)*(cvol-ovol)/(ovol))
+                      "%.3f" % float((100)*(cvol-ovol)/(ovol)))
 
     # Plot the DVHs if pylab is available
     if has_pylab:
-        for key, structure in structures.iteritems():
+        for key, structure in structures.items():
             if (key in calcdvhs) and (len(calcdvhs[key]['data'])):
                 if key in dvhs:
                     pl.plot(calcdvhs[key]['data']*100/calcdvhs[key]['data'][0],

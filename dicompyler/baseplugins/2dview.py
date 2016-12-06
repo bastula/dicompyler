@@ -7,10 +7,16 @@
 #    See the file license.txt included with this distribution, also
 #    available at http://code.google.com/p/dicompyler/
 #
-
+from __future__ import print_function, unicode_literals, absolute_import
 import wx
 from wx.xrc import XmlResource, XRCCTRL, XRCID
-from wx.lib.pubsub import Publisher as pub
+from six import u as six_unicode # 2to3 compatibility
+
+try:
+    from wx.lib.pubsub import Publisher as pub
+except ImportError:     # pheonixwx moved this library
+    from wx.lib.pubsub.core import publisher as pub
+
 from matplotlib import _cntr as cntr
 from matplotlib import __version__ as mplversion
 import numpy as np
@@ -440,7 +446,7 @@ class plugin2DView(wx.Panel):
                 feetfirst = True
             else:
                 feetfirst = False
-            for id, structure in self.structures.iteritems():
+            for id, structure in self.structures.items():
                 self.DrawStructure(structure, gc, self.z, prone, feetfirst)
 
             # Draw the isodoses if present
@@ -451,7 +457,7 @@ class plugin2DView(wx.Panel):
                         np.arange(grid.shape[1]), np.arange(grid.shape[0]))
                     # Instantiate the isodose generator for this slice
                     isodosegen = cntr.Cntr(x, y, grid)
-                    for id, isodose in iter(sorted(self.isodoses.iteritems())):
+                    for id, isodose in iter(sorted(self.isodoses.items())):
                         self.DrawIsodose(isodose, gc, isodosegen)
 
             # Restore the translation and scaling
@@ -538,10 +544,10 @@ class plugin2DView(wx.Panel):
         # Only display if the mouse coordinates are within the image size range
         if ((0 <= xpos < len(self.structurepixlut[0])) and
             (0 <= ypos < len(self.structurepixlut[1])) and self.mouse_in_window):
-            text = "X: " + unicode('%.2f' % self.structurepixlut[0][xpos]) + \
-                " mm Y: " + unicode('%.2f' % self.structurepixlut[1][ypos]) + \
-                " mm / X: " + unicode(xpos) + \
-                " px Y:" + unicode(ypos) + " px"
+            text = "X: " + six_unicode('%.2f' % self.structurepixlut[0][xpos]) + \
+                " mm Y: " + six_unicode('%.2f' % self.structurepixlut[1][ypos]) + \
+                " mm / X: " + six_unicode(xpos) + \
+                " px Y:" + six_unicode(ypos) + " px"
 
             # Lookup the current image and find the value of the current pixel
             image = self.images[self.imagenum-1]
@@ -552,7 +558,7 @@ class plugin2DView(wx.Panel):
                               image.ds.RescaleIntercept
             else:
                 pixel_array = image.ds.pixel_array
-            value = "Value: " + unicode(pixel_array[ypos, xpos])
+            value = "Value: " + six_unicode(pixel_array[ypos, xpos])
 
             # Lookup the current dose plane and find the value of the current
             # pixel, if the dose has been loaded
@@ -564,8 +570,8 @@ class plugin2DView(wx.Panel):
                     dose = dosegrid[ydpos, xdpos] * \
                            self.dosedata['dosegridscaling']
                     value = value + " / Dose: " + \
-                            unicode('%.4g' % dose) + " Gy / " + \
-                            unicode('%.4g' % float(dose*10000/self.rxdose)) + " %"
+                            six_unicode('%.4g' % dose) + " Gy / " + \
+                            six_unicode('%.4g' % float(dose*10000/self.rxdose)) + " %"
         # Send a message with the text to the 2nd and 3rd statusbar sections
         pub.sendMessage('main.update_statusbar', {1:text, 2:value})
 
@@ -714,7 +720,7 @@ class plugin2DView(wx.Panel):
 
         menu = wx.Menu()
         if len(self.plugins):
-            for name, p in self.plugins.iteritems():
+            for name, p in self.plugins.items():
                 id = wx.NewId()
                 self.Bind(wx.EVT_MENU, p.pluginMenu, id=id)
                 menu.Append(id, name)

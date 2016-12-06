@@ -10,7 +10,11 @@
 import os
 import wx
 from wx.xrc import *
-from wx.lib.pubsub import Publisher as pub
+try:
+    from wx.lib.pubsub import Publisher as pub
+except ImportError:     # pheonixwx moved this library
+    from wx.lib.pubsub.core import publisher as pub
+from six import u as six_unicode # 2to3 compatibility
 from dicompyler import guiutil, util
 
 try:
@@ -106,7 +110,7 @@ class PreferencesManager():
         v = self.values
         if v.has_key(query[0]):
             if v[query[0]].has_key(query[1]):
-                for setting, value in v[query[0]][query[1]].iteritems():
+                for setting, value in v[query[0]][query[1]].items():
                     message = msg.data + '.' + setting
                     pub.sendMessage(message, value)
 
@@ -374,7 +378,6 @@ def main():
 
     import tempfile, os
     import wx
-    from wx.lib.pubsub import Publisher as pub
 
     app = wx.App(False)
 
@@ -401,7 +404,7 @@ def main():
          'callback':'panel1.prefgrp1.choice_setting'},
             {'name':'Directory setting',
              'type':'directory',
-          'default':unicode(sp.GetDocumentsDir()),
+          'default':six_unicode(sp.GetDocumentsDir()),
          'callback':'panel1.prefgrp1.directory_setting'}]
         },
         {'Panel 1 Preference Group 2':
@@ -425,7 +428,7 @@ def main():
         {'Panel 2 Preference Group 2':
            [{'name':'Directory setting',
              'type':'directory',
-          'default':unicode(sp.GetUserDataDir()),
+          'default':six_unicode(sp.GetUserDataDir()),
          'callback':'panel2.prefgrp2.directory_setting'},
             {'name':'Choice Setting',
              'type':'choice',
@@ -437,7 +440,7 @@ def main():
 
     def print_template_value(msg):
         """Print the received template message."""
-        print msg.topic, msg.data
+        print(msg.topic, msg.data)
 
     # Subscribe the template value printer to each set of preferences
     pub.subscribe(print_template_value, 'panel1')
@@ -452,12 +455,12 @@ def main():
     # Print the results of the preferences
     with open(filename, mode='r') as f:
         for line in f:
-            print line,
+            print(line)
 
     try:
         os.remove(filename)
     except WindowsError:
-        print '\nCould not delete: '+filename+'. Please delete it manually.'
+        print('\nCould not delete: '+filename+'. Please delete it manually.')
 
 if __name__ == '__main__':
     main()

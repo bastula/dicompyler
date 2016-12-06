@@ -12,8 +12,13 @@
 
 import wx
 from wx.xrc import XmlResource, XRCCTRL, XRCID
-from wx.lib.pubsub import Publisher as pub
-from dicompyler import guiutil, util
+
+try:
+    from wx.lib.pubsub import Publisher as pub
+except ImportError:  # pheonixwx moved this library
+    from wx.lib.pubsub.core import publisher as pub
+from six import u as six_unicode  # 2to3 compatibility
+# from dicompyler import guiutil, util
 from dicompyler import dvhdata, guidvh
 from dicompyler import wxmpl
 import numpy as np
@@ -142,7 +147,7 @@ class pluginDVH(wx.Panel):
         # Make sure that the volume has been calculated for each structure
         # before setting it
         self.checkedstructures = msg.data
-        for id, structure in self.checkedstructures.iteritems():
+        for id, structure in self.checkedstructures.items():
             if not self.structures[id].has_key('volume'):
                 self.structures[id]['volume'] = structure['volume']
 

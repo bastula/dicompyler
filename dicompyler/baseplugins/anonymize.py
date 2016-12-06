@@ -10,7 +10,11 @@
 
 import wx
 from wx.xrc import XmlResource, XRCCTRL, XRCID
-from wx.lib.pubsub import Publisher as pub
+try:
+    from wx.lib.pubsub import Publisher as pub
+except ImportError:     # pheonixwx moved this library
+    from wx.lib.pubsub.core import publisher as pub
+from six import u as six_unicode # 2to3 compatibility
 import os, threading
 from dicompyler import guiutil, util
 
@@ -271,7 +275,7 @@ class AnonymizeDialog(wx.Dialog):
     def OnImportPrefsChange(self, msg):
         """When the import preferences change, update the values."""
 
-        self.path = unicode(msg.data)
+        self.path = six_unicode(msg.data)
         self.txtDICOMFolder.SetValue(self.path)
 
     def OnFolderBrowse(self, evt):
