@@ -74,7 +74,7 @@ def calculate_dvh(structure, dose, limit=None, callback=None):
 
     plane = 0
     # Iterate over each plane in the structure
-    for z, sPlane in sPlanes.iteritems():
+    for z, sPlane in sPlanes.items():
 
         # Get the contours with calculated areas and the largest contour index
         contours, largestIndex = calculate_contour_areas(sPlane)
@@ -219,7 +219,7 @@ def main():
 
     # Generate the calculated DVHs
     calcdvhs = {}
-    for key, structure in structures.iteritems():
+    for key, structure in structures.items():
         calcdvhs[key] = get_dvh(structure, rtdose)
 
     # Compare the calculated and original DVH volume for each structure
@@ -227,7 +227,7 @@ def main():
           'Calculated Volume\t' + 'Percent Difference'
     print '--------------\t\t' + '---------------\t\t' + \
           '-----------------\t' + '------------------'
-    for key, structure in structures.iteritems():
+    for key, structure in structures.items():
         if (key in calcdvhs) and (len(calcdvhs[key]['data'])):
             if key in dvhs:
                 ovol = dvhs[key]['data'][0]
@@ -239,7 +239,7 @@ def main():
 
     # Plot the DVHs if pylab is available
     if has_pylab:
-        for key, structure in structures.iteritems():
+        for key, structure in structures.items():
             if (key in calcdvhs) and (len(calcdvhs[key]['data'])):
                 if key in dvhs:
                     pl.plot(calcdvhs[key]['data']*100/calcdvhs[key]['data'][0],

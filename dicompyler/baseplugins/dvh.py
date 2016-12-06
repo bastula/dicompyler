@@ -142,7 +142,7 @@ class pluginDVH(wx.Panel):
         # Make sure that the volume has been calculated for each structure
         # before setting it
         self.checkedstructures = msg.data
-        for id, structure in self.checkedstructures.iteritems():
+        for id, structure in self.checkedstructures.items():
             if not self.structures[id].has_key('volume'):
                 self.structures[id]['volume'] = structure['volume']
 

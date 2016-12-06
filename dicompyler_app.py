@@ -6,7 +6,7 @@
 # This file is part of dicompyler, released under a BSD license.
 #    See the file license.txt included with this distribution, also
 #    available at http://code.google.com/p/dicompyler/
-
+from __future__ import print_function, division, absolute_import
 import dicompyler.main
 
 dicompyler.main.start()

@@ -51,7 +51,7 @@ def CalculateVolume(structure):
 
     n = 0
     # Iterate over each plane in the structure
-    for sPlane in sPlanes.itervalues():
+    for sPlane in sPlanes.values():
 
         # Calculate the area for each contour in the current plane
         contours = []

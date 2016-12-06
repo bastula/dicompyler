@@ -390,7 +390,7 @@ class DicomParser:
         planes = []
 
         # Iterate over each plane in the structure
-        for z in planesDict.iterkeys():
+        for z in planesDict.keys():
             planes.append(float(z))
         planes.sort()
 

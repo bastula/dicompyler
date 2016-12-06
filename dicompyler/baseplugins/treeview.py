@@ -10,7 +10,14 @@
 
 import logging
 logger = logging.getLogger('dicompyler.treeview')
-import threading, Queue
+import threading
+try:
+    import Queue
+except ImportError:
+    # python 3 renamed Queue to be PEP8 compliant
+    import queue as Queue
+
+
 import wx
 from wx.xrc import XmlResource, XRCCTRL, XRCID
 from wx.lib.pubsub import Publisher as pub
@@ -82,7 +89,7 @@ class pluginTreeView(wx.Panel):
         self.choiceDICOM.Select(0)
         self.tlcTreeView.DeleteAllItems()
         # Iterate through the message and enumerate the DICOM datasets
-        for k, v in msg.data.iteritems():
+        for k, v in msg.data.items():
             if isinstance(v, dicom.dataset.FileDataset):
                 i = self.choiceDICOM.Append(v.SOPClassUID.name.split(' Storage')[0])
                 self.choiceDICOM.SetClientData(i, v)

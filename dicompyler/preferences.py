@@ -106,7 +106,7 @@ class PreferencesManager():
         v = self.values
         if v.has_key(query[0]):
             if v[query[0]].has_key(query[1]):
-                for setting, value in v[query[0]][query[1]].iteritems():
+                for setting, value in v[query[0]][query[1]].items():
                     message = msg.data + '.' + setting
                     pub.sendMessage(message, value)
 

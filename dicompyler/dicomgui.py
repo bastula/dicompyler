@@ -425,17 +425,17 @@ class DicomImporterDialog(wx.Dialog):
         """Add the patient data to the tree control."""
 
         # Now add the specific item to the tree
-        for key, patient in self.patients.iteritems():
+        for key, patient in self.patients.items():
             patient.update(patients[key])
             if patient.has_key('studies'):
-                for studyid, study in patient['studies'].iteritems():
+                for studyid, study in patient['studies'].items():
                     name = 'Study: ' + study['description']
                     study['treeid'] = self.tcPatients.AppendItem(patient['treeid'], name, 2)
             # Search for series and images
             if patient.has_key('series'):
-                for seriesid, series in patient['series'].iteritems():
+                for seriesid, series in patient['series'].items():
                     if patient.has_key('studies'):
-                        for studyid, study in patient['studies'].iteritems():
+                        for studyid, study in patient['studies'].items():
                             if (studyid == series['study']):
                                 modality = series['modality'].partition(' Image Storage')[0]
                                 name = 'Series: ' + series['description'] + \
@@ -449,11 +449,11 @@ class DicomImporterDialog(wx.Dialog):
                                 self.EnableItemSelection(patient, series, [])
             # Search for RT Structure Sets
             if patient.has_key('structures'):
-                for structureid, structure in patient['structures'].iteritems():
+                for structureid, structure in patient['structures'].items():
                     if patient.has_key('series'):
                         foundseries = False
                         name = 'RT Structure Set: ' + structure['label']
-                        for seriesid, series in patient['series'].iteritems():
+                        for seriesid, series in patient['series'].items():
                             foundseries = False
                             if (seriesid == structure['series']):
                                 structure['treeid'] = self.tcPatients.AppendItem(series['treeid'], name, 4)
@@ -465,14 +465,14 @@ class DicomImporterDialog(wx.Dialog):
                         self.EnableItemSelection(patient, structure, filearray)
             # Search for RT Plans
             if patient.has_key('plans'):
-                for planid, plan in patient['plans'].iteritems():
+                for planid, plan in patient['plans'].items():
                     foundstructure = False
                     planname = ' (' + plan['name'] + ')' if len(plan['name']) else ""
                     rxdose = plan['rxdose'] if plan['rxdose'] > 0 else "Unknown"
                     name = 'RT Plan: ' + plan['label'] + planname + \
                         ' - Dose: ' + str(rxdose) + ' cGy'
                     if patient.has_key('structures'):
-                        for structureid, structure in patient['structures'].iteritems():
+                        for structureid, structure in patient['structures'].items():
                             foundstructure = False
                             if (structureid == plan['rtss']):
                                 plan['treeid'] = self.tcPatients.AppendItem(structure['treeid'], name, 5)
@@ -481,7 +481,7 @@ class DicomImporterDialog(wx.Dialog):
                     if not foundstructure:
                         # If there is an image series, add a fake rtss to it
                         foundseries = False
-                        for seriesid, series in patient['series'].iteritems():
+                        for seriesid, series in patient['series'].items():
                             foundseries = False
                             if (series['referenceframe'] == plan['referenceframe']):
                                 badstructure = self.tcPatients.AppendItem(
@@ -497,10 +497,10 @@ class DicomImporterDialog(wx.Dialog):
                     self.EnableItemSelection(patient, plan, filearray, plan['rxdose'])
             # Search for RT Doses
             if patient.has_key('doses'):
-                for doseid, dose in patient['doses'].iteritems():
+                for doseid, dose in patient['doses'].items():
                     foundplan = False
                     if patient.has_key('plans'):
-                        for planid, plan in patient['plans'].iteritems():
+                        for planid, plan in patient['plans'].items():
                             foundplan = False
                             if (planid == dose['rtplan']):
                                 foundplan = True
@@ -543,7 +543,7 @@ class DicomImporterDialog(wx.Dialog):
                                 name = 'RT Dose without Dose Grid or DVH'
                         foundstructure = False
                         if patient.has_key('structures'):
-                            for structureid, structure in patient['structures'].iteritems():
+                            for structureid, structure in patient['structures'].items():
                                 foundstructure = False
                                 if dose.has_key('rtss'):
                                     if (structureid == dose['rtss']):
@@ -560,7 +560,7 @@ class DicomImporterDialog(wx.Dialog):
                         if not foundstructure:
                             # If there is an image series, add a fake rtss to it
                             foundseries = False
-                            for seriesid, series in patient['series'].iteritems():
+                            for seriesid, series in patient['series'].items():
                                 foundseries = False
                                 if (series['referenceframe'] == dose['referenceframe']):
                                     badstructure = self.tcPatients.AppendItem(
@@ -580,9 +580,9 @@ class DicomImporterDialog(wx.Dialog):
             # No RT Dose files were found
             else:
                 if patient.has_key('structures'):
-                    for structureid, structure in patient['structures'].iteritems():
+                    for structureid, structure in patient['structures'].items():
                         if patient.has_key('plans'):
-                            for planid, plan in patient['plans'].iteritems():
+                            for planid, plan in patient['plans'].items():
                                 name = 'RT Dose not found'
                                 baddose = self.tcPatients.AppendItem(plan['treeid'], name, 9)
                                 self.tcPatients.SetItemTextColour(baddose, wx.RED)
@@ -605,7 +605,7 @@ class DicomImporterDialog(wx.Dialog):
 
         # Add the respective images to the filearray if they exist
         if patient.has_key('images'):
-            for imageid, image in patient['images'].iteritems():
+            for imageid, image in patient['images'].items():
                 appendImage = False
                 # used for image series
                 if item.has_key('id'):
@@ -624,7 +624,7 @@ class DicomImporterDialog(wx.Dialog):
                     filearray.append(image['filename'])
         # Add the respective rtss files to the filearray if they exist
         if patient.has_key('structures'):
-            for structureid, structure in patient['structures'].iteritems():
+            for structureid, structure in patient['structures'].items():
                 if item.has_key('rtss'):
                     if (structureid == item['rtss']):
                         filearray.append(structure['filename'])
@@ -635,14 +635,14 @@ class DicomImporterDialog(wx.Dialog):
                 # If no referenced rtss, but ref'd rtplan, check rtplan->rtss
                 if item.has_key('rtplan'):
                     if patient.has_key('plans'):
-                        for planid, plan in patient['plans'].iteritems():
+                        for planid, plan in patient['plans'].items():
                             if (planid == item['rtplan']):
                                 if plan.has_key('rtss'):
                                     if (structureid == plan['rtss']):
                                         filearray.append(structure['filename'])
         # Add the respective rtplan files to the filearray if they exist
         if patient.has_key('plans'):
-            for planid, plan in patient['plans'].iteritems():
+            for planid, plan in patient['plans'].items():
                 if item.has_key('rtplan'):
                     if (planid == item['rtplan']):
                         filearray.append(plan['filename'])

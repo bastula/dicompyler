@@ -440,7 +440,7 @@ class plugin2DView(wx.Panel):
                 feetfirst = True
             else:
                 feetfirst = False
-            for id, structure in self.structures.iteritems():
+            for id, structure in self.structures.items():
                 self.DrawStructure(structure, gc, self.z, prone, feetfirst)
 
             # Draw the isodoses if present
@@ -451,7 +451,7 @@ class plugin2DView(wx.Panel):
                         np.arange(grid.shape[1]), np.arange(grid.shape[0]))
                     # Instantiate the isodose generator for this slice
                     isodosegen = cntr.Cntr(x, y, grid)
-                    for id, isodose in iter(sorted(self.isodoses.iteritems())):
+                    for id, isodose in iter(sorted(self.isodoses.items())):
                         self.DrawIsodose(isodose, gc, isodosegen)
 
             # Restore the translation and scaling
@@ -714,7 +714,7 @@ class plugin2DView(wx.Panel):
 
         menu = wx.Menu()
         if len(self.plugins):
-            for name, p in self.plugins.iteritems():
+            for name, p in self.plugins.items():
                 id = wx.NewId()
                 self.Bind(wx.EVT_MENU, p.pluginMenu, id=id)
                 menu.Append(id, name)
