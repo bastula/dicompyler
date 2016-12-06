@@ -16,6 +16,7 @@ try:
     from wx.lib.pubsub import Publisher as pub
 except ImportError:     # pheonixwx moved this library
     from wx.lib.pubsub.core import publisher as pub
+
 from matplotlib import _cntr as cntr
 from matplotlib import __version__ as mplversion
 import numpy as np

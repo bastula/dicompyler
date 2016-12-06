@@ -12,8 +12,13 @@
 
 import wx
 from wx.xrc import XmlResource, XRCCTRL, XRCID
-try:     from wx.lib.pubsub import Publisher as pub except:     # pheonixwx moved this library     from wx.lib.pubsub.core import publisher as pub
-from dicompyler import guiutil, util
+
+try:
+    from wx.lib.pubsub import Publisher as pub
+except ImportError:  # pheonixwx moved this library
+    from wx.lib.pubsub.core import publisher as pub
+from six import u as six_unicode  # 2to3 compatibility
+# from dicompyler import guiutil, util
 from dicompyler import dvhdata, guidvh
 from dicompyler import wxmpl
 import numpy as np
