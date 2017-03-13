@@ -154,7 +154,6 @@
                     </object>
                   </object>
                   <cols>3</cols>
-                  <rows>1</rows>
                   <vgap>5</vgap>
                   <hgap>5</hgap>
                   <growablecols>1</growablecols>
@@ -171,7 +170,7 @@
         </object>
         <option>3</option>
         <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
-        <border>3</border>
+        <border>1</border>
       </object>
       <object class="sizeritem">
         <object class="wxBoxSizer">
@@ -222,7 +221,7 @@
                     <option>1</option>
                     <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
                   </object>
-                  <cols>4</cols>
+                  <cols>8</cols>
                   <rows>2</rows>
                   <vgap>5</vgap>
                   <hgap>5</hgap>
@@ -417,13 +416,13 @@
         <label>&amp;Export</label>
       </object>
       <object class="separator"/>
-      <object class="wxMenuItem" name="menuExit">
+      <object class="wxMenuItem" name="wxID_EXIT">
         <label>E&amp;xit</label>
         <accel>Alt+F4</accel>
       </object>
     </object>
     <object class="wxMenu" name="menuTools">
-      <object class="wxMenuItem" name="menuPreferences">
+      <object class="wxMenuItem" name="wxID_PREFERENCES">
         <label>&amp;Options...</label>
       </object>
       <object class="wxMenuItem" name="menuShowLogs">
@@ -443,7 +442,7 @@
         <label>&amp;License</label>
       </object>
       <object class="separator"/>
-      <object class="wxMenuItem" name="menuAbout">
+      <object class="wxMenuItem" name="wxID_ABOUT">
         <label>&amp;About dicompyler</label>
       </object>
     </object>

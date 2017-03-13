@@ -7,24 +7,18 @@
 #    See the file license.txt included with this distribution, also
 #    available at http://code.google.com/p/dicompyler/
 
-from distribute_setup import use_setuptools
-use_setuptools()
-
 from setuptools import setup, find_packages
-import sys
 
 requires = [
-    'matplotlib>=0.99, <=1.1.0',
+    'matplotlib>=1.3, <=1.5.1',
     'numpy>=1.2.1',
-    'pil>=1.1.7',
-    'pydicom>=0.9.5, <0.9.7']
-
-if sys.version_info[0] == 2 and sys.version_info[1] < 6:
-    requires.append('simplejson')
+    'pillow>=1.0',
+    'dicompyler-core>=0.5.2',
+    'pydicom>=0.9.9']
 
 setup(
     name="dicompyler",
-    version="0.4.2",
+    version = "0.5.0",
     include_package_data = True,
     packages = find_packages(),
     package_data = {'dicompyler':
@@ -32,7 +26,8 @@ setup(
         'baseplugins/*.py', 'baseplugins/*.xrc']},
     zip_safe = False,
     install_requires = requires,
-    dependency_links=['https://pydicom.googlecode.com/files/pydicom-0.9.6.zip'],
+    dependency_links = [
+        'git+https://github.com/darcymason/pydicom.git#egg=pydicom-1.0.0'],
     entry_points={'console_scripts':['dicompyler = dicompyler.main:start']},
 
     # metadata for upload to PyPI
@@ -50,8 +45,6 @@ setup(
         "Intended Audience :: Science/Research",
         "Development Status :: 4 - Beta",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 2.5",
-        "Programming Language :: Python :: 2.6",
         "Programming Language :: Python :: 2.7",
         "Operating System :: OS Independent",
         "Topic :: Scientific/Engineering :: Medical Science Apps.",
@@ -84,11 +77,11 @@ setup(
     
     dicompyler requires the following packages to run from source:
     
-    - Python 2.5 or higher (not tested on Python 3)
-    - wxPython 2.8.8.1 to 2.8.10.1
-    - matplotlib 0.99 to 1.10
-    - numpy 1.2.1 or higher
-    - PIL 1.1.7 or any version of Pillow
-    - pydicom 0.9.5 or 0.9.6
-    - simplejson (only for Python 2.5, Python 2.6+ includes JSON support)""",
+    - Python 2.7 or higher (not tested on Python 3)
+    - wxPython 3.0.2.0 (not tested on wxPython Phoenix)
+    - matplotlib 1.3 to 1.5.1
+    - numpy 1.2 or higher
+    - Pillow 1.0 or higher
+    - dicompyler-core 0.5.2 or higher
+    - pydicom 0.9.9 or higher""",
 )

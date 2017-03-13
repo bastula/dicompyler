@@ -11,9 +11,10 @@
 import logging
 logger = logging.getLogger('dicompyler.quickimport')
 import wx
-from wx.lib.pubsub import Publisher as pub
-from dicompyler import dicomparser, util
-import dicom
+import wx.lib.pubsub.setuparg1
+from wx.lib.pubsub import pub
+from dicompylercore import dicomparser
+from dicompyler import util
 
 def pluginProperties():
     """Properties of the plugin."""
@@ -68,10 +69,9 @@ class plugin:
             # Try to parse the file if is a DICOM file
             try:
                 logger.debug("Reading: %s", filename)
-                dp = dicomparser.DicomParser(filename=filename)
+                dp = dicomparser.DicomParser(filename)
             # Otherwise show an error dialog
             except (AttributeError, EOFError, IOError, KeyError):
-                pass
                 logger.info("%s is not a valid DICOM file.", filename)
                 dlg = wx.MessageDialog(
                     self.parent, filename + " is not a valid DICOM file.",

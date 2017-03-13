@@ -12,7 +12,8 @@
 
 import wx
 from wx.xrc import XmlResource, XRCCTRL, XRCID
-from wx.lib.pubsub import Publisher as pub
+import wx.lib.pubsub.setuparg1
+from wx.lib.pubsub import pub
 from dicompyler import guiutil, util
 from dicompyler import dvhdata, guidvh
 from dicompyler import wxmpl
@@ -85,11 +86,8 @@ class pluginDVH(wx.Panel):
         controls.append(self.lblType.GetContainingSizer().GetStaticBox())
 
         if guiutil.IsMac():
-            font = wx.SystemSettings.GetFont(wx.SYS_DEFAULT_GUI_FONT)
-            font.SetPointSize(10)
             for control in controls:
                 control.SetWindowVariant(wx.WINDOW_VARIANT_SMALL)
-                control.SetFont(font)
 
         # Adjust the control size for the result value labels
         te = self.lblType.GetTextExtent('0')
@@ -108,7 +106,6 @@ class pluginDVH(wx.Panel):
         self.structures = {} # structures from initial DICOM data
         self.checkedstructures = {} # structures that need to be shown
         self.dvhs = {} # raw dvhs from initial DICOM data
-        self.dvhdata = {} # dict of dvh constraint functions
         self.dvharray = {} # dict of dvh data processed from dvhdata
         self.dvhscaling = {} # dict of dvh scaling data
         self.plan = {} # used for rx dose
@@ -132,9 +129,9 @@ class pluginDVH(wx.Panel):
     def OnDestroy(self, evt):
         """Unbind to all events before the plugin is destroyed."""
 
-        pub.unsubscribe(self.OnUpdatePatient)
-        pub.unsubscribe(self.OnStructureCheck)
-        pub.unsubscribe(self.OnStructureSelect)
+        pub.unsubscribe(self.OnUpdatePatient, 'patient.updated.parsed_data')
+        pub.unsubscribe(self.OnStructureCheck, 'structures.checked')
+        pub.unsubscribe(self.OnStructureSelect, 'structure.selected')
 
     def OnStructureCheck(self, msg):
         """When a structure changes, update the interface and plot."""
@@ -150,12 +147,9 @@ class pluginDVH(wx.Panel):
             # before setting it
             if self.dvhs.has_key(id):
                 self.EnableConstraints(True)
-                # Create an instance of the dvhdata class to can access its functions
-                self.dvhdata[id] = dvhdata.DVH(self.dvhs[id])
-                # Create an instance of the dvh arrays so that guidvh can plot it
-                self.dvharray[id] = dvhdata.DVH(self.dvhs[id]).dvh
+                self.dvharray[id] = self.dvhs[id].relative_volume.counts
                 # Create an instance of the dvh scaling data for guidvh
-                self.dvhscaling[id] = self.dvhs[id]['scaling']
+                self.dvhscaling[id] = 1  # self.dvhs[id]['scaling']
                 # 'Toggle' the choice box to refresh the dose data
                 self.OnToggleConstraints(None)
         if not len(self.checkedstructures):
@@ -171,10 +165,8 @@ class pluginDVH(wx.Panel):
         else:
             self.structureid = msg.data['id']
             if self.dvhs.has_key(self.structureid):
-                # Create an instance of the dvhdata class to can access its functions
-                self.dvhdata[self.structureid] = dvhdata.DVH(self.dvhs[self.structureid])
                 # Create an instance of the dvh scaling data for guidvh
-                self.dvhscaling[self.structureid] = self.dvhs[self.structureid]['scaling']
+                self.dvhscaling[self.structureid] = 1  # self.dvhs[self.structureid]['scaling']
                 # 'Toggle' the choice box to refresh the dose data
                 self.OnToggleConstraints(None)
             else:
@@ -218,22 +210,13 @@ class pluginDVH(wx.Panel):
             self.lblConstraintType.SetLabel('   Dose:')
             self.lblConstraintTypeUnits.SetLabel('%  ')
             self.lblResultType.SetLabel('Volume:')
-            rxDose = float(self.plan['rxdose'])
-            dvhdata = (len(dvh['data'])-1)*dvh['scaling']
-            constraintrange = int(dvhdata*100/rxDose)
-            # never go over the max dose as data does not exist
-            if (constraintrange > int(dvh['max'])):
-                constraintrange = int(dvh['max'])
+            constraintrange = dvh.relative_dose().max
         # Volume constraint in Gy
         elif (constrainttype == 1):
             self.lblConstraintType.SetLabel('   Dose:')
             self.lblConstraintTypeUnits.SetLabel('Gy ')
             self.lblResultType.SetLabel('Volume:')
-            constraintrange = self.plan['rxdose']/100
-            maxdose = int(dvh['max']*self.plan['rxdose']/10000)
-            # never go over the max dose as data does not exist
-            if (constraintrange*100 > maxdose):
-                constraintrange = maxdose
+            constraintrange = round(dvh.max)
         # Dose constraint
         elif (constrainttype == 2):
             self.lblConstraintType.SetLabel('Volume:')
@@ -245,7 +228,7 @@ class pluginDVH(wx.Panel):
             self.lblConstraintType.SetLabel('Volume:')
             self.lblConstraintTypeUnits.SetLabel(u'cm³')
             self.lblResultType.SetLabel('   Dose:')
-            constraintrange = int(self.structures[self.structureid]['volume'])
+            constraintrange = dvh.volume
 
         self.sliderConstraint.SetRange(0, constraintrange)
         self.sliderConstraint.SetValue(constraintrange)
@@ -265,47 +248,50 @@ class pluginDVH(wx.Panel):
 
         self.txtConstraint.SetValue(slidervalue)
         self.sliderConstraint.SetValue(slidervalue)
-        rxDose = self.plan['rxdose']
         id = self.structureid
+        dvh = self.dvhs[self.structureid]
 
         constrainttype = self.choiceConstraint.GetSelection()
         # Volume constraint
         if (constrainttype == 0):
-            absDose = rxDose * slidervalue / 100
-            volume = self.structures[id]['volume']
-            cc = self.dvhdata[id].GetVolumeConstraintCC(absDose, volume)
-            constraint = self.dvhdata[id].GetVolumeConstraint(absDose)
+            absDose = dvh.rx_dose * slidervalue
+            cc = dvh.volume_constraint(slidervalue)
+            constraint = dvh.relative_volume.volume_constraint(slidervalue)
 
-            self.lblConstraintUnits.SetLabel("%.1f" % cc + u' cm³')
-            self.lblConstraintPercent.SetLabel("%.1f" % constraint + " %")
+            self.lblConstraintUnits.SetLabel(str(cc))
+            self.lblConstraintPercent.SetLabel(str(constraint))
             self.guiDVH.Replot([self.dvharray], [self.dvhscaling],
-                self.checkedstructures, ([absDose], [constraint]), id)
+                self.checkedstructures, ([absDose], [constraint.value]), id)
         # Volume constraint in Gy
         elif (constrainttype == 1):
             absDose = slidervalue*100
-            volume = self.structures[id]['volume']
-            cc = self.dvhdata[id].GetVolumeConstraintCC(absDose, volume)
-            constraint = self.dvhdata[id].GetVolumeConstraint(absDose)
+            cc = dvh.volume_constraint(slidervalue, dvh.dose_units)
+            constraint = dvh.relative_volume.volume_constraint(
+                slidervalue, dvh.dose_units)
 
-            self.lblConstraintUnits.SetLabel("%.1f" % cc + u' cm³')
-            self.lblConstraintPercent.SetLabel("%.1f" % constraint + " %")
+            self.lblConstraintUnits.SetLabel(str(cc))
+            self.lblConstraintPercent.SetLabel(str(constraint))
             self.guiDVH.Replot([self.dvharray], [self.dvhscaling],
-                self.checkedstructures, ([absDose], [constraint]), id)
+                self.checkedstructures, ([absDose], [constraint.value]), id)
         # Dose constraint
         elif (constrainttype == 2):
-            dose = self.dvhdata[id].GetDoseConstraint(slidervalue)
+            dose = dvh.dose_constraint(slidervalue)
+            relative_dose = dvh.relative_dose().dose_constraint(slidervalue)
 
-            self.lblConstraintUnits.SetLabel("%.1f" % dose + u' cGy')
-            self.lblConstraintPercent.SetLabel("%.1f" % (dose*100/rxDose) + " %")
+            self.lblConstraintUnits.SetLabel(str(dose))
+            self.lblConstraintPercent.SetLabel(str(relative_dose))
             self.guiDVH.Replot([self.dvharray], [self.dvhscaling],
-                self.checkedstructures, ([dose], [slidervalue]), id)
+                self.checkedstructures,
+                ([dose.value * 100], [slidervalue]), id)
         # Dose constraint in cc
         elif (constrainttype == 3):
             volumepercent = slidervalue*100/self.structures[id]['volume']
+            dose = dvh.dose_constraint(slidervalue, dvh.volume_units)
+            relative_dose = dvh.relative_dose().dose_constraint(
+                slidervalue, dvh.volume_units)
 
-            dose = self.dvhdata[id].GetDoseConstraint(volumepercent)
-
-            self.lblConstraintUnits.SetLabel("%.1f" % dose + u' cGy')
-            self.lblConstraintPercent.SetLabel("%.1f" % (dose*100/rxDose) + " %")
+            self.lblConstraintUnits.SetLabel(str(dose))
+            self.lblConstraintPercent.SetLabel(str(relative_dose))
             self.guiDVH.Replot([self.dvharray], [self.dvhscaling],
-                self.checkedstructures, ([dose], [volumepercent]), id)
+                self.checkedstructures,
+                ([dose.value * 100], [volumepercent]), id)

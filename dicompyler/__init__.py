@@ -7,7 +7,7 @@
 #    See the file license.txt included with this distribution, also
 #    available at http://code.google.com/p/dicompyler/
 
-from main import start, __version__
+from dicompyler.main import start, __version__
 
 if __name__ == '__main__':
     import dicompyler.main

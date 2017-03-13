@@ -13,10 +13,14 @@ logger = logging.getLogger('dicompyler.treeview')
 import threading, Queue
 import wx
 from wx.xrc import XmlResource, XRCCTRL, XRCID
-from wx.lib.pubsub import Publisher as pub
+import wx.lib.pubsub.setuparg1
+from wx.lib.pubsub import pub
 from wx.gizmos import TreeListCtrl as tlc
 from dicompyler import guiutil, util
-import dicom
+try:
+    import pydicom
+except ImportError:
+    import dicom as pydicom
 
 def pluginProperties():
     """Properties of the plugin."""
@@ -83,7 +87,7 @@ class pluginTreeView(wx.Panel):
         self.tlcTreeView.DeleteAllItems()
         # Iterate through the message and enumerate the DICOM datasets
         for k, v in msg.data.iteritems():
-            if isinstance(v, dicom.dataset.FileDataset):
+            if isinstance(v, pydicom.dataset.FileDataset):
                 i = self.choiceDICOM.Append(v.SOPClassUID.name.split(' Storage')[0])
                 self.choiceDICOM.SetClientData(i, v)
             # Add the images to the choicebox
@@ -93,11 +97,12 @@ class pluginTreeView(wx.Panel):
                         image.SOPClassUID.name.split(' Storage')[0] + \
                         ' Slice ' + str(imgnum + 1))
                     self.choiceDICOM.SetClientData(i, image)
+        pub.unsubscribe(self.OnUpdatePatient, 'patient.updated.raw_data')
 
     def OnDestroy(self, evt):
         """Unbind to all events before the plugin is destroyed."""
 
-        pub.unsubscribe(self.OnUpdatePatient)
+        pub.unsubscribe(self.OnUpdatePatient, 'patient.updated.raw_data')
 
     def OnLoadTree(self, event):
         """Update and load the DICOM tree."""
@@ -177,8 +182,8 @@ class pluginTreeView(wx.Panel):
                     # Apply the DICOM character encoding to the data element
                     if not isinstance(data_element.value, unicode):
                         try:
-                            dicom.charset.decode(
-                                    dicom.charset.decode(data_element, cs))
+                            pydicom.charset.decode(
+                                    pydicom.charset.decode(data_element, cs))
                         # Otherwise try decoding via ASCII encoding
                         except:
                             try:

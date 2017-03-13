@@ -22,7 +22,7 @@ import weakref
 import matplotlib
 matplotlib.use('WXAgg')
 import numpy as np
-from matplotlib.axes import _process_plot_var_args
+from matplotlib.axes._base import _process_plot_var_args
 from matplotlib.backends.backend_agg import RendererAgg
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg
 from matplotlib.figure import Figure

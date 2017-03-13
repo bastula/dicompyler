@@ -10,7 +10,8 @@
 
 import wx
 from wx.xrc import XmlResource, XRCCTRL, XRCID
-from wx.lib.pubsub import Publisher as pub
+import wx.lib.pubsub.setuparg1
+from wx.lib.pubsub import pub
 import os, threading
 from dicompyler import guiutil, util
 

@@ -20,10 +20,12 @@ from wx.xrc import *
 import wx.lib.dialogs, webbrowser
 # Uncomment line to setup pubsub for frozen targets on wxPython 2.8.11 and above
 # from wx.lib.pubsub import setupv1
-from wx.lib.pubsub import Publisher as pub
+import wx.lib.pubsub.setuparg1
+from wx.lib.pubsub import pub
+from dicompylercore import dvhcalc
 from dicompyler import guiutil, util
-from dicompyler import dicomgui, dvhdata, dvhdoses, dvhcalc
-from dicompyler.dicomparser import DicomParser as dp
+from dicompyler import dicomgui, dvhdata, dvhdoses
+from dicompylercore.dicomparser import DicomParser as dp
 from dicompyler import plugin, preferences
 
 __version__ = "0.4.2"
@@ -118,15 +120,12 @@ class MainFrame(wx.Frame):
         self.cclbStructures = guiutil.ColorCheckListBox(self.notebookTools, 'structure')
         self.cclbIsodoses = guiutil.ColorCheckListBox(self.notebookTools, 'isodose')
 
-        # Modify the control and font size on Mac
+        # Modify the control size on Mac
         controls = [self.notebookTools, self.choiceStructure]
 
         if guiutil.IsMac():
-            font = wx.SystemSettings.GetFont(wx.SYS_DEFAULT_GUI_FONT)
-            font.SetPointSize(10)
             for control in controls:
                 control.SetWindowVariant(wx.WINDOW_VARIANT_SMALL)
-                control.SetFont(font)
 
         # Setup the layout for the frame
         mainGrid = wx.BoxSizer(wx.VERTICAL)
@@ -168,11 +167,11 @@ class MainFrame(wx.Frame):
 
         # Bind menu events to the proper methods
         wx.EVT_MENU(self, XRCID('menuOpen'), self.OnOpenPatient)
-        wx.EVT_MENU(self, XRCID('menuExit'), self.OnClose)
-        wx.EVT_MENU(self, XRCID('menuPreferences'), self.OnPreferences)
+        wx.EVT_MENU(self, XRCID('wxID_EXIT'), self.OnClose)
+        wx.EVT_MENU(self, XRCID('wxID_PREFERENCES'), self.OnPreferences)
         wx.EVT_MENU(self, XRCID('menuShowLogs'), self.OnShowLogs)
         wx.EVT_MENU(self, XRCID('menuPluginManager'), self.OnPluginManager)
-        wx.EVT_MENU(self, XRCID('menuAbout'), self.OnAbout)
+        wx.EVT_MENU(self, XRCID('wxID_ABOUT'), self.OnAbout)
         wx.EVT_MENU(self, XRCID('menuHomepage'), self.OnHomepage)
         wx.EVT_MENU(self, XRCID('menuLicense'), self.OnLicense)
 
@@ -318,6 +317,10 @@ class MainFrame(wx.Frame):
         if (not len(msg.data)) or (self.ptdata == msg.data):
             return
         else:
+            # Unsubscribe all listeners to the raw data updated while
+            # it is re-processed
+            pub.unsubAll('patient.updated.raw_data')
+            pub.subscribe(self.OnLoadPatientData, 'patient.updated.raw_data')
             self.ptdata = msg.data
             # Delete the previous notebook pages
             self.notebook.DeleteAllPages()
@@ -331,12 +334,15 @@ class MainFrame(wx.Frame):
                 self.menuPlugins.Delete(wx.ID_SEPARATOR)
                 for menuid, menu in self.menuDict.iteritems():
                     self.menuPlugins.Delete(menuid)
+                    # Remove the menu object from memory
+                    del(menu)
                 self.menuDict = {}
             # Delete the previous export menus
             if len(self.menuExportDict):
                 self.menuExportItem.Enable(False)
                 for menuid, menu in self.menuExportDict.iteritems():
                     self.menuExport.Delete(menuid)
+                    del(menu)
                 self.menuExportDict = {}
             # Reset the preferences template
             self.preftemplate = [{'General':self.generalpreftemplate}]
@@ -377,17 +383,17 @@ class MainFrame(wx.Frame):
                         elif (props['plugin_type'] == 'menu'):
                             if not len(self.menuDict):
                                 self.menuPlugins.AppendSeparator()
-                            self.menuDict[100+i] = self.menuPlugins.Append(
-                                                100+i, props['name']+'...')
+                            self.menuPlugins.Append(100+i, props['name']+'...')
                             plugin = p.plugin(self)
+                            self.menuDict[100+i] = plugin
                             wx.EVT_MENU(self, 100+i, plugin.pluginMenu)
                         # Load the export menu plugins
                         elif (props['plugin_type'] == 'export'):
                             if not len(self.menuExportDict):
                                 self.menuExportItem.Enable(True)
-                            self.menuExportDict[200+i] = self.menuExport.Append(
-                                                200+i, props['menuname'])
+                            self.menuExport.Append(200+i, props['menuname'])
                             plugin = p.plugin(self)
+                            self.menuExportDict[200+i] = plugin
                             wx.EVT_MENU(self, 200+i, plugin.pluginMenu)
                         # If a sub-plugin, mark it to be initialized later
                         else:
@@ -424,7 +430,12 @@ class MainFrame(wx.Frame):
             patient.update(dp(ptdata.values()[0]).GetDemographics())
         if ptdata.has_key('rtss'):
             wx.CallAfter(progressFunc, 20, 100, 'Processing RT Structure Set...')
-            patient['structures'] = dp(ptdata['rtss']).GetStructures()
+            d = dp(ptdata['rtss'])
+            s = d.GetStructures()
+            for k in s.keys():
+                s[k]['planes'] = d.GetStructureCoordinates(k)
+                s[k]['thickness'] = d.CalculatePlaneThickness(s[k]['planes'])
+            patient['structures'] = s
         if ptdata.has_key('rtplan'):
             wx.CallAfter(progressFunc, 40, 100, 'Processing RT Plan...')
             patient['plan'] = dp(ptdata['rtplan']).GetPlan()
@@ -463,28 +474,14 @@ class MainFrame(wx.Frame):
                                  'Calculating DVH for ' + structure['name'] +
                                  '...')
                     # Limit DVH bins to 500 Gy due to high doses in brachy
-                    dvh = dvhcalc.get_dvh(structure, patient['dose'], 50000)
-                    if len(dvh['data']):
+                    dvh = dvhcalc.get_dvh(ptdata['rtss'], patient['dose'].ds, key, 50000)
+                    if len(dvh.counts):
                         patient['dvhs'][key] = dvh
                     i += 1
             for key, dvh in patient['dvhs'].iteritems():
-                self.CalculateDoseStatistics(dvh, ptdata['rxdose'])
+                dvh.rx_dose = patient['plan']['rxdose'] / 100
         wx.CallAfter(progressFunc, 100, 100, 'Done')
         wx.CallAfter(updateFunc, patient)
-
-    def CalculateDoseStatistics(self, dvh, rxdose):
-        """Calculate the dose statistics for the given DVH and rx dose."""
-
-        sfdict = {'min':dvhdoses.get_dvh_min,
-                  'mean':dvhdoses.get_dvh_mean,
-                  'max':dvhdoses.get_dvh_max}
-
-        for stat, func in sfdict.iteritems():
-            # Only calculate stat if the stat was not calculated previously (-1)
-            if dvh[stat] == -1:
-                dvh[stat] = 100*func(dvh['data']*dvh['scaling'])/rxdose
-
-        return dvh
 
     def OnUpdatePatientData(self, patient):
         """Update the patient data in the main program interface."""
@@ -568,7 +565,7 @@ class MainFrame(wx.Frame):
         self.lblPatientName.SetLabel(demographics['name'])
         self.lblPatientID.SetLabel(demographics['id'])
         self.lblPatientGender.SetLabel(demographics['gender'])
-        self.lblPatientDOB.SetLabel(demographics['dob'])
+        self.lblPatientDOB.SetLabel(str(demographics['birth_date']))
 
     def PopulatePlan(self, plan):
         """Populate the patient's plan information."""
@@ -599,8 +596,8 @@ class MainFrame(wx.Frame):
         # before setting it
         if not self.structures[id].has_key('volume'):
             # Use the volume units from the DVH if they are absolute volume
-            if self.dvhs.has_key(id) and (self.dvhs[id]['volumeunits'] == 'CM3'):
-                self.structures[id]['volume'] = self.dvhs[id]['data'][0]
+            if self.dvhs.has_key(id) and (self.dvhs[id].volume_units == 'cm3'):
+                self.structures[id]['volume'] = self.dvhs[id].volume
             # Otherwise calculate the volume from the structure data
             else:
                 self.structures[id]['volume'] = dvhdata.CalculateVolume(
@@ -666,9 +663,9 @@ class MainFrame(wx.Frame):
         # make sure that the dvh has been calculated for each structure
         # before setting it
         if self.dvhs.has_key(id):
-            self.lblStructureMinDose.SetLabel("%.3f" % self.dvhs[id]['min'])
-            self.lblStructureMaxDose.SetLabel("%.3f" % self.dvhs[id]['max'])
-            self.lblStructureMeanDose.SetLabel("%.3f" % self.dvhs[id]['mean'])
+            self.lblStructureMinDose.SetLabel("%.3f" % self.dvhs[id].relative_dose().min)
+            self.lblStructureMaxDose.SetLabel("%.3f" % self.dvhs[id].relative_dose().max)
+            self.lblStructureMeanDose.SetLabel("%.3f" % self.dvhs[id].relative_dose().mean)
         else:
             self.lblStructureMinDose.SetLabel('-')
             self.lblStructureMaxDose.SetLabel('-')
@@ -925,15 +922,10 @@ class MainFrame(wx.Frame):
 
 class dicompyler(wx.App):
     def OnInit(self):
-        wx.InitAllImageHandlers()
         wx.GetApp().SetAppName("dicompyler")
 
         # Load the XRC file for our gui resources
         self.res = XmlResource(util.GetResourcePath('main.xrc'))
-
-        # Use the native listctrl on Mac OS X
-        if guiutil.IsMac():
-            wx.SystemOptions.SetOptionInt("mac.listctrl.always_use_generic", 0)
 
         dicompylerFrame = MainFrame(None, -1, "dicompyler", self.res)
         self.SetTopWindow(dicompylerFrame)

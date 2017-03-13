@@ -15,9 +15,11 @@ logger = logging.getLogger('dicompyler.dicomgui')
 import hashlib, os, threading
 import wx
 from wx.xrc import *
-from wx.lib.pubsub import Publisher as pub
+import wx.lib.pubsub.setuparg1
+from wx.lib.pubsub import pub
 import numpy as np
-from dicompyler import dicomparser, dvhdoses, guiutil, util
+from dicompylercore import dicomparser
+from dicompyler import dvhdoses, guiutil, util
 
 def ImportDicom(parent):
     """Prepare to show the dialog that will Import DICOM and DICOM RT files."""
@@ -81,7 +83,7 @@ class DicomImporterDialog(wx.Dialog):
         wx.EVT_TREE_SEL_CHANGED(self, XRCID('tcPatients'), self.OnSelectTreeItem)
         wx.EVT_TREE_ITEM_ACTIVATED(self, XRCID('tcPatients'), self.OnOK)
         wx.EVT_BUTTON(self, wx.ID_OK, self.OnOK)
-        wx.EVT_BUTTON(self, wx.ID_CANCEL, self.OnCancel)
+        # wx.EVT_BUTTON(self, wx.ID_CANCEL, self.OnCancel)
 
         # Set the dialog font and bold the font of the directions label
         font = wx.SystemSettings.GetFont(wx.SYS_DEFAULT_GUI_FONT)
@@ -224,7 +226,7 @@ class DicomImporterDialog(wx.Dialog):
                 if (os.path.isfile(files[n])):
                     try:
                         logger.debug("Reading: %s", files[n])
-                        dp = dicomparser.DicomParser(filename=files[n])
+                        dp = dicomparser.DicomParser(files[n])
                     except (AttributeError, EOFError, IOError, KeyError):
                         pass
                         logger.info("%s is not a valid DICOM file.", files[n])
@@ -258,9 +260,9 @@ class DicomImporterDialog(wx.Dialog):
                             image['id'] = dp.GetSOPInstanceUID()
                             image['filename'] = files[n]
                             image['series'] = seinfo['id']
-                            image['referenceframe'] = dp.GetFrameofReferenceUID()
+                            image['referenceframe'] = dp.GetFrameOfReferenceUID()
                             patients[h]['series'][seinfo['id']]['numimages'] = \
-                                patients[h]['series'][seinfo['id']]['numimages'] + 1 
+                                patients[h]['series'][seinfo['id']]['numimages'] + 1
                             patients[h]['images'][image['id']] = image
                         # Create each RT Structure Set
                         elif dp.ds.Modality in ['RTSTRUCT']:
@@ -270,7 +272,7 @@ class DicomImporterDialog(wx.Dialog):
                             structure['id'] = dp.GetSOPInstanceUID()
                             structure['filename'] = files[n]
                             structure['series'] = dp.GetReferencedSeries()
-                            structure['referenceframe'] = dp.GetFrameofReferenceUID()
+                            structure['referenceframe'] = dp.GetFrameOfReferenceUID()
                             patients[h]['structures'][structure['id']] = structure
                         # Create each RT Plan
                         elif dp.ds.Modality in ['RTPLAN']:
@@ -280,7 +282,7 @@ class DicomImporterDialog(wx.Dialog):
                             plan['id'] = dp.GetSOPInstanceUID()
                             plan['filename'] = files[n]
                             plan['series'] = dp.ds.SeriesInstanceUID
-                            plan['referenceframe'] = dp.GetFrameofReferenceUID()
+                            plan['referenceframe'] = dp.GetFrameOfReferenceUID()
                             plan['beams'] = dp.GetReferencedBeamsInFraction()
                             plan['rtss'] = dp.GetReferencedStructureSet()
                             patients[h]['plans'][plan['id']] = plan
@@ -291,7 +293,7 @@ class DicomImporterDialog(wx.Dialog):
                             dose = {}
                             dose['id'] = dp.GetSOPInstanceUID()
                             dose['filename'] = files[n]
-                            dose['referenceframe'] = dp.GetFrameofReferenceUID()
+                            dose['referenceframe'] = dp.GetFrameOfReferenceUID()
                             dose['hasdvh'] = dp.HasDVHs()
                             dose['hasgrid'] = "PixelData" in dp.ds
                             dose['summationtype'] = dp.ds.DoseSummationType
@@ -701,7 +703,7 @@ class DicomImporterDialog(wx.Dialog):
                 wx.CallAfter(progressFunc, 98, 100, 'Importing patient cancelled.')
                 return
             dcmfile = str(os.path.join(self.path, filearray[n]))
-            dp = dicomparser.DicomParser(filename=dcmfile)
+            dp = dicomparser.DicomParser(dcmfile)
             if (n == 0):
                 self.patient = {}
                 self.patient['rxdose'] = RxDose
@@ -820,4 +822,4 @@ class DicomImporterDialog(wx.Dialog):
         """Stop the directory search and close the dialog."""
 
         self.terminate = True
-        self.Hide()
+        super().OnCancel(evt)

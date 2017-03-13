@@ -10,7 +10,8 @@
 
 import wx
 from wx.xrc import XmlResource, XRCCTRL, XRCID
-from wx.lib.pubsub import Publisher as pub
+import wx.lib.pubsub.setuparg1
+from wx.lib.pubsub import pub
 from matplotlib import _cntr as cntr
 from matplotlib import __version__ as mplversion
 import numpy as np
@@ -178,8 +179,9 @@ class plugin2DView(wx.Panel):
         self.Bind(wx.EVT_RIGHT_UP, self.OnMouseUp)
         self.Bind(wx.EVT_ENTER_WINDOW, self.OnMouseEnter)
         self.Bind(wx.EVT_LEAVE_WINDOW, self.OnMouseLeave)
-        pub.subscribe(self.OnKeyDown, 'main.key_down')
-        pub.subscribe(self.OnMouseWheel, 'main.mousewheel')
+        if guiutil.IsMSWindows():
+            pub.subscribe(self.OnKeyDown, 'main.key_down')
+            pub.subscribe(self.OnMouseWheel, 'main.mousewheel')
 
     def OnUnfocus(self):
         """Unbind to certain events when the plugin is unfocused."""
@@ -192,18 +194,19 @@ class plugin2DView(wx.Panel):
         self.Unbind(wx.EVT_RIGHT_DOWN)
         self.Unbind(wx.EVT_RIGHT_UP)
         self.Unbind(wx.EVT_MOTION)
-        pub.unsubscribe(self.OnKeyDown)
-        pub.unsubscribe(self.OnMouseWheel)
-        pub.unsubscribe(self.OnRefresh)
+        if guiutil.IsMSWindows():
+            pub.unsubscribe(self.OnKeyDown, 'main.key_down')
+            pub.unsubscribe(self.OnMouseWheel, 'main.mousewheel')
+        pub.unsubscribe(self.OnRefresh, '2dview.refresh')
 
     def OnDestroy(self, evt):
         """Unbind to all events before the plugin is destroyed."""
 
-        pub.unsubscribe(self.OnUpdatePatient)
-        pub.unsubscribe(self.OnStructureCheck)
-        pub.unsubscribe(self.OnIsodoseCheck)
-        pub.unsubscribe(self.OnDrawingPrefsChange)
-        pub.unsubscribe(self.OnPluginLoaded)
+        pub.unsubscribe(self.OnUpdatePatient, 'patient.updated.parsed_data')
+        pub.unsubscribe(self.OnStructureCheck, 'structures.checked')
+        pub.unsubscribe(self.OnIsodoseCheck, 'isodoses.checked')
+        pub.unsubscribe(self.OnDrawingPrefsChange, '2dview.drawingprefs')
+        pub.unsubscribe(self.OnPluginLoaded, 'plugin.loaded.2dview')
         self.OnUnfocus()
 
     def OnStructureCheck(self, msg):
@@ -264,7 +267,7 @@ class plugin2DView(wx.Panel):
             color = wx.Colour(structure['color'][0], structure['color'][1],
                 structure['color'][2], int(self.structure_fill_opacity*255/100))
             # Set fill (brush) color, transparent for external contour
-            if (('RTROIType' in structure) and (structure['RTROIType'].lower() == 'external')):
+            if (('type' in structure) and (structure['type'].lower() == 'external')):
                 gc.SetBrush(wx.Brush(color, style=wx.TRANSPARENT))
             else:
                 gc.SetBrush(wx.Brush(color))
@@ -273,10 +276,10 @@ class plugin2DView(wx.Panel):
             # Create the path for the contour
             path = gc.CreatePath()
             for contour in structure['planes'][structure['zkeys'][index]]:
-                if (contour['geometricType'] == u"CLOSED_PLANAR"):
+                if (contour['type'] == u"CLOSED_PLANAR"):
                     # Convert the structure data to pixel data
                     pixeldata = self.GetContourPixelData(
-                        self.structurepixlut, contour['contourData'], prone, feetfirst)
+                        self.structurepixlut, contour['data'], prone, feetfirst)
 
                     # Move the origin to the last point of the contour
                     point = pixeldata[-1]

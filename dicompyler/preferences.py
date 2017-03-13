@@ -10,7 +10,8 @@
 import os
 import wx
 from wx.xrc import *
-from wx.lib.pubsub import Publisher as pub
+import wx.lib.pubsub.setuparg1
+from wx.lib.pubsub import pub
 from dicompyler import guiutil, util
 
 try:
@@ -228,10 +229,10 @@ class PreferencesDialog(wx.Dialog):
                     c.SetValue(value)
                     sizer.Add(c, 0, wx.ALIGN_CENTER)
                     # Remove the label preceding the checkbox
-                    t = self.FindWindowById(c.PrevControlId(c.GetId()))
+                    t = c.GetPrevSibling()
                     t.SetLabel('')
                     # Adjust the sizer preceding the label
-                    fgsizer.GetItem(0).SetSpacer((20,0))
+                    fgsizer.GetItem(0).AssignSpacer((20,0))
                     # Add control to the callback dict
                     self.callbackdict[c] = setting['callback']
                     self.Bind(wx.EVT_CHECKBOX, self.OnUpdateCheckbox, c)
@@ -323,7 +324,7 @@ class PreferencesDialog(wx.Dialog):
 
         b = evt.GetEventObject()
         # Get the the label associated with the browse button
-        t = self.FindWindowById(b.PrevControlId(b.GetId()))
+        t = b.GetPrevSibling()
         dlg = wx.DirDialog(self, defaultPath = t.GetValue())
 
         if dlg.ShowModal() == wx.ID_OK:
