@@ -77,8 +77,8 @@ setup(
     
     dicompyler requires the following packages to run from source:
     
-    - Python 2.7 or higher (not tested on Python 3)
-    - wxPython 3.0.2.0 (not tested on wxPython Phoenix)
+    - Python 3.6 or higher 
+    - wxPython-phoenix 4.0.0a3 
     - matplotlib 1.3 to 1.5.1
     - numpy 1.2 or higher
     - Pillow 1.0 or higher

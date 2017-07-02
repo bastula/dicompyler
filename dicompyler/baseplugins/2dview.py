@@ -47,9 +47,10 @@ class plugin2DView(wx.Panel):
     """Plugin to display DICOM image, RT Structure, RT Dose in 2D."""
 
     def __init__(self):
-        pre = wx.PrePanel()
+        #pre = wx.PrePanel()
         # the Create step is done by XRC.
-        self.PostCreate(pre)
+        #self.PostCreate(pre)
+        wx.Panel.__init__(self)
 
     def Init(self, res):
         """Method called after the panel has been initialized."""
@@ -133,19 +134,19 @@ class plugin2DView(wx.Panel):
         self.z = 0
         self.structurepixlut = ([], [])
         self.dosepixlut = ([], [])
-        if msg.data.has_key('images'):
+        if 'images' in msg.data:
             self.images = msg.data['images']
             self.imagenum = 1
             # If more than one image, set first image to middle of the series
             if (len(self.images) > 1):
-                self.imagenum = len(self.images)/2
+                self.imagenum = int(len(self.images)/2)
             image = self.images[self.imagenum-1]
             self.structurepixlut = image.GetPatientToPixelLUT()
             # Determine the default window and level of the series
             self.window, self.level = image.GetDefaultImageWindowLevel()
             # Dose display depends on whether we have images loaded or not
             self.isodoses = {}
-            if (msg.data.has_key('dose') and \
+            if ('dose' in msg.data and \
                 ("PixelData" in msg.data['dose'].ds)):
                 self.dose = msg.data['dose']
                 self.dosedata = self.dose.GetDoseData()
@@ -155,7 +156,7 @@ class plugin2DView(wx.Panel):
                 self.dosepixlut = self.GetDoseGridPixelData(self.structurepixlut, doselut)
             else:
                 self.dose = []
-            if msg.data.has_key('plan'):
+            if 'plan' in msg.data:
                 self.rxdose = msg.data['plan']['rxdose']
             else:
                 self.rxdose = 0
@@ -165,6 +166,7 @@ class plugin2DView(wx.Panel):
         self.SetBackgroundColour(wx.Colour(0, 0, 0))
         # Set the focus to this panel so we can capture key events
         self.SetFocus()
+        self.OnFocus() #Workaround on Windows. ST
         self.Refresh()
 
     def OnFocus(self):
@@ -249,7 +251,7 @@ class plugin2DView(wx.Panel):
         # to compare with the image z position
         if not "zarray" in structure:
             structure['zarray'] = np.array(
-                    structure['planes'].keys(), dtype=np.float32)
+                    list(structure['planes'].keys()), dtype=np.float32)
             structure['zkeys'] = structure['planes'].keys()
 
         # Return if there are no z positions in the structure data
@@ -275,7 +277,7 @@ class plugin2DView(wx.Panel):
                 style=self.GetLineDrawingStyle(self.structure_line_style)))
             # Create the path for the contour
             path = gc.CreatePath()
-            for contour in structure['planes'][structure['zkeys'][index]]:
+            for contour in structure['planes'][list(structure['zkeys'])[index]]:
                 if (contour['type'] == u"CLOSED_PLANAR"):
                     # Convert the structure data to pixel data
                     pixeldata = self.GetContourPixelData(
@@ -443,7 +445,7 @@ class plugin2DView(wx.Panel):
                 feetfirst = True
             else:
                 feetfirst = False
-            for id, structure in self.structures.iteritems():
+            for id, structure in self.structures.items():
                 self.DrawStructure(structure, gc, self.z, prone, feetfirst)
 
             # Draw the isodoses if present
@@ -454,7 +456,7 @@ class plugin2DView(wx.Panel):
                         np.arange(grid.shape[1]), np.arange(grid.shape[0]))
                     # Instantiate the isodose generator for this slice
                     isodosegen = cntr.Cntr(x, y, grid)
-                    for id, isodose in iter(sorted(self.isodoses.iteritems())):
+                    for id, isodose in iter(sorted(self.isodoses.items())):
                         self.DrawIsodose(isodose, gc, isodosegen)
 
             # Restore the translation and scaling
@@ -541,21 +543,21 @@ class plugin2DView(wx.Panel):
         # Only display if the mouse coordinates are within the image size range
         if ((0 <= xpos < len(self.structurepixlut[0])) and
             (0 <= ypos < len(self.structurepixlut[1])) and self.mouse_in_window):
-            text = "X: " + unicode('%.2f' % self.structurepixlut[0][xpos]) + \
-                " mm Y: " + unicode('%.2f' % self.structurepixlut[1][ypos]) + \
-                " mm / X: " + unicode(xpos) + \
-                " px Y:" + unicode(ypos) + " px"
+            text = "X: " + str('%.2f' % self.structurepixlut[0][xpos]) + \
+                " mm Y: " + str('%.2f' % self.structurepixlut[1][ypos]) + \
+                " mm / X: " + str(xpos) + \
+                " px Y:" + str(ypos) + " px"
 
             # Lookup the current image and find the value of the current pixel
             image = self.images[self.imagenum-1]
             # Rescale the slope and intercept of the image if present
-            if (image.ds.has_key('RescaleIntercept') and
-                image.ds.has_key('RescaleSlope')):
+            if ('RescaleIntercept' in image.ds and
+                'RescaleSlope' in image.ds):
                 pixel_array = image.ds.pixel_array*image.ds.RescaleSlope + \
                               image.ds.RescaleIntercept
             else:
                 pixel_array = image.ds.pixel_array
-            value = "Value: " + unicode(pixel_array[ypos, xpos])
+            value = "Value: " + str(pixel_array[ypos, xpos])
 
             # Lookup the current dose plane and find the value of the current
             # pixel, if the dose has been loaded
@@ -567,8 +569,8 @@ class plugin2DView(wx.Panel):
                     dose = dosegrid[ydpos, xdpos] * \
                            self.dosedata['dosegridscaling']
                     value = value + " / Dose: " + \
-                            unicode('%.4g' % dose) + " Gy / " + \
-                            unicode('%.4g' % float(dose*10000/self.rxdose)) + " %"
+                            str('%.4g' % dose) + " Gy / " + \
+                            str('%.4g' % float(dose*10000/self.rxdose)) + " %"
         # Send a message with the text to the 2nd and 3rd statusbar sections
         pub.sendMessage('main.update_statusbar', {1:text, 2:value})
 
@@ -717,7 +719,7 @@ class plugin2DView(wx.Panel):
 
         menu = wx.Menu()
         if len(self.plugins):
-            for name, p in self.plugins.iteritems():
+            for name, p in self.plugins.items():
                 id = wx.NewId()
                 self.Bind(wx.EVT_MENU, p.pluginMenu, id=id)
                 menu.Append(id, name)

@@ -30,6 +30,7 @@ class PreferencesManager():
         # Load the XRC file for our gui resources
         res = XmlResource(util.GetResourcePath('preferences.xrc'))
         self.dlgPreferences = res.LoadDialog(None, "PreferencesDialog")
+        #self.dlgPreferences = PreferencesDialog(parent,name=name)
         self.dlgPreferences.Init(name, appname)
 
         # Setup internal pubsub methods
@@ -95,9 +96,9 @@ class PreferencesManager():
 
         query = msg.data.split('.')
         v = self.values
-        if v.has_key(query[0]):
-            if v[query[0]].has_key(query[1]):
-                if v[query[0]][query[1]].has_key(query[2]):
+        if query[0] in v:
+            if query[1] in v[query[0]]:
+                if query[2] in v[query[0]][query[1]]:
                     pub.sendMessage(msg.data, v[query[0]][query[1]][query[2]])
 
     def GetPreferenceValues(self, msg):
@@ -105,18 +106,20 @@ class PreferencesManager():
 
         query = msg.data.split('.')
         v = self.values
-        if v.has_key(query[0]):
-            if v[query[0]].has_key(query[1]):
-                for setting, value in v[query[0]][query[1]].iteritems():
+        if query[0] in v:
+            if query[1] in v[query[0]]:
+                for setting, value in list(v[query[0]][query[1]].items()):
                     message = msg.data + '.' + setting
                     pub.sendMessage(message, value)
 
     def SetPreferenceValue(self, msg):
         """Set the preference value for the given preference setting."""
 
-        SetValue(self.values, msg.data.keys()[0], msg.data.values()[0])
+        #Using list() may break threading.  
+        #See https://blog.labix.org/2008/06/27/watch-out-for-listdictkeys-in-python-3
+        SetValue(self.values, list(msg.data.keys())[0], list(msg.data.values())[0])
         pub.sendMessage('preferences.updated.values', self.values)
-        pub.sendMessage(msg.data.keys()[0], msg.data.values()[0])
+        pub.sendMessage(list(msg.data.keys())[0], list(msg.data.values())[0]) 
 
 ############################## Preferences Dialog ##############################
 
@@ -124,9 +127,11 @@ class PreferencesDialog(wx.Dialog):
     """Dialog to display and change preferences."""
 
     def __init__(self):
-        pre = wx.PreDialog()
+        #pre = wx.PreDialog()
         # the Create step is done by XRC.
-        self.PostCreate(pre)
+        #self.PostCreate(pre)
+        wx.Dialog.__init__(self)
+        #self.Create(None)
 
     def Init(self, name = None, appname = ""):
         """Method called after the panel has been initialized."""
@@ -144,7 +149,7 @@ class PreferencesDialog(wx.Dialog):
 
         # Initialize controls
         self.notebook = XRCCTRL(self, 'notebook')
-
+        
         # Modify the control and font size on Mac
         for child in self.GetChildren():
             guiutil.adjust_control(child)
@@ -171,8 +176,8 @@ class PreferencesDialog(wx.Dialog):
 
         # Add each preference panel to the notebook
         for template in self.preftemplate:
-            panel = self.CreatePreferencePanel(template.values()[0])
-            self.notebook.AddPage(panel, template.keys()[0])
+            panel = self.CreatePreferencePanel(list(template.values())[0])
+            self.notebook.AddPage(panel, list(template.keys())[0])
 
     def CreatePreferencePanel(self, prefpaneldata):
         """Create a preference panel for the given data."""
@@ -187,7 +192,7 @@ class PreferencesDialog(wx.Dialog):
             bsizer.Add((0,5))
             hsizer = wx.BoxSizer(wx.HORIZONTAL)
             hsizer.Add((12, 0))
-            h = wx.StaticText(panel, -1, group.keys()[0])
+            h = wx.StaticText(panel, -1, list(group.keys())[0])
             font = h.GetFont()
             font.SetWeight(wx.FONTWEIGHT_BOLD)
             h.SetFont(font)
@@ -195,10 +200,10 @@ class PreferencesDialog(wx.Dialog):
             bsizer.Add(hsizer)
             bsizer.Add((0,7))
             # Create a FlexGridSizer to contain the group of settings
-            fgsizer = wx.FlexGridSizer(len(group.values()[0]), 4, 10, 4)
+            fgsizer = wx.FlexGridSizer(len(list(group.values())[0]), 4, 10, 4)
             fgsizer.AddGrowableCol(2, 1)
             # Create controls for each setting
-            for setting in group.values()[0]:
+            for setting in list(group.values())[0]:
                 fgsizer.Add((24, 0))
                 # Show the restart asterisk for this setting if required
                 restart = str('*' if 'restart' in setting else '')
@@ -329,7 +334,7 @@ class PreferencesDialog(wx.Dialog):
 
         if dlg.ShowModal() == wx.ID_OK:
             # Update the associated label with the new directory
-            d = unicode(dlg.GetPath())
+            d = str(dlg.GetPath())
             t.SetValue(d)
             pub.sendMessage(self.callbackdict[b], d)
             SetValue(self.values, self.callbackdict[b], d)
@@ -349,9 +354,9 @@ def GetValue(values, setting):
     # Look for the saved value and return it if it exists
     query = setting['callback'].split('.')
     value = setting['default']
-    if values.has_key(query[0]):
-        if values[query[0]].has_key(query[1]):
-            if values[query[0]][query[1]].has_key(query[2]):
+    if query[0] in values:
+        if query[1] in values[query[0]]:
+            if query[2] in values[query[0]][query[1]]:
                 value = values[query[0]][query[1]][query[2]]
     # Otherwise return the default value
     return value
@@ -361,8 +366,8 @@ def SetValue(values, setting, value):
 
     # Look if a prior value exists and replace it
     query = setting.split('.')
-    if values.has_key(query[0]):
-        if values[query[0]].has_key(query[1]):
+    if query[0] in values:
+        if query[1] in values[query[0]]:
             values[query[0]][query[1]][query[2]] = value
         else:
             values[query[0]].update({query[1]:{query[2]:value}})
@@ -402,7 +407,7 @@ def main():
          'callback':'panel1.prefgrp1.choice_setting'},
             {'name':'Directory setting',
              'type':'directory',
-          'default':unicode(sp.GetDocumentsDir()),
+          'default':str(sp.GetDocumentsDir()),
          'callback':'panel1.prefgrp1.directory_setting'}]
         },
         {'Panel 1 Preference Group 2':
@@ -426,7 +431,7 @@ def main():
         {'Panel 2 Preference Group 2':
            [{'name':'Directory setting',
              'type':'directory',
-          'default':unicode(sp.GetUserDataDir()),
+          'default':str(sp.GetUserDataDir()),
          'callback':'panel2.prefgrp2.directory_setting'},
             {'name':'Choice Setting',
              'type':'choice',
@@ -438,7 +443,7 @@ def main():
 
     def print_template_value(msg):
         """Print the received template message."""
-        print msg.topic, msg.data
+        print(msg.topic, msg.data)
 
     # Subscribe the template value printer to each set of preferences
     pub.subscribe(print_template_value, 'panel1')
@@ -453,12 +458,12 @@ def main():
     # Print the results of the preferences
     with open(filename, mode='r') as f:
         for line in f:
-            print line,
+            print(line)
 
     try:
         os.remove(filename)
     except WindowsError:
-        print '\nCould not delete: '+filename+'. Please delete it manually.'
+        print('\nCould not delete: '+filename+'. Please delete it manually.')
 
 if __name__ == '__main__':
     main()

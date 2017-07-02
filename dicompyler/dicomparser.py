@@ -170,7 +170,7 @@ class DicomParser:
                 dicom.charset.decode(self.ds.data_element(tag), cs)
             except:
                 logger.info("Could not decode character set for %s.", oldval)
-                return unicode(self.ds.data_element(tag).value, errors='replace')
+                return str(self.ds.data_element(tag).value, errors='replace')
 
             newval = self.ds.data_element(tag).value
             self.ds.data_element(tag).value = oldval
@@ -199,8 +199,8 @@ class DicomParser:
         if ((window == 0) and (level == 0)):
             window, level = self.GetDefaultImageWindowLevel()
         # Rescale the slope and intercept of the image if present
-        if (self.ds.has_key('RescaleIntercept') and
-            self.ds.has_key('RescaleSlope')):
+        if ('RescaleIntercept' in self.ds and
+            'RescaleSlope' in self.ds):
             rescaled_image = self.ds.pixel_array*self.ds.RescaleSlope + \
                              self.ds.RescaleIntercept
         else:
@@ -228,8 +228,8 @@ class DicomParser:
             wmax = 0
             wmin = 0
             # Rescale the slope and intercept of the image if present
-            if (self.ds.has_key('RescaleIntercept') and
-                self.ds.has_key('RescaleSlope')):
+            if ('RescaleIntercept' in self.ds and
+                'RescaleSlope' in self.ds):
                 pixel_array = self.ds.pixel_array*self.ds.RescaleSlope + \
                               self.ds.RescaleIntercept
             else:
@@ -304,7 +304,7 @@ class DicomParser:
             return structures
 
         # Locate the name and number of each ROI
-        if self.ds.has_key('StructureSetROIs'):
+        if 'StructureSetROIs' in self.ds:
             for item in self.ds.StructureSetROIs:
                 data = {}
                 number = item.ROINumber
@@ -314,13 +314,13 @@ class DicomParser:
                 structures[number] = data
 
         # Determine the type of each structure (PTV, organ, external, etc)
-        if self.ds.has_key('RTROIObservations'):
+        if 'RTROIObservations' in self.ds:
             for item in self.ds.RTROIObservations:
                 number = item.ReferencedROINumber
                 structures[number]['RTROIType'] = item.RTROIInterpretedType
 
         # The coordinate data of each ROI is stored within ROIContourSequence
-        if self.ds.has_key('ROIContours'):
+        if 'ROIContours' in self.ds:
             for roi in self.ds.ROIContours:
                 number = roi.ReferencedROINumber
 
@@ -330,7 +330,7 @@ class DicomParser:
                         random.randint(0,255),
                         random.randint(0,255)), dtype=float)
                 # Get the RGB color triplet for the current ROI if it exists
-                if roi.has_key('ROIDisplayColor'):
+                if 'ROIDisplayColor' in roi:
                     # Make sure the color is not none
                     if not (roi.ROIDisplayColor == None):
                         color = roi.ROIDisplayColor
@@ -349,7 +349,7 @@ class DicomParser:
                                 str(number))
 
                 planes = {}
-                if roi.has_key('Contours'):
+                if 'Contours' in roi:
                     # Locate the contour sequence for each referenced ROI
                     for contour in roi.Contours:
                         # For each plane, initialize a new plane dictionary
@@ -361,13 +361,13 @@ class DicomParser:
                         plane['contourData'] = self.GetContourPoints(contour.ContourData)
 
                         # Each plane which coincides with a image slice will have a unique ID
-                        if contour.has_key('ContourImages'):
+                        if 'ContourImages' in contour:
                             plane['UID'] = contour.ContourImages[0].ReferencedSOPInstanceUID
 
                         # Add each plane to the planes dictionary of the current ROI
-                        if plane.has_key('geometricType'):
+                        if 'geometricType' in plane:
                             z = ('%.2f' % plane['contourData'][0][2]).replace('-0','0')
-                            if not planes.has_key(z):
+                            if not z in planes:
                                 planes[z] = []
                             planes[z].append(plane)
 
@@ -643,7 +643,7 @@ class DicomParser:
                     self.plan['name'] = "N/A"
                     if "DoseReferenceDescription" in item:
                         self.plan['name'] = item.DoseReferenceDescription
-                    if item.has_key('TargetPrescriptionDose'):
+                    if 'TargetPrescriptionDose' in item:
                         rxdose = item.TargetPrescriptionDose * 100
                         if (rxdose > self.plan['rxdose']):
                             self.plan['rxdose'] = rxdose

@@ -51,7 +51,7 @@ class plugin:
         """When the import preferences change, update the values."""
 
         if (msg.topic[2] == 'import_location'):
-            self.path = unicode(msg.data)
+            self.path = str(msg.data)
         elif (msg.topic[2] == 'import_location_setting'):
             self.import_location_setting = msg.data
 
