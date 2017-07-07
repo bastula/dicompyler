@@ -19,6 +19,7 @@ import wx
 from wx.xrc import *
 import wx.adv
 import wx.lib.dialogs, webbrowser
+import dicom
 # Uncomment line to setup pubsub for frozen targets on wxPython 2.8.11 and above
 # from wx.lib.pubsub import setupv1
 import wx.lib.pubsub.setuparg1
@@ -428,7 +429,11 @@ class MainFrame(wx.Frame):
         patient = {}
 
         if not 'images' in ptdata:
-            patient.update(dp(ptdata.values()[0]).GetDemographics())
+            #Look for DICOM data in the ptdata dictionary
+            for rtdatatype in ptdata.keys():
+                if isinstance(ptdata[rtdatatype], dicom.dataset.FileDataset):
+                    patient.update(dp(ptdata[rtdatatype]).GetDemographics())
+                    break
         if 'rtss' in ptdata:
             wx.CallAfter(progressFunc, 20, 100, 'Processing RT Structure Set...')
             d = dp(ptdata['rtss'])
