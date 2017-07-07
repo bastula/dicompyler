@@ -218,9 +218,6 @@ class AnonymizeDialog(wx.Dialog):
     """Dialog that shows the options to anonymize DICOM / DICOM RT data."""
 
     def __init__(self):
-        #pre = wx.PreDialog()
-        # the Create step is done by XRC.
-        #self.PostCreate(pre)
         wx.Dialog.__init__(self)
 
     def Init(self):

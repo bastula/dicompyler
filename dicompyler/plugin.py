@@ -77,9 +77,6 @@ class PluginManagerDialog(wx.Dialog):
     """Manage the available plugins."""
 
     def __init__(self):
-        #pre = wx.PreDialog()
-        # the Create step is done by XRC.
-        #self.PostCreate(pre)
         wx.Dialog.__init__(self)
 
     def Init(self, plugins, pluginsDisabled):

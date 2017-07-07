@@ -49,10 +49,8 @@ class pluginDVH(wx.Panel):
     """Plugin to display DVH data with adjustable constraints."""
 
     def __init__(self):
-        #pre = wx.PrePanel()
-        # the Create step is done by XRC.
-        #self.PostCreate(pre)
         wx.Panel.__init__(self)
+        
     def Init(self, res):
         """Method called after the panel has been initialized."""
 

@@ -47,9 +47,6 @@ class plugin2DView(wx.Panel):
     """Plugin to display DICOM image, RT Structure, RT Dose in 2D."""
 
     def __init__(self):
-        #pre = wx.PrePanel()
-        # the Create step is done by XRC.
-        #self.PostCreate(pre)
         wx.Panel.__init__(self)
 
     def Init(self, res):

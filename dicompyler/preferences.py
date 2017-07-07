@@ -126,12 +126,8 @@ class PreferencesManager():
 class PreferencesDialog(wx.Dialog):
     """Dialog to display and change preferences."""
 
-    def __init__(self):
-        #pre = wx.PreDialog()
-        # the Create step is done by XRC.
-        #self.PostCreate(pre)
+    def __init__(self):      
         wx.Dialog.__init__(self)
-        #self.Create(None)
 
     def Init(self, name = None, appname = ""):
         """Method called after the panel has been initialized."""

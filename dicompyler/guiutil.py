@@ -112,9 +112,6 @@ class ProgressDialog(wx.Dialog):
     """Dialog to show progress for certain long-running events."""
 
     def __init__(self):
-        #pre = wx.PreDialog()
-        # the Create step is done by XRC.
-        #self.PostCreate(pre)
         wx.Dialog.__init__(self)
     
     def Init(self, res, title=None):

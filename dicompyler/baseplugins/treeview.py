@@ -52,9 +52,6 @@ class pluginTreeView(wx.Panel):
     """Plugin to display DICOM data in a tree view."""
 
     def __init__(self):
-        #pre = wx.PrePanel()
-        # the Create step is done by XRC.
-        #self.PostCreate(pre)
         wx.Panel.__init__(self)
 
     def Init(self, res):
