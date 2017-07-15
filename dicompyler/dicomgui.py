@@ -15,7 +15,6 @@ logger = logging.getLogger('dicompyler.dicomgui')
 import hashlib, os, threading
 import wx
 from wx.xrc import *
-import wx.lib.pubsub.setuparg1
 from wx.lib.pubsub import pub
 import numpy as np
 from dicompylercore import dicomparser
@@ -33,7 +32,7 @@ def ImportDicom(parent):
     # Show the dialog and return the result
     if (dlgDicomImporter.ShowModal() == wx.ID_OK):
         value = dlgDicomImporter.GetPatient()
-        pub.sendMessage('patient.updated.raw_data', value)
+        pub.sendMessage('patient.updated.raw_data', msg=value)
     else:
         value = {}
     # Block until the thread is done before destroying the dialog
@@ -113,7 +112,7 @@ class DicomImporterDialog(wx.Dialog):
 
         # Initialize the import location via pubsub
         pub.subscribe(self.OnImportPrefsChange, 'general.dicom')
-        pub.sendMessage('preferences.requested.values', 'general.dicom')
+        pub.sendMessage('preferences.requested.values', msg='general.dicom')
 
         # Search subfolders by default
         self.import_search_subfolders = True
@@ -129,17 +128,17 @@ class DicomImporterDialog(wx.Dialog):
         # Start the directory search as soon as the panel loads
         self.OnDirectorySearch()
 
-    def OnImportPrefsChange(self, msg):
+    def OnImportPrefsChange(self, topic, msg):
         """When the import preferences change, update the values."""
-
-        if (msg.topic[2] == 'import_location'):
-            self.path = str(msg.data)
+        topic = topic.split('.')
+        if (topic[1] == 'import_location'):
+            self.path = str(msg)
             self.txtDicomImport.SetValue(self.path)
-        elif (msg.topic[2] == 'import_location_setting'):
-            self.import_location_setting = msg.data
-        elif (msg.topic[2] == 'import_search_subfolders'):
-            self.import_search_subfolders = msg.data
-            self.checkSearchSubfolders.SetValue(msg.data)
+        elif (topic[1] == 'import_location_setting'):
+            self.import_location_setting = msg
+        elif (topic[1] == 'import_search_subfolders'):
+            self.import_search_subfolders = msg
+            self.checkSearchSubfolders.SetValue(msg)
 
     def OnCheckSearchSubfolders(self, evt):
         """Determine whether to search subfolders for DICOM data."""
@@ -802,12 +801,12 @@ class DicomImporterDialog(wx.Dialog):
             # if the 'import_location_setting' is "Remember Last Used"
             if (self.import_location_setting == "Remember Last Used"):
                 pub.sendMessage('preferences.updated.value',
-                    {'general.dicom.import_location':self.path})
+                    msg={'general.dicom.import_location':self.path})
 
             # Since we have updated the search subfolders setting,
             # update the setting in preferences
             pub.sendMessage('preferences.updated.value',
-                {'general.dicom.import_search_subfolders':
+                msg={'general.dicom.import_search_subfolders':
                  self.import_search_subfolders})
 
             filearray = self.tcPatients.GetPyData(item)['filearray']

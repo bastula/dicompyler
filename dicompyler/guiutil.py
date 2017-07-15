@@ -10,7 +10,6 @@
 import util
 import wx
 from wx.xrc import XmlResource, XRCCTRL, XRCID
-import wx.lib.pubsub.setuparg1
 from wx.lib.pubsub import pub
 
 def IsMSWindows():
@@ -225,9 +224,9 @@ class ColorCheckBox(wx.Panel):
         message = {'item':self.item, 'data':self.data,
                 'color':self.colorbox.GetBackgroundColour()}
         if evt.IsChecked():
-            pub.sendMessage('colorcheckbox.checked.' + self.pubsubname, message)
+            pub.sendMessage('colorcheckbox.checked.' + self.pubsubname, msg=message)
         else:
-            pub.sendMessage('colorcheckbox.unchecked.' + self.pubsubname, message)
+            pub.sendMessage('colorcheckbox.unchecked.' + self.pubsubname, msg=message)
 
 class ColorBox(wx.Window):
     """Control that shows and stores a color."""

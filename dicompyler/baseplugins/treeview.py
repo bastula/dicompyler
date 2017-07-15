@@ -13,7 +13,6 @@ logger = logging.getLogger('dicompyler.treeview')
 import threading, queue
 import wx
 from wx.xrc import XmlResource, XRCCTRL, XRCID
-import wx.lib.pubsub.setuparg1
 from wx.lib.pubsub import pub
 from wx.dataview import TreeListCtrl as tlc
 from dicompyler import guiutil, util
@@ -84,7 +83,7 @@ class pluginTreeView(wx.Panel):
         self.choiceDICOM.Select(0)
         self.tlcTreeView.DeleteAllItems()
         # Iterate through the message and enumerate the DICOM datasets
-        for k, v in msg.data.items():
+        for k, v in msg.items():
             if isinstance(v, pydicom.dataset.FileDataset):
                 i = self.choiceDICOM.Append(v.SOPClassUID.name.split(' Storage')[0])
                 self.choiceDICOM.SetClientData(i, v)

@@ -11,7 +11,6 @@
 import logging
 logger = logging.getLogger('dicompyler.quickimport')
 import wx
-import wx.lib.pubsub.setuparg1
 from wx.lib.pubsub import pub
 from dicompylercore import dicomparser
 from dicompyler import util
@@ -37,7 +36,7 @@ class plugin:
 
         # Initialize the import location via pubsub
         pub.subscribe(self.OnImportPrefsChange, 'general.dicom')
-        pub.sendMessage('preferences.requested.values', 'general.dicom')
+        pub.sendMessage('preferences.requested.values', msg='general.dicom')
 
         self.parent = parent
 
@@ -47,13 +46,13 @@ class plugin:
                             'shortHelp':"Open DICOM File Quickly...",
                             'eventhandler':self.pluginMenu}]
 
-    def OnImportPrefsChange(self, msg):
+    def OnImportPrefsChange(self, topic, msg):
         """When the import preferences change, update the values."""
-
-        if (msg.topic[2] == 'import_location'):
-            self.path = str(msg.data)
-        elif (msg.topic[2] == 'import_location_setting'):
-            self.import_location_setting = msg.data
+        topic = topic.split('.')
+        if (topic[1] == 'import_location'):
+            self.path = str(msg)
+        elif (topic[1] == 'import_location_setting'):
+            self.import_location_setting = msg
 
     def pluginMenu(self, evt):
         """Import DICOM data quickly."""
@@ -95,8 +94,8 @@ class plugin:
                 # if the 'import_location_setting' is "Remember Last Used"
                 if (self.import_location_setting == "Remember Last Used"):
                     pub.sendMessage('preferences.updated.value',
-                        {'general.dicom.import_location':dlg.GetDirectory()})
-                    pub.sendMessage('preferences.requested.values', 'general.dicom')
-        pub.sendMessage('patient.updated.raw_data', patient)
+                        msg={'general.dicom.import_location':dlg.GetDirectory()})
+                    pub.sendMessage('preferences.requested.values', msg='general.dicom')
+        pub.sendMessage('patient.updated.raw_data', msg=patient)
         dlg.Destroy()
         return

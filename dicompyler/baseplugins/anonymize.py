@@ -10,7 +10,6 @@
 
 import wx
 from wx.xrc import XmlResource, XRCCTRL, XRCID
-import wx.lib.pubsub.setuparg1
 from wx.lib.pubsub import pub
 import os, threading
 from dicompyler import guiutil, util
@@ -46,7 +45,7 @@ class plugin:
     def OnUpdatePatient(self, msg):
         """Update and load the patient data."""
 
-        self.data = msg.data
+        self.data = msg
 
     def pluginMenu(self, evt):
         """Anonymize DICOM / DICOM RT data."""
@@ -252,7 +251,7 @@ class AnonymizeDialog(wx.Dialog):
 
         # Initialize the import location via pubsub
         pub.subscribe(self.OnImportPrefsChange, 'general.dicom.import_location')
-        pub.sendMessage('preferences.requested.value', 'general.dicom.import_location')
+        pub.sendMessage('preferences.requested.value', msg='general.dicom.import_location')
 
         # Pre-select the text on the text controls due to a Mac OS X bug
         self.txtFirstName.SetSelection(-1, -1)
@@ -270,7 +269,7 @@ class AnonymizeDialog(wx.Dialog):
     def OnImportPrefsChange(self, msg):
         """When the import preferences change, update the values."""
 
-        self.path = str(msg.data)
+        self.path = str(msg)
         self.txtDICOMFolder.SetValue(self.path)
 
     def OnFolderBrowse(self, evt):

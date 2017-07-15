@@ -10,7 +10,6 @@
 import os
 import wx
 from wx.xrc import *
-import wx.lib.pubsub.setuparg1
 from wx.lib.pubsub import pub
 from dicompyler import guiutil, util
 
@@ -48,11 +47,12 @@ class PreferencesManager():
         self.filename = os.path.join(guiutil.get_data_dir(), filename)
         self.LoadPreferenceValues()
 
-    def __del__(self):
-
-        # Destroy the dialog when the preferences manager object is deleted
-        if self.dlgPreferences:
-            self.dlgPreferences.Destroy()
+#     def __del__(self):
+# 
+#         # Destroy the dialog when the preferences manager object is deleted
+#         if self.dlgPreferences:
+#             
+#             self.dlgPreferences.Destroy()
 
     def Show(self):
         """Show the preferences dialog with the given preferences."""
@@ -69,7 +69,7 @@ class PreferencesManager():
     def SetPreferenceTemplate(self, msg):
         """Set the template that the preferences will be shown in the dialog."""
 
-        self.preftemplate = msg.data
+        self.preftemplate = msg
         self.dlgPreferences.LoadPreferences(self.preftemplate, self.values)
 
     def LoadPreferenceValues(self):
@@ -86,40 +86,41 @@ class PreferencesManager():
 
     def SavePreferenceValues(self, msg):
         """Save the preference values to disk after the dialog is closed."""
-
-        self.values = msg.data
+        
+        print(msg.keys())
+        self.values = msg
         with open(self.filename, mode='w') as f:
             json.dump(self.values, f, sort_keys=True, indent=4)
 
     def GetPreferenceValue(self, msg):
         """Publish the requested value for a single preference setting."""
 
-        query = msg.data.split('.')
+        query = msg.split('.')
         v = self.values
         if query[0] in v:
             if query[1] in v[query[0]]:
                 if query[2] in v[query[0]][query[1]]:
-                    pub.sendMessage(msg.data, v[query[0]][query[1]][query[2]])
+                    pub.sendMessage(msg, topic=msg, msg=v[query[0]][query[1]][query[2]])
 
     def GetPreferenceValues(self, msg):
         """Publish the requested values for preference setting group."""
 
-        query = msg.data.split('.')
+        query = msg.split('.')
         v = self.values
         if query[0] in v:
             if query[1] in v[query[0]]:
                 for setting, value in list(v[query[0]][query[1]].items()):
-                    message = msg.data + '.' + setting
-                    pub.sendMessage(message, value)
+                    message = msg + '.' + setting
+                    pub.sendMessage(message, topic='.'.join(['general',setting]), msg=value)
 
     def SetPreferenceValue(self, msg):
         """Set the preference value for the given preference setting."""
 
         #Using list() may break threading.  
         #See https://blog.labix.org/2008/06/27/watch-out-for-listdictkeys-in-python-3
-        SetValue(self.values, list(msg.data.keys())[0], list(msg.data.values())[0])
-        pub.sendMessage('preferences.updated.values', self.values)
-        pub.sendMessage(list(msg.data.keys())[0], list(msg.data.values())[0]) 
+        SetValue(self.values, list(msg.keys())[0], list(msg.values())[0])
+        pub.sendMessage('preferences.updated.values', msg=self.values)
+        pub.sendMessage(list(msg.keys())[0], topic=list(msg.keys())[0], msg=list(msg.values())[0]) 
 
 ############################## Preferences Dialog ##############################
 
@@ -300,14 +301,14 @@ class PreferencesDialog(wx.Dialog):
         """Publish the updated choice when the value changes."""
 
         c = evt.GetEventObject()
-        pub.sendMessage(self.callbackdict[c], evt.GetString())
+        pub.sendMessage(self.callbackdict[c], msg=evt.GetString())
         SetValue(self.values, self.callbackdict[c], evt.GetString())
 
     def OnUpdateCheckbox(self, evt):
         """Publish the updated checkbox when the value changes."""
 
         c = evt.GetEventObject()
-        pub.sendMessage(self.callbackdict[c], evt.IsChecked())
+        pub.sendMessage(self.callbackdict[c], topic=self.callbackdict[c], msg=evt.IsChecked())
         SetValue(self.values, self.callbackdict[c], evt.IsChecked())
 
     def OnUpdateSlider(self, evt):
@@ -317,7 +318,7 @@ class PreferencesDialog(wx.Dialog):
         # Update the associated label with the new number
         t = self.FindWindowById(s.NextControlId(s.GetId()))
         t.SetLabel(str(s.GetValue()))
-        pub.sendMessage(self.callbackdict[s], s.GetValue())
+        pub.sendMessage(self.callbackdict[s], topic=self.callbackdict[s], msg=s.GetValue())
         SetValue(self.values, self.callbackdict[s], s.GetValue())
 
     def OnUpdateDirectory(self, evt):
@@ -332,15 +333,16 @@ class PreferencesDialog(wx.Dialog):
             # Update the associated label with the new directory
             d = str(dlg.GetPath())
             t.SetValue(d)
-            pub.sendMessage(self.callbackdict[b], d)
+            pub.sendMessage(self.callbackdict[b], topic=self.callbackdict[b], msg=d)
             SetValue(self.values, self.callbackdict[b], d)
         dlg.Destroy()
 
     def OnClose(self, evt):
         """Publish the updated preference values when closing the dialog."""
 
-        pub.sendMessage('preferences.updated.values', self.values)
-        self.Hide()
+        pub.sendMessage('preferences.updated.values', msg=self.values)
+        if self:
+            self.Hide()
 
 ############################ Get/Set Value Functions ###########################
 
@@ -439,14 +441,14 @@ def main():
 
     def print_template_value(msg):
         """Print the received template message."""
-        print(msg.topic, msg.data)
+        print(msg.topic, msg)
 
     # Subscribe the template value printer to each set of preferences
     pub.subscribe(print_template_value, 'panel1')
     pub.subscribe(print_template_value, 'panel2')
 
     # Notify the preferences manager that a pref template is available
-    pub.sendMessage('preferences.updated.template', preftemplate)
+    pub.sendMessage('preferences.updated.template', msg=preftemplate)
 
     frame.prefmgr.Show()
     app.MainLoop()

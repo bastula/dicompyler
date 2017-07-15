@@ -10,7 +10,6 @@
 
 import wx
 from wx.xrc import XmlResource, XRCCTRL, XRCID
-import wx.lib.pubsub.setuparg1
 from wx.lib.pubsub import pub
 from matplotlib import _cntr as cntr
 from matplotlib import __version__ as mplversion
@@ -123,7 +122,7 @@ class plugin2DView(wx.Panel):
         pub.subscribe(self.OnRefresh, '2dview.refresh')
         pub.subscribe(self.OnDrawingPrefsChange, '2dview.drawingprefs')
         pub.subscribe(self.OnPluginLoaded, 'plugin.loaded.2dview')
-        pub.sendMessage('preferences.requested.values', '2dview.drawingprefs')
+        pub.sendMessage('preferences.requested.values', msg='2dview.drawingprefs')
 
     def OnUpdatePatient(self, msg):
         """Update and load the patient data."""
@@ -131,8 +130,8 @@ class plugin2DView(wx.Panel):
         self.z = 0
         self.structurepixlut = ([], [])
         self.dosepixlut = ([], [])
-        if 'images' in msg.data:
-            self.images = msg.data['images']
+        if 'images' in msg:
+            self.images = msg['images']
             self.imagenum = 1
             # If more than one image, set first image to middle of the series
             if (len(self.images) > 1):
@@ -143,9 +142,9 @@ class plugin2DView(wx.Panel):
             self.window, self.level = image.GetDefaultImageWindowLevel()
             # Dose display depends on whether we have images loaded or not
             self.isodoses = {}
-            if ('dose' in msg.data and \
-                ("PixelData" in msg.data['dose'].ds)):
-                self.dose = msg.data['dose']
+            if ('dose' in msg and \
+                ("PixelData" in msg['dose'].ds)):
+                self.dose = msg['dose']
                 self.dosedata = self.dose.GetDoseData()
                 # First get the dose grid LUT
                 doselut = self.dose.GetPatientToPixelLUT()
@@ -153,8 +152,8 @@ class plugin2DView(wx.Panel):
                 self.dosepixlut = self.GetDoseGridPixelData(self.structurepixlut, doselut)
             else:
                 self.dose = []
-            if 'plan' in msg.data:
-                self.rxdose = msg.data['plan']['rxdose']
+            if 'plan' in msg:
+                self.rxdose = msg['plan']['rxdose']
             else:
                 self.rxdose = 0
         else:
@@ -211,35 +210,35 @@ class plugin2DView(wx.Panel):
     def OnStructureCheck(self, msg):
         """When the structure list changes, update the panel."""
 
-        self.structures = msg.data
+        self.structures = msg
         self.SetFocus()
         self.Refresh()
 
     def OnIsodoseCheck(self, msg):
         """When the isodose list changes, update the panel."""
 
-        self.isodoses = msg.data
+        self.isodoses = msg
         self.SetFocus()
         self.Refresh()
 
-    def OnDrawingPrefsChange(self, msg):
+    def OnDrawingPrefsChange(self, topic, msg):
         """When the drawing preferences change, update the drawing styles."""
-
-        if (msg.topic[2] == 'isodose_line_style'):
-            self.isodose_line_style = msg.data
-        elif (msg.topic[2] == 'isodose_fill_opacity'):
-            self.isodose_fill_opacity = msg.data
-        elif (msg.topic[2] == 'structure_line_style'):
-            self.structure_line_style = msg.data
-        elif (msg.topic[2] == 'structure_fill_opacity'):
-            self.structure_fill_opacity = msg.data
+        topic = topic.split('.')
+        if (topic[1] == 'isodose_line_style'):
+            self.isodose_line_style = msg
+        elif (topic[1] == 'isodose_fill_opacity'):
+            self.isodose_fill_opacity = msg
+        elif (topic[1] == 'structure_line_style'):
+            self.structure_line_style = msg
+        elif (topic[1] == 'structure_fill_opacity'):
+            self.structure_fill_opacity = msg
         self.Refresh()
 
     def OnPluginLoaded(self, msg):
         """When a 2D View-dependent plugin is loaded, initialize the plugin."""
 
-        name = msg.data.pluginProperties()['name']
-        self.plugins[name] = msg.data.plugin(self)
+        name = msg.pluginProperties()['name']
+        self.plugins[name] = msg.plugin(self)
 
     def DrawStructure(self, structure, gc, position, prone, feetfirst):
         """Draw the given structure on the panel."""
@@ -488,7 +487,7 @@ class plugin2DView(wx.Panel):
 
             # Send message with the current image number and various properties
             pub.sendMessage('2dview.updated.image',
-                            {'number':self.imagenum,    # slice number
+                            msg={'number':self.imagenum,    # slice number
                              'z':self.z,                # slice location
                              'window':self.window,      # current window value
                              'level':self.level,        # curent level value
@@ -569,7 +568,7 @@ class plugin2DView(wx.Panel):
                             str('%.4g' % dose) + " Gy / " + \
                             str('%.4g' % float(dose*10000/self.rxdose)) + " %"
         # Send a message with the text to the 2nd and 3rd statusbar sections
-        pub.sendMessage('main.update_statusbar', {1:text, 2:value})
+        pub.sendMessage('main.update_statusbar', msg={1:text, 2:value})
 
     def OnZoomIn(self, evt):
         """Zoom the view in."""
@@ -654,7 +653,7 @@ class plugin2DView(wx.Panel):
             (self.mouse_in_window) and
             (evt.LeftDown())):
             pub.sendMessage('2dview.mousedown',
-                        {'x':self.xpos,
+                        msg={'x':self.xpos,
                          'y':self.ypos,
                          'xmm':self.structurepixlut[0][self.xpos],
                          'ymm':self.structurepixlut[1][self.ypos]})
