@@ -301,7 +301,7 @@ class PreferencesDialog(wx.Dialog):
         """Publish the updated choice when the value changes."""
 
         c = evt.GetEventObject()
-        pub.sendMessage(self.callbackdict[c], msg=evt.GetString())
+        pub.sendMessage(self.callbackdict[c], topic=self.callbackdict[c], msg=evt.GetString())
         SetValue(self.values, self.callbackdict[c], evt.GetString())
 
     def OnUpdateCheckbox(self, evt):
