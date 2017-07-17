@@ -10,7 +10,6 @@
 import util
 import wx
 from wx.xrc import XmlResource, XRCCTRL, XRCID
-import wx.lib.pubsub.setuparg1
 from wx.lib.pubsub import pub
 
 def IsMSWindows():
@@ -78,11 +77,11 @@ def convert_pil_to_wx(pil, alpha=True):
     """ Convert a PIL Image into a wx.Image.
         Code taken from Dave Witten's imViewer-Simple.py in pydicom contrib."""
     if alpha:
-        image = apply(wx.EmptyImage, pil.size)
+        image = wx.Image(pil.size[0], pil.size[1], clear=True)
         image.SetData(pil.convert("RGB").tobytes())
-        image.SetAlphaData(pil.convert("RGBA").tobytes()[3::4])
+        image.SetAlpha(pil.convert("RGBA").tobytes()[3::4])
     else:
-        image = wx.EmptyImage(pil.size[0], pil.size[1])
+        image = wx.Image(pil.size[0], pil.size[1], clear=True)
         new_image = pil.convert('RGB')
         data = new_image.tostring()
         image.SetData(data)
@@ -112,9 +111,7 @@ class ProgressDialog(wx.Dialog):
     """Dialog to show progress for certain long-running events."""
 
     def __init__(self):
-        pre = wx.PreDialog()
-        # the Create step is done by XRC.
-        self.PostCreate(pre)
+        wx.Dialog.__init__(self)
     
     def Init(self, res, title=None):
         """Method called after the dialog has been initialized."""
@@ -180,7 +177,7 @@ class ColorCheckListBox(wx.ScrolledWindow):
         """Removes all items from the control."""
 
         self.items = []
-        self.grid.Clear(deleteWindows=True)
+        self.grid.Clear()
         self.grid.Add((0,3), 0)
         self.Layout()
 
@@ -227,9 +224,9 @@ class ColorCheckBox(wx.Panel):
         message = {'item':self.item, 'data':self.data,
                 'color':self.colorbox.GetBackgroundColour()}
         if evt.IsChecked():
-            pub.sendMessage('colorcheckbox.checked.' + self.pubsubname, message)
+            pub.sendMessage('colorcheckbox.checked.' + self.pubsubname, msg=message)
         else:
-            pub.sendMessage('colorcheckbox.unchecked.' + self.pubsubname, message)
+            pub.sendMessage('colorcheckbox.unchecked.' + self.pubsubname, msg=message)
 
 class ColorBox(wx.Window):
     """Control that shows and stores a color."""

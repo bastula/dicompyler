@@ -523,7 +523,7 @@ class Painter:
         dc.SetTextForeground(self.TEXT_FOREGROUND)
         dc.SetTextBackground(self.TEXT_BACKGROUND)
         dc.SetLogicalFunction(self.FUNCTION)
-        dc.BeginDrawing()
+        #dc.BeginDrawing()
 
         if self.lastValue is not None:
             self.clearValue(dc, self.lastValue)
@@ -533,7 +533,7 @@ class Painter:
             self.drawValue(dc, value)
             self.lastValue = value
 
-        dc.EndDrawing()
+        #dc.EndDrawing()
 
     def formatValue(self, value):
         """
@@ -1122,7 +1122,7 @@ class PlotPanel(FigureCanvasWxAgg):
         # find the toplevel parent window and register an activation event
         # handler that is keyed to the id of this PlotPanel
         topwin = toplevel_parent_of_window(self)
-        topwin.Connect(-1, self.GetId(), wx.wxEVT_ACTIVATE, self.OnActivate)
+        topwin.Connect(self.GetId(), wx.ID_ANY, wx.wxEVT_ACTIVATE, self.OnActivate)
 
         wx.EVT_ERASE_BACKGROUND(self, self.OnEraseBackground)
         wx.EVT_WINDOW_DESTROY(self, self.OnDestroy)
@@ -1440,7 +1440,7 @@ class PlotFrame(wx.Frame):
 
         try:
             self.panel.print_figure(fileName)
-        except IOError, e:
+        except IOError as e:
             if e.strerror:
                 err = e.strerror
             else:

@@ -12,7 +12,6 @@ logger = logging.getLogger('dicompyler.plugin')
 import imp, os
 import wx
 from wx.xrc import *
-import wx.lib.pubsub.setuparg1
 from wx.lib.pubsub import pub
 from dicompyler import guiutil, util
 
@@ -77,9 +76,7 @@ class PluginManagerDialog(wx.Dialog):
     """Manage the available plugins."""
 
     def __init__(self):
-        pre = wx.PreDialog()
-        # the Create step is done by XRC.
-        self.PostCreate(pre)
+        wx.Dialog.__init__(self)
 
     def Init(self, plugins, pluginsDisabled):
         """Method called after the panel has been initialized."""
@@ -258,4 +255,4 @@ class PluginManagerDialog(wx.Dialog):
             logger.debug("%s disabled", p.__name__)
 
         pub.sendMessage('preferences.updated.value',
-                {'general.plugins.disabled_list': list(self.pluginsDisabled)})
+                msg={'general.plugins.disabled_list': list(self.pluginsDisabled)})

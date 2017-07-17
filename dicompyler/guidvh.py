@@ -36,7 +36,7 @@ class guiDVH:
             # Enumerate each set of DVHs
             for d, dvhs in enumerate(dvhlist):
                 # Plot the DVH from each set
-                for id, dvh in dvhs.iteritems():
+                for id, dvh in dvhs.items():
                     if id in structures:
                         # Convert the color array to MPL formatted color
                         colorarray = np.array(structures[id]['color'],

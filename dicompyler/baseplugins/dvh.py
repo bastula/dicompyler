@@ -12,7 +12,6 @@
 
 import wx
 from wx.xrc import XmlResource, XRCCTRL, XRCID
-import wx.lib.pubsub.setuparg1
 from wx.lib.pubsub import pub
 from dicompyler import guiutil, util
 from dicompyler import dvhdata, guidvh
@@ -49,10 +48,8 @@ class pluginDVH(wx.Panel):
     """Plugin to display DVH data with adjustable constraints."""
 
     def __init__(self):
-        pre = wx.PrePanel()
-        # the Create step is done by XRC.
-        self.PostCreate(pre)
-
+        wx.Panel.__init__(self)
+        
     def Init(self, res):
         """Method called after the panel has been initialized."""
 
@@ -119,9 +116,9 @@ class pluginDVH(wx.Panel):
     def OnUpdatePatient(self, msg):
         """Update and load the patient data."""
 
-        self.structures = msg.data['structures']
-        self.dvhs = msg.data['dvhs']
-        self.plan = msg.data['plan']
+        self.structures = msg['structures']
+        self.dvhs = msg['dvhs']
+        self.plan = msg['plan']
         # show an empty plot when (re)loading a patient
         self.guiDVH.Replot()
         self.EnableConstraints(False)
@@ -138,14 +135,14 @@ class pluginDVH(wx.Panel):
 
         # Make sure that the volume has been calculated for each structure
         # before setting it
-        self.checkedstructures = msg.data
-        for id, structure in self.checkedstructures.iteritems():
-            if not self.structures[id].has_key('volume'):
+        self.checkedstructures = msg
+        for id, structure in self.checkedstructures.items():
+            if not 'volume' in self.structures[id]:
                 self.structures[id]['volume'] = structure['volume']
 
             # make sure that the dvh has been calculated for each structure
             # before setting it
-            if self.dvhs.has_key(id):
+            if id in self.dvhs:
                 self.EnableConstraints(True)
                 self.dvharray[id] = self.dvhs[id].relative_volume.counts
                 # Create an instance of the dvh scaling data for guidvh
@@ -160,11 +157,11 @@ class pluginDVH(wx.Panel):
     def OnStructureSelect(self, msg):
         """Load the constraints for the currently selected structure."""
 
-        if (msg.data['id'] == None):
+        if (msg['id'] == None):
             self.EnableConstraints(False)
         else:
-            self.structureid = msg.data['id']
-            if self.dvhs.has_key(self.structureid):
+            self.structureid = msg['id']
+            if self.structureid in self.dvhs:
                 # Create an instance of the dvh scaling data for guidvh
                 self.dvhscaling[self.structureid] = 1  # self.dvhs[self.structureid]['scaling']
                 # 'Toggle' the choice box to refresh the dose data
@@ -190,7 +187,7 @@ class pluginDVH(wx.Panel):
 
         # Replot the remaining structures and disable the constraints
         # if a structure that has no DVH calculated is selected
-        if not self.dvhs.has_key(self.structureid):
+        if not self.structureid in self.dvhs:
             self.guiDVH.Replot([self.dvharray], [self.dvhscaling], self.checkedstructures)
             self.EnableConstraints(False)
             return
