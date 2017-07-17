@@ -62,7 +62,7 @@ class pluginTreeView(wx.Panel):
         res.AttachUnknownControl('tlcTreeView', self.tlcTreeView, self)
 
         # Bind interface events to the proper methods
-        wx.EVT_CHOICE(self, XRCID('choiceDICOM'), self.OnLoadTree)
+        self.Bind(wx.EVT_CHOICE, self.OnLoadTree, id=XRCID('choiceDICOM'))
         self.Bind(wx.EVT_WINDOW_DESTROY, self.OnDestroy)
 
         # Decrease the font size on Mac

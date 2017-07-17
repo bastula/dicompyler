@@ -105,10 +105,14 @@ class PluginManagerDialog(wx.Dialog):
 
         # Bind interface events to the proper methods
 #        wx.EVT_BUTTON(self, XRCID('btnDeletePlugin'), self.DeletePlugin)
-        wx.EVT_CHECKBOX(self, XRCID('checkEnabled'), self.OnEnablePlugin)
-        wx.EVT_TREE_ITEM_ACTIVATED(self, XRCID('tcPlugins'), self.OnEnablePlugin)
-        wx.EVT_TREE_SEL_CHANGED(self, XRCID('tcPlugins'), self.OnSelectTreeItem)
-        wx.EVT_TREE_SEL_CHANGING(self, XRCID('tcPlugins'), self.OnSelectRootItem)
+        # wx.EVT_CHECKBOX(self, XRCID('checkEnabled'), self.OnEnablePlugin)
+        self.Bind(wx.EVT_CHECKBOX, self.OnEnablePlugin, id=XRCID('checkEnabled'))
+        # wx.EVT_TREE_ITEM_ACTIVATED(self, XRCID('tcPlugins'), self.OnEnablePlugin)
+        self.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.OnEnablePlugin, id=XRCID('tcPlugins'))
+        # wx.EVT_TREE_SEL_CHANGED(self, XRCID('tcPlugins'), self.OnSelectTreeItem)
+        self.Bind(wx.EVT_TREE_SEL_CHANGED, self.OnSelectTreeItem, id=XRCID('tcPlugins'))
+        # wx.EVT_TREE_SEL_CHANGING(self, XRCID('tcPlugins'), self.OnSelectRootItem)
+        self.Bind(wx.EVT_TREE_SEL_CHANGING, self.OnSelectRootItem, id=XRCID('tcPlugins'))
 
         # Modify the control and font size as needed
         font = wx.SystemSettings.GetFont(wx.SYS_DEFAULT_GUI_FONT)
@@ -185,19 +189,23 @@ class PluginManagerDialog(wx.Dialog):
                 self.tcPlugins.SetItemImage(i, 2)
                 self.tcPlugins.SetItemTextColour(i, wx.Colour(169, 169, 169))
 
-            self.tcPlugins.SetPyData(i, n)
+            self.tcPlugins.SetItemData(i, n)
             self.tcPlugins.SelectItem(i)
         self.tcPlugins.ExpandAll()
-        wx.EVT_TREE_ITEM_COLLAPSING(
-                self, XRCID('tcPlugins'), self.OnExpandCollapseTree)
-        wx.EVT_TREE_ITEM_EXPANDING(
-                self, XRCID('tcPlugins'), self.OnExpandCollapseTree)
+        self.Bind(
+            wx.EVT_TREE_ITEM_COLLAPSING,
+            self.OnExpandCollapseTree,
+            id=XRCID('tcPlugins'))
+        self.Bind(
+            wx.EVT_TREE_ITEM_EXPANDING,
+            self.OnExpandCollapseTree,
+            id=XRCID('tcPlugins'))
 
     def OnSelectTreeItem(self, evt):
         """Update the interface when the selected item has changed."""
 
         item = evt.GetItem()
-        n = self.tcPlugins.GetPyData(item)
+        n = self.tcPlugins.GetItemData(item)
         if (n == None):
             self.panelProperties.Hide()
             return
@@ -221,7 +229,7 @@ class PluginManagerDialog(wx.Dialog):
         """Block the root items from being selected."""
 
         item = evt.GetItem()
-        n = self.tcPlugins.GetPyData(item)
+        n = self.tcPlugins.GetItemData(item)
         if (n == None):
             evt.Veto()
 
@@ -234,7 +242,7 @@ class PluginManagerDialog(wx.Dialog):
         """Publish the enabled/disabled state of the plugin."""
 
         item = self.tcPlugins.GetSelection()
-        n = self.tcPlugins.GetPyData(item)
+        n = self.tcPlugins.GetItemData(item)
         plugin = self.plugins[n]
         p = plugin['plugin']
 

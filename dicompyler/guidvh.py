@@ -9,7 +9,7 @@
 #
 # It's assumed that the reference (prescription) dose is in cGy.
 
-import wxmpl
+from dicompyler import wxmpl
 import numpy as np
 
 class guiDVH:

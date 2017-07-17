@@ -205,7 +205,7 @@ class plugin2DView(wx.Panel):
         pub.unsubscribe(self.OnIsodoseCheck, 'isodoses.checked')
         pub.unsubscribe(self.OnDrawingPrefsChange, '2dview.drawingprefs')
         pub.unsubscribe(self.OnPluginLoaded, 'plugin.loaded.2dview')
-        self.OnUnfocus()
+        # self.OnUnfocus()
 
     def OnStructureCheck(self, msg):
         """When the structure list changes, update the panel."""
@@ -416,7 +416,7 @@ class plugin2DView(wx.Panel):
 
             image = guiutil.convert_pil_to_wx(
                 self.images[self.imagenum-1].GetImage(self.window, self.level))
-            bmp = wx.BitmapFromImage(image)
+            bmp = wx.Bitmap(image)
             self.bwidth, self.bheight = image.GetSize()
 
             # Center the image
@@ -661,7 +661,7 @@ class plugin2DView(wx.Panel):
     def OnMouseUp(self, evt):
         """Reset the cursor when the mouse is released."""
 
-        self.SetCursor(wx.StockCursor(wx.CURSOR_DEFAULT))
+        self.SetCursor(wx.Cursor(wx.CURSOR_DEFAULT))
 
     def OnMouseEnter(self, evt):
         """Set a flag when the cursor enters the window."""
@@ -680,7 +680,7 @@ class plugin2DView(wx.Panel):
 
         if evt.LeftIsDown():
             self.OnLeftIsDown(evt)
-            self.SetCursor(wx.StockCursor(wx.CURSOR_SIZING))
+            self.SetCursor(wx.Cursor(wx.CURSOR_SIZING))
         elif evt.RightIsDown():
             self.OnRightIsDown(evt)
             # Custom cursors with > 2 colors only works on Windows currently

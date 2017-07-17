@@ -46,10 +46,7 @@ class DicomImporterDialog(wx.Dialog):
     """Import DICOM RT files and return a dictionary of data."""
 
     def __init__(self):
-        #pre = wx.PreDialog()
         wx.Dialog.__init__(self)
-        # the Create step is done by XRC.
-        #self.Create(parent=None)
 
     def Init(self, res):
         """Method called after the panel has been initialized."""
@@ -77,12 +74,17 @@ class DicomImporterDialog(wx.Dialog):
         self.btnSelect = XRCCTRL(self, 'wxID_OK')
 
         # Bind interface events to the proper methods
-        wx.EVT_BUTTON(self, XRCID('btnDicomImport'), self.OnBrowseDicomImport)
-        wx.EVT_CHECKBOX(self, XRCID('checkSearchSubfolders'),
-                                    self.OnCheckSearchSubfolders)
-        wx.EVT_TREE_SEL_CHANGED(self, XRCID('tcPatients'), self.OnSelectTreeItem)
-        wx.EVT_TREE_ITEM_ACTIVATED(self, XRCID('tcPatients'), self.OnOK)
-        wx.EVT_BUTTON(self, wx.ID_OK, self.OnOK)
+        # wx.EVT_BUTTON(self, XRCID('btnDicomImport'), self.OnBrowseDicomImport)
+        self.Bind(wx.EVT_BUTTON, self.OnBrowseDicomImport, id=XRCID('btnDicomImport'))
+        # wx.EVT_CHECKBOX(self, XRCID('checkSearchSubfolders'),
+        #                             self.OnCheckSearchSubfolders)
+        self.Bind(wx.EVT_CHECKBOX, self.OnCheckSearchSubfolders, id=XRCID('checkSearchSubfolders'))
+        # wx.EVT_TREE_SEL_CHANGED(self, XRCID('tcPatients'), self.OnSelectTreeItem)
+        self.Bind(wx.EVT_TREE_SEL_CHANGED, self.OnSelectTreeItem, id=XRCID('tcPatients'))
+        # wx.EVT_TREE_ITEM_ACTIVATED(self, XRCID('tcPatients'), self.OnOK)
+        self.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.OnOK, id=XRCID('tcPatients'))
+        # wx.EVT_BUTTON(self, wx.ID_OK, self.OnOK)
+        self.Bind(wx.EVT_BUTTON, self.OnOK, id=wx.ID_OK)
         # wx.EVT_BUTTON(self, wx.ID_CANCEL, self.OnCancel)
 
         # Set the dialog font and bold the font of the directions label
@@ -649,9 +651,9 @@ class DicomImporterDialog(wx.Dialog):
                     if (planid == item['rtplan']):
                         filearray.append(plan['filename'])
         if not rxdose:
-            self.tcPatients.SetPyData(item['treeid'], {'filearray':filearray})
+            self.tcPatients.SetItemData(item['treeid'], {'filearray':filearray})
         else:
-            self.tcPatients.SetPyData(item['treeid'], {'filearray':filearray, 'rxdose':rxdose})
+            self.tcPatients.SetItemData(item['treeid'], {'filearray':filearray, 'rxdose':rxdose})
         self.tcPatients.SetItemBold(item['treeid'], True)
         self.tcPatients.SelectItem(item['treeid'])
 
@@ -663,15 +665,15 @@ class DicomImporterDialog(wx.Dialog):
         self.EnableRxDose(False)
         self.btnSelect.Enable(False)
         # If the item has data, check to see whether there is an rxdose
-        if not (self.tcPatients.GetPyData(item) ==  None):
-            data = self.tcPatients.GetPyData(item)
+        if not (self.tcPatients.GetItemData(item) ==  None):
+            data = self.tcPatients.GetItemData(item)
             self.btnSelect.Enable()
             rxdose = 0
             parent = self.tcPatients.GetItemParent(item)
             if 'rxdose' in data:
                 rxdose = data['rxdose']
             else:
-                parentdata = self.tcPatients.GetPyData(parent)
+                parentdata = self.tcPatients.GetItemData(parent)
                 if not (parentdata == None):
                     if 'rxdose' in parentdata:
                         rxdose = parentdata['rxdose']
@@ -795,7 +797,7 @@ class DicomImporterDialog(wx.Dialog):
         """Return the patient data if the patient is selected or the button
             is pressed."""
         item = self.tcPatients.GetSelection()
-        if self.tcPatients.GetPyData(item):
+        if self.tcPatients.GetItemData(item):
             # Since we have decided to use this location to import from,
             # update the location in the preferences for the next session
             # if the 'import_location_setting' is "Remember Last Used"
@@ -809,7 +811,7 @@ class DicomImporterDialog(wx.Dialog):
                 msg={'general.dicom.import_search_subfolders':
                  self.import_search_subfolders})
 
-            filearray = self.tcPatients.GetPyData(item)['filearray']
+            filearray = self.tcPatients.GetItemData(item)['filearray']
             self.btnSelect.Enable(False)
             self.txtRxDose.Enable(False)
             self.terminate = False

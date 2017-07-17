@@ -1124,8 +1124,8 @@ class PlotPanel(FigureCanvasWxAgg):
         topwin = toplevel_parent_of_window(self)
         topwin.Connect(self.GetId(), wx.ID_ANY, wx.wxEVT_ACTIVATE, self.OnActivate)
 
-        wx.EVT_ERASE_BACKGROUND(self, self.OnEraseBackground)
-        wx.EVT_WINDOW_DESTROY(self, self.OnDestroy)
+        self.Bind(wx.EVT_ERASE_BACKGROUND, self.OnEraseBackground)
+        # self.Bind(wx.EVT_WINDOW_DESTROY, self.OnDestroy)
 
     def OnActivate(self, evt):
         """
@@ -1146,14 +1146,13 @@ class PlotPanel(FigureCanvasWxAgg):
         """
         pass
 
-    def OnDestroy(self, evt):
-        """
-        Handles the wxPython window destruction event.
-        """
-        if self.GetId() == evt.GetEventObject().GetId():
-            # unregister the activation event handler for this PlotPanel
-            topwin = toplevel_parent_of_window(self)
-            topwin.Disconnect(-1, self.GetId(), wx.wxEVT_ACTIVATE)
+    # def OnDestroy(self, evt):
+    #     """
+    #     Handles the wxPython window destruction event.
+    #     """
+    #     if self.GetId() == evt.GetEventObject().GetId():
+    #         # unregister the activation event handler for this PlotPanel
+    #         topwin = toplevel_parent_of_window(self)
 
     def _onPaint(self, evt):
         """

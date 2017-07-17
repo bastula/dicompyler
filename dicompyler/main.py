@@ -19,7 +19,7 @@ import wx
 from wx.xrc import *
 import wx.adv
 import wx.lib.dialogs, webbrowser
-import dicom
+import pydicom
 from wx.lib.pubsub import pub
 from dicompylercore import dvhcalc
 from dicompyler import guiutil, util
@@ -141,9 +141,9 @@ class MainFrame(wx.Frame):
 
         # If we are running on Mac OS X, alter the menu location
         if guiutil.IsMac():
-            wx.App_SetMacAboutMenuItemId(XRCID('menuAbout'))
-            wx.App_SetMacPreferencesMenuItemId(XRCID('menuPreferences'))
-            wx.App_SetMacExitMenuItemId(XRCID('menuExit'))
+            wx.PyApp.SetMacAboutMenuItemId(XRCID('menuAbout'))
+            wx.PyApp.SetMacPreferencesMenuItemId(XRCID('menuPreferences'))
+            wx.PyApp.SetMacExitMenuItemId(XRCID('menuExit'))
 
         # Set the menu as the default menu for this frame
         self.SetMenuBar(menuMain)
@@ -165,14 +165,15 @@ class MainFrame(wx.Frame):
         self.menuExportItem.Enable(False)
 
         # Bind menu events to the proper methods
-        wx.EVT_MENU(self, XRCID('menuOpen'), self.OnOpenPatient)
-        wx.EVT_MENU(self, XRCID('wxID_EXIT'), self.OnClose)
-        wx.EVT_MENU(self, XRCID('wxID_PREFERENCES'), self.OnPreferences)
-        wx.EVT_MENU(self, XRCID('menuShowLogs'), self.OnShowLogs)
-        wx.EVT_MENU(self, XRCID('menuPluginManager'), self.OnPluginManager)
-        wx.EVT_MENU(self, XRCID('wxID_ABOUT'), self.OnAbout)
-        wx.EVT_MENU(self, XRCID('menuHomepage'), self.OnHomepage)
-        wx.EVT_MENU(self, XRCID('menuLicense'), self.OnLicense)
+        self.Bind(wx.EVT_MENU, self.OnOpenPatient, id=XRCID('menuOpen'))
+        self.Bind(wx.EVT_MENU, self.OnClose, id=wx.ID_EXIT)
+        self.Bind(wx.EVT_MENU, self.OnPreferences, id=wx.ID_PREFERENCES)
+        self.Bind(wx.EVT_MENU, self.OnShowLogs, id=XRCID('menuShowLogs'))
+        self.Bind(
+            wx.EVT_MENU, self.OnPluginManager, id=XRCID('menuPluginManager'))
+        self.Bind(wx.EVT_MENU, self.OnAbout, id=wx.ID_ABOUT)
+        self.Bind(wx.EVT_MENU, self.OnHomepage, id=XRCID('menuHomepage'))
+        self.Bind(wx.EVT_MENU, self.OnLicense, id=XRCID('menuLicense'))
 
         # Load the toolbar for the frame
         toolbarMain = self.res.LoadToolBar(self, 'toolbarMain')
@@ -185,14 +186,14 @@ class MainFrame(wx.Frame):
                             'shortHelp':"Open Patient...",
                             'eventhandler':self.OnOpenPatient}]
         for m, tool in enumerate(self.maintools):
-            self.toolbar.AddLabelTool(
-                                    m+1, tool['label'], tool['bmp'],
-                                    shortHelp=tool['shortHelp'])
+            self.toolbar.AddTool(m+1, tool['label'], tool['bmp'],
+                                 shortHelp=tool['shortHelp'])
             self.Bind(wx.EVT_TOOL, tool['eventhandler'], id=m+1)
         self.toolbar.Realize()
 
         # Bind interface events to the proper methods
-        wx.EVT_CHOICE(self, XRCID('choiceStructure'), self.OnStructureSelect)
+        self.Bind(
+            wx.EVT_CHOICE, self.OnStructureSelect, id=XRCID('choiceStructure'))
         self.Bind(wx.EVT_ACTIVATE, self.OnActivate)
         self.Bind(wx.EVT_CLOSE, self.OnClose)
         self.notebook.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.OnPageChanged)
@@ -227,10 +228,10 @@ class MainFrame(wx.Frame):
         # Initialize the preferences
         if guiutil.IsMac():
             self.prefmgr = preferences.PreferencesManager(
-                parent = None, appname = 'dicompyler')
+                parent = self, appname = 'dicompyler')
         else:
             self.prefmgr = preferences.PreferencesManager(
-                parent = None, appname = 'dicompyler', name = 'Options')
+                parent = self, appname = 'dicompyler', name = 'Options')
         sp = wx.StandardPaths.Get()
         self.generalpreftemplate = [
             {'DICOM Import Settings':
@@ -385,7 +386,7 @@ class MainFrame(wx.Frame):
                             self.menuPlugins.Append(100+i, props['name']+'...')
                             plugin = p.plugin(self)
                             self.menuDict[100+i] = plugin
-                            wx.EVT_MENU(self, 100+i, plugin.pluginMenu)
+                            self.Bind(wx.EVT_MENU, plugin.pluginMenu, id=100+i)
                         # Load the export menu plugins
                         elif (props['plugin_type'] == 'export'):
                             if not len(self.menuExportDict):
@@ -393,7 +394,7 @@ class MainFrame(wx.Frame):
                             self.menuExport.Append(200+i, props['menuname'])
                             plugin = p.plugin(self)
                             self.menuExportDict[200+i] = plugin
-                            wx.EVT_MENU(self, 200+i, plugin.pluginMenu)
+                            self.Bind(wx.EVT_MENU, plugin.pluginMenu, id=200+i)
                         # If a sub-plugin, mark it to be initialized later
                         else:
                             subplugins.append(p)
@@ -428,7 +429,7 @@ class MainFrame(wx.Frame):
         if not 'images' in ptdata:
             #Look for DICOM data in the ptdata dictionary
             for rtdatatype in ptdata.keys():
-                if isinstance(ptdata[rtdatatype], dicom.dataset.FileDataset):
+                if isinstance(ptdata[rtdatatype], pydicom.dataset.FileDataset):
                     patient.update(dp(ptdata[rtdatatype]).GetDemographics())
                     break
         if 'rtss' in ptdata:
@@ -787,7 +788,7 @@ class MainFrame(wx.Frame):
                     if hasattr(pi, 'tools'):
                         for t, tool in enumerate(pi.tools):
                             self.maintools.append(tool)
-                            self.toolbar.AddLabelTool(
+                            self.toolbar.AddTool(
                                         (300+i)*10+t, tool['label'],
                                         tool['bmp'], shortHelp=tool['shortHelp'])
                             self.Bind(wx.EVT_TOOL, tool['eventhandler'], id=(300+i)*10+t)
@@ -810,7 +811,7 @@ class MainFrame(wx.Frame):
         # If the tab has toolbar items, display them
         if hasattr(page, 'tools'):
             for t, tool in enumerate(page.tools):
-                self.toolbar.AddLabelTool(
+                self.toolbar.AddTool(
                             (new+1)*10+t, tool['label'],
                             tool['bmp'], shortHelp=tool['shortHelp'])
                 self.Bind(wx.EVT_TOOL, tool['eventhandler'], id=(new+1)*10+t)
@@ -922,6 +923,7 @@ class MainFrame(wx.Frame):
             pub.sendMessage('preferences.updated.value',
                     msg={'general.window.position':tuple(self.GetPosition())})
         self.Destroy()
+        sys.exit(0)
 
 class dicompyler(wx.App):
     def OnInit(self):

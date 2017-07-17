@@ -47,12 +47,12 @@ class PreferencesManager():
         self.filename = os.path.join(guiutil.get_data_dir(), filename)
         self.LoadPreferenceValues()
 
-#     def __del__(self):
-# 
-#         # Destroy the dialog when the preferences manager object is deleted
-#         if self.dlgPreferences:
-#             
-#             self.dlgPreferences.Destroy()
+    def __del__(self):
+
+        # Destroy the dialog when the preferences manager object is deleted
+        if self.dlgPreferences:
+            
+            self.dlgPreferences.Destroy()
 
     def Show(self):
         """Show the preferences dialog with the given preferences."""
@@ -86,8 +86,7 @@ class PreferencesManager():
 
     def SavePreferenceValues(self, msg):
         """Save the preference values to disk after the dialog is closed."""
-        
-        print(msg.keys())
+
         self.values = msg
         with open(self.filename, mode='w') as f:
             json.dump(self.values, f, sort_keys=True, indent=4)
@@ -154,7 +153,7 @@ class PreferencesDialog(wx.Dialog):
         # Bind ui events to the proper methods
         self.Bind(wx.EVT_CLOSE, self.OnClose)
         self.Bind(wx.EVT_WINDOW_DESTROY, self.OnClose)
-        wx.EVT_BUTTON(self, XRCID('wxID_OK'), self.OnClose)
+        self.Bind(wx.EVT_BUTTON, self.OnClose, id=wx.ID_OK)
 
         # Initialize variables
         self.preftemplate = []

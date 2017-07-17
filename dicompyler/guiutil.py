@@ -7,7 +7,7 @@
 #    See the file license.txt included with this distribution, also
 #    available at http://code.google.com/p/dicompyler/
 
-import util
+from dicompyler import util
 import wx
 from wx.xrc import XmlResource, XRCCTRL, XRCID
 from wx.lib.pubsub import pub
@@ -133,7 +133,7 @@ class ProgressDialog(wx.Dialog):
 
         self.gaugeProgress.SetValue(percentDone)
         self.lblProgressPercent.SetLabel(str(percentDone))
-        if not (message == None):
+        if not message:
             self.lblProgress.SetLabel(message)
 
         # End the dialog since we are done with the import process
@@ -231,14 +231,13 @@ class ColorCheckBox(wx.Panel):
 class ColorBox(wx.Window):
     """Control that shows and stores a color."""
 
-    def __init__(self, parent, color=None):
+    def __init__(self, parent, color=[]):
         wx.Window.__init__(self, parent, -1)
         self.SetMinSize((16,16))
-        if not (color == None):
-            col = []
-            for val in color:
-                col.append(int(val))
-            self.SetBackgroundColour(tuple(col))
+        col = []
+        for val in color:
+            col.append(int(val))
+        self.SetBackgroundColour(tuple(col))
 
         # Bind ui events to the proper methods
         self.Bind(wx.EVT_SET_FOCUS, self.OnFocus)

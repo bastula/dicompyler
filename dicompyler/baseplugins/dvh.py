@@ -93,10 +93,16 @@ class pluginDVH(wx.Panel):
         self.Layout()
 
         # Bind ui events to the proper methods
-        wx.EVT_CHOICE(self, XRCID('choiceConstraint'), self.OnToggleConstraints)
-        wx.EVT_SPINCTRL(self, XRCID('txtConstraint'), self.OnChangeConstraint)
-        wx.EVT_COMMAND_SCROLL_THUMBTRACK(self, XRCID('sliderConstraint'), self.OnChangeConstraint)
-        wx.EVT_COMMAND_SCROLL_CHANGED(self, XRCID('sliderConstraint'), self.OnChangeConstraint)
+        self.Bind(
+            wx.EVT_CHOICE, self.OnToggleConstraints, id=XRCID('choiceConstraint'))
+        self.Bind(
+            wx.EVT_SPINCTRL, self.OnChangeConstraint, id=XRCID('txtConstraint'))
+        self.Bind(
+            wx.EVT_COMMAND_SCROLL_THUMBTRACK,
+            self.OnChangeConstraint, id=XRCID('sliderConstraint'))
+        self.Bind(
+            wx.EVT_COMMAND_SCROLL_CHANGED,
+            self.OnChangeConstraint, id=XRCID('sliderConstraint'))
         self.Bind(wx.EVT_WINDOW_DESTROY, self.OnDestroy)
 
         # Initialize variables
