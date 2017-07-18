@@ -6,7 +6,7 @@
 # Copyright (c) 2009 Roy Keyes
 # This file is part of dicompyler, released under a BSD license.
 #    See the file license.txt included with this distribution, also
-#    available at http://code.google.com/p/dicompyler/
+#    available at https://github.com/bastula/dicompyler/
 #
 # It's assumed that the reference (prescription) dose is in cGy.
 
@@ -18,7 +18,7 @@ from wx.xrc import *
 from wx.lib.pubsub import pub
 import numpy as np
 from dicompylercore import dicomparser
-from dicompyler import dvhdoses, guiutil, util
+from dicompyler import guiutil, util
 
 def ImportDicom(parent):
     """Prepare to show the dialog that will Import DICOM and DICOM RT files."""

@@ -1,11 +1,11 @@
 #!/usr/bin/env python
-# -*- coding: ISO-8859-1 -*-
+# -*- coding: utf-8 -*-
 # quickopen.py
 """dicompyler plugin that allows quick import of DICOM data."""
-# Copyright (c) 2012 Aditya Panchal
+# Copyright (c) 2012-2017 Aditya Panchal
 # This file is part of dicompyler, released under a BSD license.
 #    See the file license.txt included with this distribution, also
-#    available at http://code.google.com/p/dicompyler/
+#    available at https://github.com/bastula/dicompyler/
 #
 
 import logging
@@ -23,7 +23,7 @@ def pluginProperties():
     props['menuname'] = "&DICOM File Quickly...\tCtrl-Shift-O"
     props['description'] = "Import DICOM data quickly"
     props['author'] = 'Aditya Panchal'
-    props['version'] = "0.4.2"
+    props['version'] = "0.5.0"
     props['plugin_type'] = 'import'
     props['plugin_version'] = 1
     props['min_dicom'] = []

@@ -1,11 +1,11 @@
 #!/usr/bin/env python
-# -*- coding: ISO-8859-1 -*-
+# -*- coding: utf-8 -*-
 # guidvh.py
 """Class that displays the dose volume histogram via wxPython and matplotlib."""
-# Copyright (c) 2009-2012 Aditya Panchal
+# Copyright (c) 2009-2017 Aditya Panchal
 # This file is part of dicompyler, released under a BSD license.
 #    See the file license.txt included with this distribution, also
-#    available at http://code.google.com/p/dicompyler/
+#    available at https://github.com/bastula/dicompyler/
 #
 # It's assumed that the reference (prescription) dose is in cGy.
 

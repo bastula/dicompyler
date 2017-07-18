@@ -6,7 +6,7 @@
 # Copyright (c) 2009 Roy Keyes
 # This file is part of dicompyler, released under a BSD license.
 #    See the file license.txt included with this distribution, also
-#    available at http://code.google.com/p/dicompyler/
+#    available at https://github.com/bastula/dicompyler/
 
 # Configure logging for dicompyler
 import logging, logging.handlers
@@ -24,7 +24,7 @@ from wx.lib.pubsub import pub
 from dicompylercore import dvhcalc
 from dicompyler import __version__
 from dicompyler import guiutil, util
-from dicompyler import dicomgui, dvhdata, dvhdoses
+from dicompyler import dicomgui, dvhdata
 from dicompylercore.dicomparser import DicomParser as dp
 from dicompyler import plugin, preferences
 
@@ -872,7 +872,7 @@ class MainFrame(wx.Frame):
                 "See the Help menu for license information."
         info.Description = desc
         if guiutil.IsGtk():
-            info.WebSite = "http://code.google.com/p/dicompyler/"
+            info.WebSite = "https://github.com/bastula/dicompyler/"
 
         # Then we call wx.AboutBox giving it that info object
         wx.adv.AboutBox(info)
@@ -880,7 +880,7 @@ class MainFrame(wx.Frame):
     def OnHomepage(self, evt):
         """Show the homepage for dicompyler."""
 
-        webbrowser.open_new_tab("http://code.google.com/p/dicompyler/")
+        webbrowser.open_new_tab("https://github.com/bastula/dicompyler/")
         
     def OnLicense(self, evt):
         """Show the license document in a new dialog."""

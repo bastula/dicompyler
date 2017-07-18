@@ -1,11 +1,11 @@
 #!/usr/bin/env python
-# -*- coding: ISO-8859-1 -*-
+# -*- coding: utf-8 -*-
 # plugin.py
 """Plugin manager for dicompyler."""
-# Copyright (c) 2010-2012 Aditya Panchal
+# Copyright (c) 2010-2017 Aditya Panchal
 # This file is part of dicompyler, released under a BSD license.
 #    See the file license.txt included with this distribution, also
-#    available at http://code.google.com/p/dicompyler/
+#    available at https://github.com/bastula/dicompyler/
 
 import logging
 logger = logging.getLogger('dicompyler.plugin')

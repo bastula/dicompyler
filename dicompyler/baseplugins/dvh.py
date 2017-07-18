@@ -1,12 +1,12 @@
 #!/usr/bin/env python
-# -*- coding: ISO-8859-1 -*-
+# -*- coding: utf-8 -*-
 # dvh.py
 """dicompyler plugin that displays a dose volume histogram (DVH)
     with adjustable constraints via wxPython and matplotlib."""
-# Copyright (c) 2009-2012 Aditya Panchal
+# Copyright (c) 2009-2017 Aditya Panchal
 # This file is part of dicompyler, released under a BSD license.
 #    See the file license.txt included with this distribution, also
-#    available at http://code.google.com/p/dicompyler/
+#    available at https://github.com/bastula/dicompyler/
 #
 # It is assumed that the reference (prescription) dose is in cGy.
 
@@ -14,8 +14,7 @@ import wx
 from wx.xrc import XmlResource, XRCCTRL, XRCID
 from wx.lib.pubsub import pub
 from dicompyler import guiutil, util
-from dicompyler import dvhdata, guidvh
-from dicompyler import wxmpl
+from dicompyler import guidvh
 import numpy as np
 
 def pluginProperties():
@@ -25,7 +24,7 @@ def pluginProperties():
     props['name'] = 'DVH'
     props['description'] = "Display and evaluate dose volume histogram (DVH) data"
     props['author'] = 'Aditya Panchal'
-    props['version'] = "0.4.2"
+    props['version'] = "0.5.0"
     props['plugin_type'] = 'main'
     props['plugin_version'] = 1
     props['min_dicom'] = ['rtss', 'rtdose']
@@ -223,13 +222,13 @@ class pluginDVH(wx.Panel):
         # Dose constraint
         elif (constrainttype == 2):
             self.lblConstraintType.SetLabel('Volume:')
-            self.lblConstraintTypeUnits.SetLabel(u'%  ')
+            self.lblConstraintTypeUnits.SetLabel('%  ')
             self.lblResultType.SetLabel('   Dose:')
             constraintrange = 100
         # Dose constraint in cc
         elif (constrainttype == 3):
             self.lblConstraintType.SetLabel('Volume:')
-            self.lblConstraintTypeUnits.SetLabel(u'cm³')
+            self.lblConstraintTypeUnits.SetLabel('cm\u00B3')
             self.lblResultType.SetLabel('   Dose:')
             constraintrange = dvh.volume
 

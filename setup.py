@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 # setup.py
 """Setup script for dicompyler."""
-# Copyright (c) 2012-2014 Aditya Panchal
+# Copyright (c) 2012-2017 Aditya Panchal
 # This file is part of dicompyler, relased under a BSD license.
 #    See the file license.txt included with this distribution, also
-#    available at http://code.google.com/p/dicompyler/
+#    available at https://github.com/bastula/dicompyler/
 
 from setuptools import setup, find_packages
 
@@ -37,7 +37,7 @@ setup(
         "viewer for DICOM and DICOM RT.",
     license = "BSD License",
     keywords = "radiation therapy research python dicom dicom-rt",
-    url = "http://code.google.com/p/dicompyler/",
+    url = "https://github.com/bastula/dicompyler/",
     classifiers = [
         "License :: OSI Approved :: BSD License",
         "Intended Audience :: Developers",
@@ -63,7 +63,7 @@ setup(
     architecture, it is easy to extend it with 3rd party plugins.
     
     Visit the dicompyler _`home page`:
-    http://code.google.com/p/dicompyler/ for how-to information and guides.
+    https://github.com/bastula/dicompyler/ for how-to information and guides.
 
     Getting Help
     ============
