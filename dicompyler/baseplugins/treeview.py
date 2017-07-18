@@ -1,8 +1,8 @@
 #!/usr/bin/env python
-# -*- coding: ISO-8859-1 -*-
+# -*- coding: utf-8 -*-
 # treeview.py
 """dicompyler plugin that displays a tree view of the DICOM data structure."""
-# Copyright (c) 2010-2012 Aditya Panchal
+# Copyright (c) 2010-2017 Aditya Panchal
 # This file is part of dicompyler, released under a BSD license.
 #    See the file license.txt included with this distribution, also
 #    available at http://code.google.com/p/dicompyler/
@@ -28,7 +28,7 @@ def pluginProperties():
     props['name'] = 'DICOM Tree'
     props['description'] = "Display a tree view of the DICOM data stucture"
     props['author'] = 'Aditya Panchal'
-    props['version'] = "0.4.2"
+    props['version'] = "0.5.0"
     props['plugin_type'] = 'main'
     props['plugin_version'] = 1
     props['min_dicom'] = []

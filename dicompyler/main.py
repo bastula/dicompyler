@@ -1,8 +1,8 @@
 #!/usr/bin/env python
-# -*- coding: ISO-8859-1 -*-
+# -*- coding: utf-8 -*-
 # main.py
 """Main file for dicompyler."""
-# Copyright (c) 2009-2014 Aditya Panchal
+# Copyright (c) 2009-2017 Aditya Panchal
 # Copyright (c) 2009 Roy Keyes
 # This file is part of dicompyler, released under a BSD license.
 #    See the file license.txt included with this distribution, also
@@ -22,12 +22,11 @@ import wx.lib.dialogs, webbrowser
 import pydicom
 from wx.lib.pubsub import pub
 from dicompylercore import dvhcalc
+from dicompyler import __version__
 from dicompyler import guiutil, util
 from dicompyler import dicomgui, dvhdata, dvhdoses
 from dicompylercore.dicomparser import DicomParser as dp
 from dicompyler import plugin, preferences
-
-__version__ = "0.4.2"
 
 class MainFrame(wx.Frame):
     def __init__(self, parent, id, title, res):
@@ -864,7 +863,7 @@ class MainFrame(wx.Frame):
         info = wx.adv.AboutDialogInfo()
         info.Name = "dicompyler"
         info.Version = __version__
-        info.Copyright = u"© 2009-2014 Aditya Panchal"
+        info.Copyright = "(c) 2009-2017 Aditya Panchal"
         credits = util.get_credits()
         info.Developers = credits['developers']
         info.Artists = credits['artists']

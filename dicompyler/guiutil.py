@@ -1,8 +1,8 @@
 #!/usr/bin/env python
-# -*- coding: ISO-8859-1 -*-
+# -*- coding: utf-8 -*-
 # guiutil.py
 """Several GUI utility functions that don't really belong anywhere."""
-# Copyright (c) 2009-2012 Aditya Panchal
+# Copyright (c) 2009-2017 Aditya Panchal
 # This file is part of dicompyler, released under a BSD license.
 #    See the file license.txt included with this distribution, also
 #    available at http://code.google.com/p/dicompyler/
@@ -123,7 +123,7 @@ class ProgressDialog(wx.Dialog):
         self.gaugeProgress = XRCCTRL(self, 'gaugeProgress')
         self.lblProgressPercent = XRCCTRL(self, 'lblProgressPercent')
 
-    def OnUpdateProgress(self, num, length, message=None):
+    def OnUpdateProgress(self, num, length, message=''):
         """Update the process interface elements."""
 
         if not length:
@@ -133,8 +133,7 @@ class ProgressDialog(wx.Dialog):
 
         self.gaugeProgress.SetValue(percentDone)
         self.lblProgressPercent.SetLabel(str(percentDone))
-        if not message:
-            self.lblProgress.SetLabel(message)
+        self.lblProgress.SetLabel(message)
 
         # End the dialog since we are done with the import process
         if (message == 'Done'):

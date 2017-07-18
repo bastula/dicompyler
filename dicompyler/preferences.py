@@ -1,8 +1,8 @@
 #!/usr/bin/env python
-# -*- coding: ISO-8859-1 -*-
+# -*- coding: utf-8 -*-
 # preferences.py
 """Preferences manager for dicompyler."""
-# Copyright (c) 2011-2012 Aditya Panchal
+# Copyright (c) 2011-2017 Aditya Panchal
 # This file is part of dicompyler, released under a BSD license.
 #    See the file license.txt included with this distribution, also
 #    available at http://code.google.com/p/dicompyler/
