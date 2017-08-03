@@ -10,11 +10,12 @@
 from setuptools import setup, find_packages
 
 requires = [
-    'matplotlib>=1.3, <=1.5.1',
+    'matplotlib>=1.3',
     'numpy>=1.2.1',
     'pillow>=1.0',
     'dicompyler-core>=0.5.2',
-    'pydicom>=0.9.9']
+    'pydicom>=0.9.9',
+    'wxPython>=4.0.0a3']
 
 setup(
     name="dicompyler",
