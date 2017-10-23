@@ -1,19 +1,19 @@
 #!/usr/bin/env python
-# -*- coding: ISO-8859-1 -*-
+# -*- coding: utf-8 -*-
 # quickopen.py
 """dicompyler plugin that allows quick import of DICOM data."""
-# Copyright (c) 2012 Aditya Panchal
+# Copyright (c) 2012-2017 Aditya Panchal
 # This file is part of dicompyler, released under a BSD license.
 #    See the file license.txt included with this distribution, also
-#    available at http://code.google.com/p/dicompyler/
+#    available at https://github.com/bastula/dicompyler/
 #
 
 import logging
 logger = logging.getLogger('dicompyler.quickimport')
 import wx
-from wx.lib.pubsub import Publisher as pub
-from dicompyler import dicomparser, util
-import dicom
+from wx.lib.pubsub import pub
+from dicompylercore import dicomparser
+from dicompyler import util
 
 def pluginProperties():
     """Properties of the plugin."""
@@ -23,7 +23,7 @@ def pluginProperties():
     props['menuname'] = "&DICOM File Quickly...\tCtrl-Shift-O"
     props['description'] = "Import DICOM data quickly"
     props['author'] = 'Aditya Panchal'
-    props['version'] = "0.4.2"
+    props['version'] = "0.5.0"
     props['plugin_type'] = 'import'
     props['plugin_version'] = 1
     props['min_dicom'] = []
@@ -36,7 +36,7 @@ class plugin:
 
         # Initialize the import location via pubsub
         pub.subscribe(self.OnImportPrefsChange, 'general.dicom')
-        pub.sendMessage('preferences.requested.values', 'general.dicom')
+        pub.sendMessage('preferences.requested.values', msg='general.dicom')
 
         self.parent = parent
 
@@ -46,13 +46,13 @@ class plugin:
                             'shortHelp':"Open DICOM File Quickly...",
                             'eventhandler':self.pluginMenu}]
 
-    def OnImportPrefsChange(self, msg):
+    def OnImportPrefsChange(self, topic, msg):
         """When the import preferences change, update the values."""
-
-        if (msg.topic[2] == 'import_location'):
-            self.path = unicode(msg.data)
-        elif (msg.topic[2] == 'import_location_setting'):
-            self.import_location_setting = msg.data
+        topic = topic.split('.')
+        if (topic[1] == 'import_location'):
+            self.path = str(msg)
+        elif (topic[1] == 'import_location_setting'):
+            self.import_location_setting = msg
 
     def pluginMenu(self, evt):
         """Import DICOM data quickly."""
@@ -68,10 +68,9 @@ class plugin:
             # Try to parse the file if is a DICOM file
             try:
                 logger.debug("Reading: %s", filename)
-                dp = dicomparser.DicomParser(filename=filename)
+                dp = dicomparser.DicomParser(filename)
             # Otherwise show an error dialog
             except (AttributeError, EOFError, IOError, KeyError):
-                pass
                 logger.info("%s is not a valid DICOM file.", filename)
                 dlg = wx.MessageDialog(
                     self.parent, filename + " is not a valid DICOM file.",
@@ -95,8 +94,8 @@ class plugin:
                 # if the 'import_location_setting' is "Remember Last Used"
                 if (self.import_location_setting == "Remember Last Used"):
                     pub.sendMessage('preferences.updated.value',
-                        {'general.dicom.import_location':dlg.GetDirectory()})
-                    pub.sendMessage('preferences.requested.values', 'general.dicom')
-        pub.sendMessage('patient.updated.raw_data', patient)
+                        msg={'general.dicom.import_location':dlg.GetDirectory()})
+                    pub.sendMessage('preferences.requested.values', msg='general.dicom')
+        pub.sendMessage('patient.updated.raw_data', msg=patient)
         dlg.Destroy()
         return

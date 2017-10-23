@@ -4,7 +4,7 @@ dicompyler
 <img src='https://raw.githubusercontent.com/wiki/bastula/dicompyler/images/0.3/2dview_mac_thumb.png' align='right' height='240' width='287' alt="dicompyler screenshot">
 dicompyler is an extensible open source radiation therapy research platform based on the DICOM standard. It also functions as a cross-platform DICOM RT viewer.
 
-dicompyler is written in Python and is built on a number of technologies including:  [pydicom](http://www.pydicom.org), [wxPython](http://www.wxpython.org), [PIL](http://www.pythonware.com/products/pil/), and [matplotlib](http://matplotlib.org) and runs on Windows, Mac OS X and Linux.
+dicompyler is written in Python and is built on a number of technologies including:  [pydicom](https://github.com/pydicom/pydicom), [wxPython](http://www.wxpython.org), [Pillow](http://python-pillow.org/), and [matplotlib](http://matplotlib.org) and runs on Windows, Mac OS X and Linux.
 
 dicompyler is released under a BSD [license](dicompyler/license.txt).
 
@@ -34,8 +34,8 @@ For upcoming features, see the [project roadmap](https://github.com/bastula/dico
 
 System Requirements:
 --------------------
-* Windows 2000/XP/Vista/7
-* Mac OS X 10.5 - 10.10 (Intel) - Must bypass [Gatekeeper](https://support.apple.com/en-us/HT202491)
+* Windows XP/Vista/7/8/10
+* Mac OS X 10.5 - 10.13 (Intel) - Must bypass [Gatekeeper](https://support.apple.com/en-us/HT202491)
 * Linux - via a package from [PyPI](https://pypi.python.org/pypi/dicompyler) or a [Debian package](https://packages.debian.org/sid/dicompyler) (courtesy of debian-med)
 
 If you are interested in building from source, please check out the [build instructions](https://github.com/bastula/dicompyler/wiki/BuildRequirements).

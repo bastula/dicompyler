@@ -70,6 +70,6 @@
     </object>
     <title>Loading...</title>
     <centered>1</centered>
-    <style>wxCAPTION|wxSTAY_ON_TOP|wxDIALOG_MODAL</style>
+    <style>wxCAPTION|wxSTAY_ON_TOP</style>
   </object>
 </resource>

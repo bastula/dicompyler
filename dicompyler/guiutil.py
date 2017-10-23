@@ -1,16 +1,16 @@
 #!/usr/bin/env python
-# -*- coding: ISO-8859-1 -*-
+# -*- coding: utf-8 -*-
 # guiutil.py
 """Several GUI utility functions that don't really belong anywhere."""
-# Copyright (c) 2009-2012 Aditya Panchal
+# Copyright (c) 2009-2017 Aditya Panchal
 # This file is part of dicompyler, released under a BSD license.
 #    See the file license.txt included with this distribution, also
-#    available at http://code.google.com/p/dicompyler/
+#    available at https://github.com/bastula/dicompyler/
 
-import util
+from dicompyler import util
 import wx
 from wx.xrc import XmlResource, XRCCTRL, XRCID
-from wx.lib.pubsub import Publisher as pub
+from wx.lib.pubsub import pub
 
 def IsMSWindows():
     """Are we running on Windows?
@@ -77,11 +77,11 @@ def convert_pil_to_wx(pil, alpha=True):
     """ Convert a PIL Image into a wx.Image.
         Code taken from Dave Witten's imViewer-Simple.py in pydicom contrib."""
     if alpha:
-        image = apply(wx.EmptyImage, pil.size)
-        image.SetData(pil.convert("RGB").tostring())
-        image.SetAlphaData(pil.convert("RGBA").tostring()[3::4])
+        image = wx.Image(pil.size[0], pil.size[1], clear=True)
+        image.SetData(pil.convert("RGB").tobytes())
+        image.SetAlpha(pil.convert("RGBA").tobytes()[3::4])
     else:
-        image = wx.EmptyImage(pil.size[0], pil.size[1])
+        image = wx.Image(pil.size[0], pil.size[1], clear=True)
         new_image = pil.convert('RGB')
         data = new_image.tostring()
         image.SetData(data)
@@ -111,9 +111,7 @@ class ProgressDialog(wx.Dialog):
     """Dialog to show progress for certain long-running events."""
 
     def __init__(self):
-        pre = wx.PreDialog()
-        # the Create step is done by XRC.
-        self.PostCreate(pre)
+        wx.Dialog.__init__(self)
     
     def Init(self, res, title=None):
         """Method called after the dialog has been initialized."""
@@ -125,7 +123,7 @@ class ProgressDialog(wx.Dialog):
         self.gaugeProgress = XRCCTRL(self, 'gaugeProgress')
         self.lblProgressPercent = XRCCTRL(self, 'lblProgressPercent')
 
-    def OnUpdateProgress(self, num, length, message=None):
+    def OnUpdateProgress(self, num, length, message=''):
         """Update the process interface elements."""
 
         if not length:
@@ -135,8 +133,7 @@ class ProgressDialog(wx.Dialog):
 
         self.gaugeProgress.SetValue(percentDone)
         self.lblProgressPercent.SetLabel(str(percentDone))
-        if not (message == None):
-            self.lblProgress.SetLabel(message)
+        self.lblProgress.SetLabel(message)
 
         # End the dialog since we are done with the import process
         if (message == 'Done'):
@@ -179,7 +176,7 @@ class ColorCheckListBox(wx.ScrolledWindow):
         """Removes all items from the control."""
 
         self.items = []
-        self.grid.Clear(deleteWindows=True)
+        self.grid.Clear(True)
         self.grid.Add((0,3), 0)
         self.Layout()
 
@@ -226,21 +223,20 @@ class ColorCheckBox(wx.Panel):
         message = {'item':self.item, 'data':self.data,
                 'color':self.colorbox.GetBackgroundColour()}
         if evt.IsChecked():
-            pub.sendMessage('colorcheckbox.checked.' + self.pubsubname, message)
+            pub.sendMessage('colorcheckbox.checked.' + self.pubsubname, msg=message)
         else:
-            pub.sendMessage('colorcheckbox.unchecked.' + self.pubsubname, message)
+            pub.sendMessage('colorcheckbox.unchecked.' + self.pubsubname, msg=message)
 
 class ColorBox(wx.Window):
     """Control that shows and stores a color."""
 
-    def __init__(self, parent, color=None):
+    def __init__(self, parent, color=[]):
         wx.Window.__init__(self, parent, -1)
         self.SetMinSize((16,16))
-        if not (color == None):
-            col = []
-            for val in color:
-                col.append(int(val))
-            self.SetBackgroundColour(tuple(col))
+        col = []
+        for val in color:
+            col.append(int(val))
+        self.SetBackgroundColour(tuple(col))
 
         # Bind ui events to the proper methods
         self.Bind(wx.EVT_SET_FOCUS, self.OnFocus)

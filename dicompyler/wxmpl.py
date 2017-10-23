@@ -22,7 +22,7 @@ import weakref
 import matplotlib
 matplotlib.use('WXAgg')
 import numpy as np
-from matplotlib.axes import _process_plot_var_args
+from matplotlib.axes._base import _process_plot_var_args
 from matplotlib.backends.backend_agg import RendererAgg
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg
 from matplotlib.figure import Figure
@@ -523,7 +523,7 @@ class Painter:
         dc.SetTextForeground(self.TEXT_FOREGROUND)
         dc.SetTextBackground(self.TEXT_BACKGROUND)
         dc.SetLogicalFunction(self.FUNCTION)
-        dc.BeginDrawing()
+        #dc.BeginDrawing()
 
         if self.lastValue is not None:
             self.clearValue(dc, self.lastValue)
@@ -533,7 +533,7 @@ class Painter:
             self.drawValue(dc, value)
             self.lastValue = value
 
-        dc.EndDrawing()
+        #dc.EndDrawing()
 
     def formatValue(self, value):
         """
@@ -1122,10 +1122,10 @@ class PlotPanel(FigureCanvasWxAgg):
         # find the toplevel parent window and register an activation event
         # handler that is keyed to the id of this PlotPanel
         topwin = toplevel_parent_of_window(self)
-        topwin.Connect(-1, self.GetId(), wx.wxEVT_ACTIVATE, self.OnActivate)
+        topwin.Connect(self.GetId(), wx.ID_ANY, wx.wxEVT_ACTIVATE, self.OnActivate)
 
-        wx.EVT_ERASE_BACKGROUND(self, self.OnEraseBackground)
-        wx.EVT_WINDOW_DESTROY(self, self.OnDestroy)
+        self.Bind(wx.EVT_ERASE_BACKGROUND, self.OnEraseBackground)
+        # self.Bind(wx.EVT_WINDOW_DESTROY, self.OnDestroy)
 
     def OnActivate(self, evt):
         """
@@ -1146,14 +1146,13 @@ class PlotPanel(FigureCanvasWxAgg):
         """
         pass
 
-    def OnDestroy(self, evt):
-        """
-        Handles the wxPython window destruction event.
-        """
-        if self.GetId() == evt.GetEventObject().GetId():
-            # unregister the activation event handler for this PlotPanel
-            topwin = toplevel_parent_of_window(self)
-            topwin.Disconnect(-1, self.GetId(), wx.wxEVT_ACTIVATE)
+    # def OnDestroy(self, evt):
+    #     """
+    #     Handles the wxPython window destruction event.
+    #     """
+    #     if self.GetId() == evt.GetEventObject().GetId():
+    #         # unregister the activation event handler for this PlotPanel
+    #         topwin = toplevel_parent_of_window(self)
 
     def _onPaint(self, evt):
         """
@@ -1440,7 +1439,7 @@ class PlotFrame(wx.Frame):
 
         try:
             self.panel.print_figure(fileName)
-        except IOError, e:
+        except IOError as e:
             if e.strerror:
                 err = e.strerror
             else:

@@ -1,15 +1,15 @@
 #!/usr/bin/env python
-# -*- coding: ISO-8859-1 -*-
+# -*- coding: utf-8 -*-
 # guidvh.py
 """Class that displays the dose volume histogram via wxPython and matplotlib."""
-# Copyright (c) 2009-2012 Aditya Panchal
+# Copyright (c) 2009-2017 Aditya Panchal
 # This file is part of dicompyler, released under a BSD license.
 #    See the file license.txt included with this distribution, also
-#    available at http://code.google.com/p/dicompyler/
+#    available at https://github.com/bastula/dicompyler/
 #
 # It's assumed that the reference (prescription) dose is in cGy.
 
-import wxmpl
+from dicompyler import wxmpl
 import numpy as np
 
 class guiDVH:
@@ -36,7 +36,7 @@ class guiDVH:
             # Enumerate each set of DVHs
             for d, dvhs in enumerate(dvhlist):
                 # Plot the DVH from each set
-                for id, dvh in dvhs.iteritems():
+                for id, dvh in dvhs.items():
                     if id in structures:
                         # Convert the color array to MPL formatted color
                         colorarray = np.array(structures[id]['color'],

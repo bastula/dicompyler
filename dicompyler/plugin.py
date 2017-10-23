@@ -1,18 +1,18 @@
 #!/usr/bin/env python
-# -*- coding: ISO-8859-1 -*-
+# -*- coding: utf-8 -*-
 # plugin.py
 """Plugin manager for dicompyler."""
-# Copyright (c) 2010-2012 Aditya Panchal
+# Copyright (c) 2010-2017 Aditya Panchal
 # This file is part of dicompyler, released under a BSD license.
 #    See the file license.txt included with this distribution, also
-#    available at http://code.google.com/p/dicompyler/
+#    available at https://github.com/bastula/dicompyler/
 
 import logging
 logger = logging.getLogger('dicompyler.plugin')
 import imp, os
 import wx
 from wx.xrc import *
-from wx.lib.pubsub import Publisher as pub
+from wx.lib.pubsub import pub
 from dicompyler import guiutil, util
 
 def import_plugins(userpath=None):
@@ -76,9 +76,7 @@ class PluginManagerDialog(wx.Dialog):
     """Manage the available plugins."""
 
     def __init__(self):
-        pre = wx.PreDialog()
-        # the Create step is done by XRC.
-        self.PostCreate(pre)
+        wx.Dialog.__init__(self)
 
     def Init(self, plugins, pluginsDisabled):
         """Method called after the panel has been initialized."""
@@ -107,10 +105,14 @@ class PluginManagerDialog(wx.Dialog):
 
         # Bind interface events to the proper methods
 #        wx.EVT_BUTTON(self, XRCID('btnDeletePlugin'), self.DeletePlugin)
-        wx.EVT_CHECKBOX(self, XRCID('checkEnabled'), self.OnEnablePlugin)
-        wx.EVT_TREE_ITEM_ACTIVATED(self, XRCID('tcPlugins'), self.OnEnablePlugin)
-        wx.EVT_TREE_SEL_CHANGED(self, XRCID('tcPlugins'), self.OnSelectTreeItem)
-        wx.EVT_TREE_SEL_CHANGING(self, XRCID('tcPlugins'), self.OnSelectRootItem)
+        # wx.EVT_CHECKBOX(self, XRCID('checkEnabled'), self.OnEnablePlugin)
+        self.Bind(wx.EVT_CHECKBOX, self.OnEnablePlugin, id=XRCID('checkEnabled'))
+        # wx.EVT_TREE_ITEM_ACTIVATED(self, XRCID('tcPlugins'), self.OnEnablePlugin)
+        self.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.OnEnablePlugin, id=XRCID('tcPlugins'))
+        # wx.EVT_TREE_SEL_CHANGED(self, XRCID('tcPlugins'), self.OnSelectTreeItem)
+        self.Bind(wx.EVT_TREE_SEL_CHANGED, self.OnSelectTreeItem, id=XRCID('tcPlugins'))
+        # wx.EVT_TREE_SEL_CHANGING(self, XRCID('tcPlugins'), self.OnSelectRootItem)
+        self.Bind(wx.EVT_TREE_SEL_CHANGING, self.OnSelectRootItem, id=XRCID('tcPlugins'))
 
         # Modify the control and font size as needed
         font = wx.SystemSettings.GetFont(wx.SYS_DEFAULT_GUI_FONT)
@@ -187,19 +189,23 @@ class PluginManagerDialog(wx.Dialog):
                 self.tcPlugins.SetItemImage(i, 2)
                 self.tcPlugins.SetItemTextColour(i, wx.Colour(169, 169, 169))
 
-            self.tcPlugins.SetPyData(i, n)
+            self.tcPlugins.SetItemData(i, n)
             self.tcPlugins.SelectItem(i)
         self.tcPlugins.ExpandAll()
-        wx.EVT_TREE_ITEM_COLLAPSING(
-                self, XRCID('tcPlugins'), self.OnExpandCollapseTree)
-        wx.EVT_TREE_ITEM_EXPANDING(
-                self, XRCID('tcPlugins'), self.OnExpandCollapseTree)
+        self.Bind(
+            wx.EVT_TREE_ITEM_COLLAPSING,
+            self.OnExpandCollapseTree,
+            id=XRCID('tcPlugins'))
+        self.Bind(
+            wx.EVT_TREE_ITEM_EXPANDING,
+            self.OnExpandCollapseTree,
+            id=XRCID('tcPlugins'))
 
     def OnSelectTreeItem(self, evt):
         """Update the interface when the selected item has changed."""
 
         item = evt.GetItem()
-        n = self.tcPlugins.GetPyData(item)
+        n = self.tcPlugins.GetItemData(item)
         if (n == None):
             self.panelProperties.Hide()
             return
@@ -223,7 +229,7 @@ class PluginManagerDialog(wx.Dialog):
         """Block the root items from being selected."""
 
         item = evt.GetItem()
-        n = self.tcPlugins.GetPyData(item)
+        n = self.tcPlugins.GetItemData(item)
         if (n == None):
             evt.Veto()
 
@@ -236,7 +242,7 @@ class PluginManagerDialog(wx.Dialog):
         """Publish the enabled/disabled state of the plugin."""
 
         item = self.tcPlugins.GetSelection()
-        n = self.tcPlugins.GetPyData(item)
+        n = self.tcPlugins.GetItemData(item)
         plugin = self.plugins[n]
         p = plugin['plugin']
 
@@ -257,4 +263,4 @@ class PluginManagerDialog(wx.Dialog):
             logger.debug("%s disabled", p.__name__)
 
         pub.sendMessage('preferences.updated.value',
-                {'general.plugins.disabled_list': list(self.pluginsDisabled)})
+                msg={'general.plugins.disabled_list': list(self.pluginsDisabled)})

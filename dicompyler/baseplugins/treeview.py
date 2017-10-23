@@ -1,22 +1,26 @@
 #!/usr/bin/env python
-# -*- coding: ISO-8859-1 -*-
+# -*- coding: utf-8 -*-
 # treeview.py
 """dicompyler plugin that displays a tree view of the DICOM data structure."""
-# Copyright (c) 2010-2012 Aditya Panchal
+# Copyright (c) 2010-2017 Aditya Panchal
 # This file is part of dicompyler, released under a BSD license.
 #    See the file license.txt included with this distribution, also
-#    available at http://code.google.com/p/dicompyler/
+#    available at https://github.com/bastula/dicompyler/
 #
 
 import logging
 logger = logging.getLogger('dicompyler.treeview')
-import threading, Queue
+import threading
+from six.moves import queue
 import wx
 from wx.xrc import XmlResource, XRCCTRL, XRCID
-from wx.lib.pubsub import Publisher as pub
-from wx.gizmos import TreeListCtrl as tlc
+from wx.lib.pubsub import pub
+from wx.dataview import TreeListCtrl as tlc
 from dicompyler import guiutil, util
-import dicom
+try:
+    import pydicom
+except ImportError:
+    import dicom as pydicom
 
 def pluginProperties():
     """Properties of the plugin."""
@@ -25,7 +29,7 @@ def pluginProperties():
     props['name'] = 'DICOM Tree'
     props['description'] = "Display a tree view of the DICOM data stucture"
     props['author'] = 'Aditya Panchal'
-    props['version'] = "0.4.2"
+    props['version'] = "0.5.0"
     props['plugin_type'] = 'main'
     props['plugin_version'] = 1
     props['min_dicom'] = []
@@ -48,9 +52,7 @@ class pluginTreeView(wx.Panel):
     """Plugin to display DICOM data in a tree view."""
 
     def __init__(self):
-        pre = wx.PrePanel()
-        # the Create step is done by XRC.
-        self.PostCreate(pre)
+        wx.Panel.__init__(self)
 
     def Init(self, res):
         """Method called after the panel has been initialized."""
@@ -61,7 +63,7 @@ class pluginTreeView(wx.Panel):
         res.AttachUnknownControl('tlcTreeView', self.tlcTreeView, self)
 
         # Bind interface events to the proper methods
-        wx.EVT_CHOICE(self, XRCID('choiceDICOM'), self.OnLoadTree)
+        self.Bind(wx.EVT_CHOICE, self.OnLoadTree, id=XRCID('choiceDICOM'))
         self.Bind(wx.EVT_WINDOW_DESTROY, self.OnDestroy)
 
         # Decrease the font size on Mac
@@ -82,8 +84,8 @@ class pluginTreeView(wx.Panel):
         self.choiceDICOM.Select(0)
         self.tlcTreeView.DeleteAllItems()
         # Iterate through the message and enumerate the DICOM datasets
-        for k, v in msg.data.iteritems():
-            if isinstance(v, dicom.dataset.FileDataset):
+        for k, v in msg.items():
+            if isinstance(v, pydicom.dataset.FileDataset):
                 i = self.choiceDICOM.Append(v.SOPClassUID.name.split(' Storage')[0])
                 self.choiceDICOM.SetClientData(i, v)
             # Add the images to the choicebox
@@ -93,11 +95,12 @@ class pluginTreeView(wx.Panel):
                         image.SOPClassUID.name.split(' Storage')[0] + \
                         ' Slice ' + str(imgnum + 1))
                     self.choiceDICOM.SetClientData(i, image)
+        pub.unsubscribe(self.OnUpdatePatient, 'patient.updated.raw_data')
 
     def OnDestroy(self, evt):
         """Unbind to all events before the plugin is destroyed."""
 
-        pub.unsubscribe(self.OnUpdatePatient)
+        pub.unsubscribe(self.OnUpdatePatient, 'patient.updated.raw_data')
 
     def OnLoadTree(self, event):
         """Update and load the DICOM tree."""
@@ -110,7 +113,7 @@ class pluginTreeView(wx.Panel):
             return
         
         self.tlcTreeView.DeleteAllItems()
-        self.root = self.tlcTreeView.AddRoot(text=dataset.SOPClassUID.name)
+        self.root = self.tlcTreeView.AppendItem(self.tlcTreeView.GetRootItem(),dataset.SOPClassUID.name)
         self.tlcTreeView.Collapse(self.root)
 
         # Initialize the progress dialog
@@ -118,7 +121,7 @@ class pluginTreeView(wx.Panel):
             wx.GetApp().GetTopWindow(),
             "Loading DICOM data...")
         # Set up the queue so that the thread knows which item was added
-        self.queue = Queue.Queue()
+        self.queue = queue.Queue()
         # Initialize and start the recursion thread
         self.t=threading.Thread(target=self.RecurseTreeThread,
             args=(dataset, self.root, self.AddItemTree,
@@ -175,27 +178,27 @@ class pluginTreeView(wx.Panel):
                     value = data_element.repval
                 else:
                     # Apply the DICOM character encoding to the data element
-                    if not isinstance(data_element.value, unicode):
+                    if not isinstance(data_element.value, str):
                         try:
-                            dicom.charset.decode(
-                                    dicom.charset.decode(data_element, cs))
+                            pydicom.charset.decode(
+                                    pydicom.charset.decode(data_element, cs))
                         # Otherwise try decoding via ASCII encoding
                         except:
                             try:
-                                value = unicode(data_element.value)
+                                value = str(data_element.value)
                             except:
                                 logger.info(
                                     "Could not decode character set for %s.",
                                     data_element.name)
-                                value = unicode(
+                                value = str(
                                     data_element.value, errors='replace')
                         else:
                             value = data_element.value
-                self.tlcTreeView.SetItemText(item, value, 1)
+                self.tlcTreeView.SetItemText(item, 1, value)
             # Fill in the rest of the data_element properties
-            self.tlcTreeView.SetItemText(item, unicode(data_element.tag), 2)
-            self.tlcTreeView.SetItemText(item, unicode(data_element.VM), 3)
-            self.tlcTreeView.SetItemText(item, unicode(data_element.VR), 4)
+            self.tlcTreeView.SetItemText(item, 2, str(data_element.tag))
+            self.tlcTreeView.SetItemText(item, 3, str(data_element.VM))
+            self.tlcTreeView.SetItemText(item, 4, str(data_element.VR))
         if (needQueue):
             self.queue.put(item)
 
@@ -204,12 +207,12 @@ class DICOMTree(tlc):
     
     def __init__(self, *args, **kwargs):
         super(DICOMTree, self).__init__(*args, **kwargs)
-        self.AddColumn('Name')
-        self.AddColumn('Value')
-        self.AddColumn('Tag')
-        self.AddColumn('VM')
-        self.AddColumn('VR')
-        self.SetMainColumn(0)
+        self.AppendColumn('Name')
+        self.AppendColumn('Value')
+        self.AppendColumn('Tag')
+        self.AppendColumn('VM')
+        self.AppendColumn('VR')
+        #self.SetMainColumn(0)
         self.SetColumnWidth(0, 200)
         self.SetColumnWidth(1, 200)
         self.SetColumnWidth(3, 50)

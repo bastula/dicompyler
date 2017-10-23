@@ -1,16 +1,16 @@
 #!/usr/bin/env python
-# -*- coding: ISO-8859-1 -*-
+# -*- coding: utf-8 -*-
 # anonymize.py
 """dicompyler plugin that anonymizes DICOM / DICOM RT data."""
-# Copyright (c) 2010-2012 Aditya Panchal
+# Copyright (c) 2010-2017 Aditya Panchal
 # This file is part of dicompyler, released under a BSD license.
 #    See the file license.txt included with this distribution, also
-#    available at http://code.google.com/p/dicompyler/
+#    available at https://github.com/bastula/dicompyler/
 #
 
 import wx
 from wx.xrc import XmlResource, XRCCTRL, XRCID
-from wx.lib.pubsub import Publisher as pub
+from wx.lib.pubsub import pub
 import os, threading
 from dicompyler import guiutil, util
 
@@ -22,7 +22,7 @@ def pluginProperties():
     props['menuname'] = "as Anonymized DICOM"
     props['description'] = "Anonymizes DICOM / DICOM RT data"
     props['author'] = 'Aditya Panchal'
-    props['version'] = "0.4.2"
+    props['version'] = "0.5.0"
     props['plugin_type'] = 'export'
     props['plugin_version'] = 1
     props['min_dicom'] = []
@@ -45,7 +45,7 @@ class plugin:
     def OnUpdatePatient(self, msg):
         """Update and load the patient data."""
 
-        self.data = msg.data
+        self.data = msg
 
     def pluginMenu(self, evt):
         """Anonymize DICOM / DICOM RT data."""
@@ -87,13 +87,13 @@ class plugin:
 
         length = 0
         for key in ['rtss', 'rtplan', 'rtdose']:
-            if data.has_key(key):
+            if key in data:
                 length = length + 1
-        if data.has_key('images'):
+        if 'images' in data:
             length = length + len(data['images'])
 
         i = 1
-        if data.has_key('rtss'):
+        if 'rtss' in data:
             rtss = data['rtss']
             wx.CallAfter(progressFunc, i, length,
                 'Anonymizing file ' + str(i) + ' of ' + str(length))
@@ -101,12 +101,12 @@ class plugin:
             self.updateElement(rtss, 'SeriesDescription', 'RT Structure Set')
             self.updateElement(rtss, 'StructureSetDate', '19010101')
             self.updateElement(rtss, 'StructureSetTime', '000000')
-            if rtss.has_key('RTROIObservations'):
+            if 'RTROIObservations' in rtss:
                 for item in rtss.RTROIObservations:
                     self.updateElement(item, 'ROIInterpreter', 'anonymous')
             rtss.save_as(os.path.join(path, 'rtss.dcm'))
             i = i + 1
-        if data.has_key('rtplan'):
+        if 'rtplan' in data:
             rtplan = data['rtplan']
             wx.CallAfter(progressFunc, i, length,
                 'Anonymizing file ' + str(i) + ' of ' + str(length))
@@ -115,10 +115,10 @@ class plugin:
             self.updateElement(rtplan, 'RTPlanName', 'plan')
             self.updateElement(rtplan, 'RTPlanDate', '19010101')
             self.updateElement(rtplan, 'RTPlanTime', '000000')
-            if rtplan.has_key('ToleranceTables'):
+            if 'ToleranceTables' in rtplan:
                 for item in rtplan.ToleranceTables:
                     self.updateElement(item, 'ToleranceTableLabel', 'tolerance')
-            if rtplan.has_key('Beams'):
+            if 'Beams' in rtplan:
                 for item in rtplan.Beams:
                     self.updateElement(item, 'Manufacturer', 'manufacturer')
                     self.updateElement(item, 'InstitutionName', 'institution')
@@ -126,7 +126,7 @@ class plugin:
                     self.updateElement(item, 'InstitutionalDepartmentName', 'department')
                     self.updateElement(item, 'ManufacturersModelName', 'model')
                     self.updateElement(item, 'TreatmentMachineName', 'txmachine')
-            if rtplan.has_key('TreatmentMachines'):
+            if 'TreatmentMachines' in rtplan:
                 for item in rtplan.TreatmentMachines:
                     self.updateElement(item, 'Manufacturer', 'manufacturer')
                     self.updateElement(item, 'InstitutionName', 'vendor')
@@ -135,13 +135,13 @@ class plugin:
                     self.updateElement(item, 'ManufacturersModelName', 'model')
                     self.updateElement(item, 'DeviceSerialNumber', '0')
                     self.updateElement(item, 'TreatmentMachineName', 'txmachine')
-            if rtplan.has_key('Sources'):
+            if 'Sources' in rtplan:
                 for item in rtplan.Sources:
                     self.updateElement(item, 'SourceManufacturer', 'manufacturer')
                     self.updateElement(item, 'SourceIsotopeName', 'isotope')
             rtplan.save_as(os.path.join(path, 'rtplan.dcm'))
             i = i + 1
-        if data.has_key('rtdose'):
+        if 'rtdose' in data:
             rtdose = data['rtdose']
             wx.CallAfter(progressFunc, i, length,
                 'Anonymizing file ' + str(i) + ' of ' + str(length))
@@ -149,7 +149,7 @@ class plugin:
             self.updateElement(rtdose, 'SeriesDescription', 'RT Dose')
             rtdose.save_as(os.path.join(path, 'rtdose.dcm'))
             i = i + 1
-        if data.has_key('images'):
+        if 'images' in data:
             images = data['images']
             for n, image in enumerate(images):
                 wx.CallAfter(progressFunc, i, length,
@@ -217,9 +217,7 @@ class AnonymizeDialog(wx.Dialog):
     """Dialog that shows the options to anonymize DICOM / DICOM RT data."""
 
     def __init__(self):
-        pre = wx.PreDialog()
-        # the Create step is done by XRC.
-        self.PostCreate(pre)
+        wx.Dialog.__init__(self)
 
     def Init(self):
         """Method called after the dialog has been initialized."""
@@ -253,7 +251,7 @@ class AnonymizeDialog(wx.Dialog):
 
         # Initialize the import location via pubsub
         pub.subscribe(self.OnImportPrefsChange, 'general.dicom.import_location')
-        pub.sendMessage('preferences.requested.value', 'general.dicom.import_location')
+        pub.sendMessage('preferences.requested.value', msg='general.dicom.import_location')
 
         # Pre-select the text on the text controls due to a Mac OS X bug
         self.txtFirstName.SetSelection(-1, -1)
@@ -271,7 +269,7 @@ class AnonymizeDialog(wx.Dialog):
     def OnImportPrefsChange(self, msg):
         """When the import preferences change, update the values."""
 
-        self.path = unicode(msg.data)
+        self.path = str(msg)
         self.txtDICOMFolder.SetValue(self.path)
 
     def OnFolderBrowse(self, evt):

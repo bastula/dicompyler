@@ -1,16 +1,16 @@
 #!/usr/bin/env python
-# -*- coding: ISO-8859-1 -*-
+# -*- coding: utf-8 -*-
 # preferences.py
 """Preferences manager for dicompyler."""
-# Copyright (c) 2011-2012 Aditya Panchal
+# Copyright (c) 2011-2017 Aditya Panchal
 # This file is part of dicompyler, released under a BSD license.
 #    See the file license.txt included with this distribution, also
-#    available at http://code.google.com/p/dicompyler/
+#    available at https://github.com/bastula/dicompyler/
 
 import os
 import wx
 from wx.xrc import *
-from wx.lib.pubsub import Publisher as pub
+from wx.lib.pubsub import pub
 from dicompyler import guiutil, util
 
 try:
@@ -29,6 +29,7 @@ class PreferencesManager():
         # Load the XRC file for our gui resources
         res = XmlResource(util.GetResourcePath('preferences.xrc'))
         self.dlgPreferences = res.LoadDialog(None, "PreferencesDialog")
+        #self.dlgPreferences = PreferencesDialog(parent,name=name)
         self.dlgPreferences.Init(name, appname)
 
         # Setup internal pubsub methods
@@ -50,6 +51,7 @@ class PreferencesManager():
 
         # Destroy the dialog when the preferences manager object is deleted
         if self.dlgPreferences:
+            
             self.dlgPreferences.Destroy()
 
     def Show(self):
@@ -67,7 +69,7 @@ class PreferencesManager():
     def SetPreferenceTemplate(self, msg):
         """Set the template that the preferences will be shown in the dialog."""
 
-        self.preftemplate = msg.data
+        self.preftemplate = msg
         self.dlgPreferences.LoadPreferences(self.preftemplate, self.values)
 
     def LoadPreferenceValues(self):
@@ -85,47 +87,47 @@ class PreferencesManager():
     def SavePreferenceValues(self, msg):
         """Save the preference values to disk after the dialog is closed."""
 
-        self.values = msg.data
+        self.values = msg
         with open(self.filename, mode='w') as f:
             json.dump(self.values, f, sort_keys=True, indent=4)
 
     def GetPreferenceValue(self, msg):
         """Publish the requested value for a single preference setting."""
 
-        query = msg.data.split('.')
+        query = msg.split('.')
         v = self.values
-        if v.has_key(query[0]):
-            if v[query[0]].has_key(query[1]):
-                if v[query[0]][query[1]].has_key(query[2]):
-                    pub.sendMessage(msg.data, v[query[0]][query[1]][query[2]])
+        if query[0] in v:
+            if query[1] in v[query[0]]:
+                if query[2] in v[query[0]][query[1]]:
+                    pub.sendMessage(msg, topic=msg, msg=v[query[0]][query[1]][query[2]])
 
     def GetPreferenceValues(self, msg):
         """Publish the requested values for preference setting group."""
 
-        query = msg.data.split('.')
+        query = msg.split('.')
         v = self.values
-        if v.has_key(query[0]):
-            if v[query[0]].has_key(query[1]):
-                for setting, value in v[query[0]][query[1]].iteritems():
-                    message = msg.data + '.' + setting
-                    pub.sendMessage(message, value)
+        if query[0] in v:
+            if query[1] in v[query[0]]:
+                for setting, value in list(v[query[0]][query[1]].items()):
+                    message = msg + '.' + setting
+                    pub.sendMessage(message, topic='.'.join(['general',setting]), msg=value)
 
     def SetPreferenceValue(self, msg):
         """Set the preference value for the given preference setting."""
 
-        SetValue(self.values, msg.data.keys()[0], msg.data.values()[0])
-        pub.sendMessage('preferences.updated.values', self.values)
-        pub.sendMessage(msg.data.keys()[0], msg.data.values()[0])
+        #Using list() may break threading.  
+        #See https://blog.labix.org/2008/06/27/watch-out-for-listdictkeys-in-python-3
+        SetValue(self.values, list(msg.keys())[0], list(msg.values())[0])
+        pub.sendMessage('preferences.updated.values', msg=self.values)
+        pub.sendMessage(list(msg.keys())[0], topic=list(msg.keys())[0], msg=list(msg.values())[0]) 
 
 ############################## Preferences Dialog ##############################
 
 class PreferencesDialog(wx.Dialog):
     """Dialog to display and change preferences."""
 
-    def __init__(self):
-        pre = wx.PreDialog()
-        # the Create step is done by XRC.
-        self.PostCreate(pre)
+    def __init__(self):      
+        wx.Dialog.__init__(self)
 
     def Init(self, name = None, appname = ""):
         """Method called after the panel has been initialized."""
@@ -143,7 +145,7 @@ class PreferencesDialog(wx.Dialog):
 
         # Initialize controls
         self.notebook = XRCCTRL(self, 'notebook')
-
+        
         # Modify the control and font size on Mac
         for child in self.GetChildren():
             guiutil.adjust_control(child)
@@ -151,7 +153,7 @@ class PreferencesDialog(wx.Dialog):
         # Bind ui events to the proper methods
         self.Bind(wx.EVT_CLOSE, self.OnClose)
         self.Bind(wx.EVT_WINDOW_DESTROY, self.OnClose)
-        wx.EVT_BUTTON(self, XRCID('wxID_OK'), self.OnClose)
+        self.Bind(wx.EVT_BUTTON, self.OnClose, id=wx.ID_OK)
 
         # Initialize variables
         self.preftemplate = []
@@ -170,8 +172,8 @@ class PreferencesDialog(wx.Dialog):
 
         # Add each preference panel to the notebook
         for template in self.preftemplate:
-            panel = self.CreatePreferencePanel(template.values()[0])
-            self.notebook.AddPage(panel, template.keys()[0])
+            panel = self.CreatePreferencePanel(list(template.values())[0])
+            self.notebook.AddPage(panel, list(template.keys())[0])
 
     def CreatePreferencePanel(self, prefpaneldata):
         """Create a preference panel for the given data."""
@@ -186,7 +188,7 @@ class PreferencesDialog(wx.Dialog):
             bsizer.Add((0,5))
             hsizer = wx.BoxSizer(wx.HORIZONTAL)
             hsizer.Add((12, 0))
-            h = wx.StaticText(panel, -1, group.keys()[0])
+            h = wx.StaticText(panel, -1, list(group.keys())[0])
             font = h.GetFont()
             font.SetWeight(wx.FONTWEIGHT_BOLD)
             h.SetFont(font)
@@ -194,10 +196,10 @@ class PreferencesDialog(wx.Dialog):
             bsizer.Add(hsizer)
             bsizer.Add((0,7))
             # Create a FlexGridSizer to contain the group of settings
-            fgsizer = wx.FlexGridSizer(len(group.values()[0]), 4, 10, 4)
+            fgsizer = wx.FlexGridSizer(len(list(group.values())[0]), 4, 10, 4)
             fgsizer.AddGrowableCol(2, 1)
             # Create controls for each setting
-            for setting in group.values()[0]:
+            for setting in list(group.values())[0]:
                 fgsizer.Add((24, 0))
                 # Show the restart asterisk for this setting if required
                 restart = str('*' if 'restart' in setting else '')
@@ -228,10 +230,10 @@ class PreferencesDialog(wx.Dialog):
                     c.SetValue(value)
                     sizer.Add(c, 0, wx.ALIGN_CENTER)
                     # Remove the label preceding the checkbox
-                    t = self.FindWindowById(c.PrevControlId(c.GetId()))
+                    t = c.GetPrevSibling()
                     t.SetLabel('')
                     # Adjust the sizer preceding the label
-                    fgsizer.GetItem(0).SetSpacer((20,0))
+                    fgsizer.GetItem(0).AssignSpacer((20,0))
                     # Add control to the callback dict
                     self.callbackdict[c] = setting['callback']
                     self.Bind(wx.EVT_CHECKBOX, self.OnUpdateCheckbox, c)
@@ -298,14 +300,14 @@ class PreferencesDialog(wx.Dialog):
         """Publish the updated choice when the value changes."""
 
         c = evt.GetEventObject()
-        pub.sendMessage(self.callbackdict[c], evt.GetString())
+        pub.sendMessage(self.callbackdict[c], topic=self.callbackdict[c], msg=evt.GetString())
         SetValue(self.values, self.callbackdict[c], evt.GetString())
 
     def OnUpdateCheckbox(self, evt):
         """Publish the updated checkbox when the value changes."""
 
         c = evt.GetEventObject()
-        pub.sendMessage(self.callbackdict[c], evt.IsChecked())
+        pub.sendMessage(self.callbackdict[c], topic=self.callbackdict[c], msg=evt.IsChecked())
         SetValue(self.values, self.callbackdict[c], evt.IsChecked())
 
     def OnUpdateSlider(self, evt):
@@ -315,7 +317,7 @@ class PreferencesDialog(wx.Dialog):
         # Update the associated label with the new number
         t = self.FindWindowById(s.NextControlId(s.GetId()))
         t.SetLabel(str(s.GetValue()))
-        pub.sendMessage(self.callbackdict[s], s.GetValue())
+        pub.sendMessage(self.callbackdict[s], topic=self.callbackdict[s], msg=s.GetValue())
         SetValue(self.values, self.callbackdict[s], s.GetValue())
 
     def OnUpdateDirectory(self, evt):
@@ -323,22 +325,23 @@ class PreferencesDialog(wx.Dialog):
 
         b = evt.GetEventObject()
         # Get the the label associated with the browse button
-        t = self.FindWindowById(b.PrevControlId(b.GetId()))
+        t = b.GetPrevSibling()
         dlg = wx.DirDialog(self, defaultPath = t.GetValue())
 
         if dlg.ShowModal() == wx.ID_OK:
             # Update the associated label with the new directory
-            d = unicode(dlg.GetPath())
+            d = str(dlg.GetPath())
             t.SetValue(d)
-            pub.sendMessage(self.callbackdict[b], d)
+            pub.sendMessage(self.callbackdict[b], topic=self.callbackdict[b], msg=d)
             SetValue(self.values, self.callbackdict[b], d)
         dlg.Destroy()
 
     def OnClose(self, evt):
         """Publish the updated preference values when closing the dialog."""
 
-        pub.sendMessage('preferences.updated.values', self.values)
-        self.Hide()
+        pub.sendMessage('preferences.updated.values', msg=self.values)
+        if self:
+            self.Hide()
 
 ############################ Get/Set Value Functions ###########################
 
@@ -348,9 +351,9 @@ def GetValue(values, setting):
     # Look for the saved value and return it if it exists
     query = setting['callback'].split('.')
     value = setting['default']
-    if values.has_key(query[0]):
-        if values[query[0]].has_key(query[1]):
-            if values[query[0]][query[1]].has_key(query[2]):
+    if query[0] in values:
+        if query[1] in values[query[0]]:
+            if query[2] in values[query[0]][query[1]]:
                 value = values[query[0]][query[1]][query[2]]
     # Otherwise return the default value
     return value
@@ -360,8 +363,8 @@ def SetValue(values, setting, value):
 
     # Look if a prior value exists and replace it
     query = setting.split('.')
-    if values.has_key(query[0]):
-        if values[query[0]].has_key(query[1]):
+    if query[0] in values:
+        if query[1] in values[query[0]]:
             values[query[0]][query[1]][query[2]] = value
         else:
             values[query[0]].update({query[1]:{query[2]:value}})
@@ -401,7 +404,7 @@ def main():
          'callback':'panel1.prefgrp1.choice_setting'},
             {'name':'Directory setting',
              'type':'directory',
-          'default':unicode(sp.GetDocumentsDir()),
+          'default':str(sp.GetDocumentsDir()),
          'callback':'panel1.prefgrp1.directory_setting'}]
         },
         {'Panel 1 Preference Group 2':
@@ -425,7 +428,7 @@ def main():
         {'Panel 2 Preference Group 2':
            [{'name':'Directory setting',
              'type':'directory',
-          'default':unicode(sp.GetUserDataDir()),
+          'default':str(sp.GetUserDataDir()),
          'callback':'panel2.prefgrp2.directory_setting'},
             {'name':'Choice Setting',
              'type':'choice',
@@ -437,14 +440,14 @@ def main():
 
     def print_template_value(msg):
         """Print the received template message."""
-        print msg.topic, msg.data
+        print(msg.topic, msg)
 
     # Subscribe the template value printer to each set of preferences
     pub.subscribe(print_template_value, 'panel1')
     pub.subscribe(print_template_value, 'panel2')
 
     # Notify the preferences manager that a pref template is available
-    pub.sendMessage('preferences.updated.template', preftemplate)
+    pub.sendMessage('preferences.updated.template', msg=preftemplate)
 
     frame.prefmgr.Show()
     app.MainLoop()
@@ -452,12 +455,12 @@ def main():
     # Print the results of the preferences
     with open(filename, mode='r') as f:
         for line in f:
-            print line,
+            print(line)
 
     try:
         os.remove(filename)
     except WindowsError:
-        print '\nCould not delete: '+filename+'. Please delete it manually.'
+        print('\nCould not delete: '+filename+'. Please delete it manually.')
 
 if __name__ == '__main__':
     main()
