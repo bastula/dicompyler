@@ -10,12 +10,12 @@
 from setuptools import setup, find_packages
 
 requires = [
-    'matplotlib>=1.3',
+    'matplotlib>=1.3.0',
     'numpy>=1.2.1',
     'pillow>=1.0',
     'dicompyler-core>=0.5.2',
     'pydicom>=0.9.9',
-    'wxPython>=4.0.0a3']
+    'wxPython>=4.0.0b2']
 
 setup(
     name="dicompyler",
@@ -45,8 +45,11 @@ setup(
         "Intended Audience :: Healthcare Industry",
         "Intended Audience :: Science/Research",
         "Development Status :: 4 - Beta",
-        "Programming Language :: Python",
-        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 2",
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6'
         "Operating System :: OS Independent",
         "Topic :: Scientific/Engineering :: Medical Science Apps.",
         "Topic :: Scientific/Engineering :: Physics",
@@ -78,10 +81,10 @@ setup(
     
     dicompyler requires the following packages to run from source:
     
-    - Python 3.6 or higher 
-    - wxPython-phoenix 4.0.0a3 
-    - matplotlib 1.3 to 1.5.1
-    - numpy 1.2 or higher
+    - Python 2.7 or 3.5 or higher 
+    - wxPython (Phoenix) 4.0.0b2 or higher
+    - matplotlib 1.3.0 or higher
+    - numpy 1.3.1 or higher
     - Pillow 1.0 or higher
     - dicompyler-core 0.5.2 or higher
     - pydicom 0.9.9 or higher""",

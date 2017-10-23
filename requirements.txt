@@ -1,5 +1,5 @@
-dicompyler-core>=0.5.2
+dicompyler-core[image]>=0.5.2
+wxPython>=4.0.0b2
 matplotlib>=1.3
 numpy>=1.13.1
-wxPython>=4.0.0a3
 https://github.com/darcymason/pydicom/archive/master.zip

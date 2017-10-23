@@ -10,7 +10,8 @@
 
 import logging
 logger = logging.getLogger('dicompyler.treeview')
-import threading, queue
+import threading
+from six.moves import queue
 import wx
 from wx.xrc import XmlResource, XRCCTRL, XRCID
 from wx.lib.pubsub import pub
