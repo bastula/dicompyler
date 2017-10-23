@@ -176,7 +176,7 @@ class ColorCheckListBox(wx.ScrolledWindow):
         """Removes all items from the control."""
 
         self.items = []
-        self.grid.Clear()
+        self.grid.Clear(True)
         self.grid.Add((0,3), 0)
         self.Layout()
 
