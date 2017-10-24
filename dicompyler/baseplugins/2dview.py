@@ -536,6 +536,9 @@ class plugin2DView(wx.Panel):
         # Set an empty text placeholder if the coordinates are not within range
         text = ""
         value = ""
+        # Skip processing if images are not loaded
+        if not len(self.images):
+            pub.sendMessage('main.update_statusbar', msg={1:text, 2:value})
         # Only display if the mouse coordinates are within the image size range
         if ((0 <= xpos < len(self.structurepixlut[0])) and
             (0 <= ypos < len(self.structurepixlut[1])) and self.mouse_in_window):
