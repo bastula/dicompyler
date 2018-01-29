@@ -10,6 +10,7 @@
 # It's assumed that the reference (prescription) dose is in cGy.
 
 import numpy as np
+from six import itervalues
 
 class DVH:
     """Processes the dose volume histogram from DICOM DVH data."""
@@ -51,7 +52,7 @@ def CalculateVolume(structure):
 
     n = 0
     # Iterate over each plane in the structure
-    for sPlane in sPlanes.itervalues():
+    for sPlane in itervalues(sPlanes):
 
         # Calculate the area for each contour in the current plane
         contours = []
@@ -61,7 +62,7 @@ def CalculateVolume(structure):
             # Create arrays for the x,y coordinate pair for the triangulation
             x = []
             y = []
-            for point in contour['contourData']:
+            for point in contour['data']:
                 x.append(point[0])
                 y.append(point[1])
 
@@ -70,7 +71,7 @@ def CalculateVolume(structure):
             for i in range(0, len(x)-1):
                 cArea = cArea + x[i]*y[i+1] - x[i+1]*y[i]
             cArea = abs(cArea / 2)
-            contours.append({'area':cArea, 'data':contour['contourData']})
+            contours.append({'area':cArea, 'data':contour['data']})
 
             # Determine which contour is the largest
             if (cArea > largest):
