@@ -462,6 +462,7 @@ class DicomImporterDialog(wx.Dialog):
                             if (seriesid == structure['series']):
                                 structure['treeid'] = self.tcPatients.AppendItem(series['treeid'], name, 4)
                                 foundseries = True
+                                break
                         # If no series were found, add the rtss to the study
                         if not foundseries:
                             structure['treeid'] = self.tcPatients.AppendItem(study['treeid'], name, 4)
@@ -481,6 +482,7 @@ class DicomImporterDialog(wx.Dialog):
                             if (structureid == plan['rtss']):
                                 plan['treeid'] = self.tcPatients.AppendItem(structure['treeid'], name, 5)
                                 foundstructure = True
+                                break
                     # If no structures were found, add the plan to the study/series instead
                     if not foundstructure:
                         # If there is an image series, add a fake rtss to it
@@ -491,6 +493,7 @@ class DicomImporterDialog(wx.Dialog):
                                 badstructure = self.tcPatients.AppendItem(
                                     series['treeid'], "RT Structure Set not found", 7)
                                 foundseries = True
+                                break
                         # If no series were found, add the rtss to the study
                         if not foundseries:
                             badstructure = self.tcPatients.AppendItem(
@@ -533,6 +536,7 @@ class DicomImporterDialog(wx.Dialog):
                                 dose['treeid'] = self.tcPatients.AppendItem(plan['treeid'], name, 6)
                                 filearray = [dose['filename']]
                                 self.EnableItemSelection(patient, dose, filearray, rxdose)
+                                break
                     # If no plans were found, add the dose to the structure/study instead
                     if not foundplan:
                         if dose['hasgrid']:
@@ -561,6 +565,7 @@ class DicomImporterDialog(wx.Dialog):
                                     self.tcPatients.SetItemTextColour(badplan, wx.RED)
                                     filearray = [dose['filename']]
                                     self.EnableItemSelection(patient, dose, filearray)
+                                    break
                         if not foundstructure:
                             # If there is an image series, add a fake rtss to it
                             foundseries = False
@@ -570,6 +575,7 @@ class DicomImporterDialog(wx.Dialog):
                                     badstructure = self.tcPatients.AppendItem(
                                         series['treeid'], "RT Structure Set not found", 7)
                                     foundseries = True
+                                    break
                             # If no series were found, add the rtss to the study
                             if not foundseries:
                                 badstructure = self.tcPatients.AppendItem(
