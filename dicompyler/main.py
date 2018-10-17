@@ -833,7 +833,7 @@ class MainFrame(wx.Frame):
             notebook tab instead of the panel receives focus."""
 
         if guiutil.IsMSWindows():
-            pub.sendMessage('main.key_down', msg=evt)
+            pub.sendMessage('main.key_down', evt=evt)
 
     def OnMouseWheel(self, evt):
         """Capture the mousewheel event when the notebook tab is focused.
@@ -841,7 +841,7 @@ class MainFrame(wx.Frame):
             notebook tab instead of the panel receives focus."""
 
         if guiutil.IsMSWindows():
-            pub.sendMessage('main.mousewheel', msg=evt)
+            pub.sendMessage('main.mousewheel', evt=evt)
 
     def OnPreferences(self, evt):
         """Load and show the Preferences dialog box."""
