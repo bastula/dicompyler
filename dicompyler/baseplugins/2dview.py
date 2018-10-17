@@ -589,13 +589,6 @@ class plugin2DView(wx.Panel):
     def OnKeyDown(self, evt):
         """Change the image when the user presses the appropriate keys."""
 
-        # Needed to work around a bug in Windows. See main.py for more details.
-        if guiutil.IsMSWindows():
-            try:
-                evt = evt.data
-            except AttributeError:
-                keyname = evt.GetKeyCode()
-
         if len(self.images):
             keyname = evt.GetKeyCode()
             prevkey = [wx.WXK_UP, wx.WXK_PAGEUP]
@@ -623,14 +616,6 @@ class plugin2DView(wx.Panel):
 
     def OnMouseWheel(self, evt):
         """Change the image when the user scrolls the mouse wheel."""
-
-        # Needed to work around a bug in Windows. See main.py for more details.
-        if guiutil.IsMSWindows():
-            try:
-                evt = evt.data
-            except AttributeError:
-                delta = evt.GetWheelDelta()
-                rot = evt.GetWheelRotation()
 
         if len(self.images):
             delta = evt.GetWheelDelta()
