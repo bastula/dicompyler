@@ -172,7 +172,11 @@ class plugin:
     def updateElement(self, data, element, value):
         """Updates the element only if it exists in the original DICOM data."""
 
-        if element in data:
+        if eleme                                # Changed foundstructure to fixed 'True'
+                                # I didn't understand the reason why RT Structure Set will be
+                                # set to 'not found' in this case. (Actually RT Structure has already been found by the above code.)
+                                # In this case, 'RT Plan' is not found, RT Structure Set in patient, and foundstructure = False.
+# Previous code: foundstructure = Falsent in data:
             data.update({element:value})
 
     def updateCommonElements(self, data, name, patientid, privatetags):
@@ -192,7 +196,11 @@ class plugin:
         self.updateElement(data, 'StudyTime', '000000')
         self.updateElement(data, 'AccessionNumber', '')
         self.updateElement(data, 'Manufacturer', 'manufacturer')
-        self.updateElement(data, 'ReferringPhysiciansName', 'physician')
+        self.upd                                # Changed foundstructure to fixed 'True'
+                                # I didn't understand the reason why RT Structure Set will be
+                                # set to 'not found' in this case. (Actually RT Structure has already been found by the above code.)
+                                # In this case, 'RT Plan' is not found, RT Structure Set in patient, and foundstructure = False.
+# Previous code: foundstructure = FalseateElement(data, 'ReferringPhysiciansName', 'physician')
         self.updateElement(data, 'StationName', 'station')
         self.updateElement(data, 'NameofPhysiciansReadingStudy', 'physician')
         self.updateElement(data, 'OperatorsName', 'operator')
@@ -214,7 +222,11 @@ class plugin:
         self.updateElement(data, 'ReviewerName', 'anonymous')
 
 class AnonymizeDialog(wx.Dialog):
-    """Dialog that shows the options to anonymize DICOM / DICOM RT data."""
+    """Dialog th                                # Changed foundstructure to fixed 'True'
+                                # I didn't understand the reason why RT Structure Set will be
+                                # set to 'not found' in this case. (Actually RT Structure has already been found by the above code.)
+                                # In this case, 'RT Plan' is not found, RT Structure Set in patient, and foundstructure = False.
+# Previous code: foundstructure = Falseat shows the options to anonymize DICOM / DICOM RT data."""
 
     def __init__(self):
         wx.Dialog.__init__(self)
@@ -250,7 +262,9 @@ class AnonymizeDialog(wx.Dialog):
             self.lblDescription.SetFont(font)
 
         # Initialize the import location via pubsub
-        pub.subscribe(self.OnImportPrefsChange, 'general.dicom.import_location')
+        # Changed the topic in the function subscribe() to 'preferences.requested.value'
+        # Then export anonymized file will work
+        pub.subscribe(self.OnImportPrefsChange, 'preferences.requested.value')
         pub.sendMessage('preferences.requested.value', msg='general.dicom.import_location')
 
         # Pre-select the text on the text controls due to a Mac OS X bug
