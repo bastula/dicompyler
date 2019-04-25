@@ -548,7 +548,12 @@ class DicomImporterDialog(wx.Dialog):
                         foundstructure = False
                         if 'structures' in patient:
                             for structureid, structure in patient['structures'].items():
-                                foundstructure = False
+                                # Changed foundstructure to fixed 'True'
+                                # I didn't understand the reason why RT Structure Set will be
+                                # set to 'not found' in this case. (Actually RT Structure has already been found by the above code.)
+                                # In this case, 'RT Plan' is not found, RT Structure Set in patient, and foundstructure = False.
+                                # Previous code: foundstructure = False
+                                foundstructure = True
                                 if 'rtss' in dose:
                                     if (structureid == dose['rtss']):
                                         foundstructure = True
