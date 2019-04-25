@@ -131,7 +131,10 @@ class ProgressDialog(wx.Dialog):
         else:
             percentDone = int(100 * (num) / length)
 
-        self.gaugeProgress.SetValue(percentDone)
+        # Temporally give a fixed value 1 to the precentDone variable
+        # to solve the bug of progress bar
+        # Previous code: self.gaugeProgress.SetValue(percentDone)
+        self.gaugeProgress.SetValue(1)
         self.lblProgressPercent.SetLabel(str(percentDone))
         self.lblProgress.SetLabel(message)
 
