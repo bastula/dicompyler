@@ -194,11 +194,13 @@ class pluginTreeView(wx.Panel):
                                     data_element.value, errors='replace')
                         else:
                             value = data_element.value
-                self.tlcTreeView.SetItemText(item, 1, value)
+                self.tlcTreeView.SetItemText(item, 2, value)
             # Fill in the rest of the data_element properties
-            self.tlcTreeView.SetItemText(item, 2, str(data_element.tag))
-            self.tlcTreeView.SetItemText(item, 3, str(data_element.VM))
-            self.tlcTreeView.SetItemText(item, 4, str(data_element.VR))
+            self.tlcTreeView.SetItemText(item, 1, str(data_element.name))
+            self.tlcTreeView.SetItemText(item, 3, str(data_element.tag))
+            self.tlcTreeView.SetItemText(item, 4, str(data_element.VM))
+            self.tlcTreeView.SetItemText(item, 5, str(data_element.VR))
+
         if (needQueue):
             self.queue.put(item)
 
@@ -207,6 +209,7 @@ class DICOMTree(tlc):
     
     def __init__(self, *args, **kwargs):
         super(DICOMTree, self).__init__(*args, **kwargs)
+        self.AppendColumn('')
         self.AppendColumn('Name')
         self.AppendColumn('Value')
         self.AppendColumn('Tag')
@@ -215,5 +218,6 @@ class DICOMTree(tlc):
         #self.SetMainColumn(0)
         self.SetColumnWidth(0, 200)
         self.SetColumnWidth(1, 200)
-        self.SetColumnWidth(3, 50)
-        self.SetColumnWidth(4, 50)
+        self.SetColumnWidth(3, 200)
+        self.SetColumnWidth(3, 200)
+        self.SetColumnWidth(4, 200)
