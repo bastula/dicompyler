@@ -10,7 +10,7 @@
 from dicompyler import util
 import wx
 from wx.xrc import XmlResource, XRCCTRL, XRCID
-from wx.lib.pubsub import pub
+from pubsub import pub
 
 def IsMSWindows():
     """Are we running on Windows?
