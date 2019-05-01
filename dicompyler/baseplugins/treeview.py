@@ -218,6 +218,6 @@ class DICOMTree(tlc):
         #self.SetMainColumn(0)
         self.SetColumnWidth(0, 200)
         self.SetColumnWidth(1, 200)
-        self.SetColumnWidth(3, 200)
+        self.SetColumnWidth(2, 200)
         self.SetColumnWidth(3, 200)
         self.SetColumnWidth(4, 200)
