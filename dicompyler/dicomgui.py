@@ -249,7 +249,7 @@ class DicomImporterDialog(wx.Dialog):
                             if not stinfo['id'] in patients[h]['studies']:
                                 patients[h]['studies'][stinfo['id']] = stinfo
                         # Create each Series of images
-                        if (('ImageOrientationPatient' in dp.ds) and \
+                        if (('ImageOrientationPatient' in dp.ds) and
                             not (dp.GetSOPClassUID() == 'rtdose')):
                             seinfo = dp.GetSeriesInfo()
                             seinfo['numimages'] = 0
@@ -553,7 +553,7 @@ class DicomImporterDialog(wx.Dialog):
                                 # set to 'not found' in this case. (Actually RT Structure has already been found by the above code.)
                                 # In this case, 'RT Plan' is not found, RT Structure Set in patient, and foundstructure = False.
                                 # Previous code: foundstructure = False
-                                foundstructure = True
+                                foundstructure = False
                                 if 'rtss' in dose:
                                     if (structureid == dose['rtss']):
                                         foundstructure = True

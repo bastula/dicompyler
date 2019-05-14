@@ -91,7 +91,7 @@ class plugin:
                 length = length + 1
         if 'images' in data:
             length = length + len(data['images'])
-
+        
         i = 1
         if 'rtss' in data:
             rtss = data['rtss']
@@ -179,7 +179,7 @@ class plugin:
         """Updates the element only if it exists in the original DICOM data."""
 
         if len(name):
-            self.updateElement(data, 'PatientsName', name)
+            self.updateElement(data, 'PatientName', name)
         if len(patientid):
             self.updateElement(data, 'PatientID', patientid)
         if privatetags:
@@ -192,17 +192,17 @@ class plugin:
         self.updateElement(data, 'StudyTime', '000000')
         self.updateElement(data, 'AccessionNumber', '')
         self.updateElement(data, 'Manufacturer', 'manufacturer')
-        self.updateElement(data, 'ReferringPhysiciansName', 'physician')
+        self.updateElement(data, 'ReferringPhysicianName', 'physician')
         self.updateElement(data, 'StationName', 'station')
         self.updateElement(data, 'NameofPhysiciansReadingStudy', 'physician')
         self.updateElement(data, 'OperatorsName', 'operator')
         self.updateElement(data, 'PhysiciansofRecord', 'physician')
-        self.updateElement(data, 'ManufacturersModelName', 'model')
-        self.updateElement(data, 'PatientsBirthDate', '')
-        self.updateElement(data, 'PatientsSex', 'O')
-        self.updateElement(data, 'PatientsAge', '000Y')
-        self.updateElement(data, 'PatientsWeight', 0)
-        self.updateElement(data, 'PatientsSize', 0)
+        self.updateElement(data, 'ManufacturerModelName', 'model')
+        self.updateElement(data, 'PatientBirthDate', '')
+        self.updateElement(data, 'PatientSex', 'O')
+        self.updateElement(data, 'PatientAge', '000Y')
+        self.updateElement(data, 'PatientWeight', 0)
+        self.updateElement(data, 'PatientSize', 0)
         self.updateElement(data, 'PatientsAddress', 'address')
         self.updateElement(data, 'AdditionalPatientHistory', '')
         self.updateElement(data, 'EthnicGroup', 'ethnicity')
