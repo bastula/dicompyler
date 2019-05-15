@@ -162,6 +162,8 @@ class plugin:
                 self.updateElement(image, 'InstitutionName', 'institution')
                 self.updateElement(image, 'InstitutionAddress', 'address')
                 self.updateElement(image, 'InstitutionalDepartmentName', 'department')
+                self.updateElement(image, 'RequestingPhysician', 'physician')
+                self.updateElement(image, 'PerformingPhysicianName', 'physician')
                 modality = image.SOPClassUID.name.partition(' Image Storage')[0]
                 image.save_as(
                     os.path.join(path, modality.lower() + '.' + str(n) + '.dcm'))
