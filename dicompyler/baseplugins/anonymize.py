@@ -12,7 +12,7 @@ import wx
 from wx.xrc import XmlResource, XRCCTRL, XRCID
 from pubsub import pub
 import os, threading
-from dicompyler import guiutil, util
+from dicompyler import guiutil, util, dicomgui
 
 def pluginProperties():
     """Properties of the plugin."""
@@ -259,7 +259,7 @@ class AnonymizeDialog(wx.Dialog):
         # Changed the topic in the function subscribe() to 'preferences.requested.value'
         # Then export anonymized file will work
         pub.subscribe(self.OnImportPrefsChange, 'preferences.requested.value')
-        pub.sendMessage('preferences.requested.value', msg='general.dicom.import_location')
+        pub.sendMessage('preferences.requested.value', msg = dicomgui.dirPath)
 
         # Pre-select the text on the text controls due to a Mac OS X bug
         self.txtFirstName.SetSelection(-1, -1)

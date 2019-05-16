@@ -20,6 +20,8 @@ import numpy as np
 from dicompylercore import dicomparser
 from dicompyler import guiutil, util
 
+dirPath = ''
+
 def ImportDicom(parent):
     """Prepare to show the dialog that will Import DICOM and DICOM RT files."""
 
@@ -132,9 +134,11 @@ class DicomImporterDialog(wx.Dialog):
 
     def OnImportPrefsChange(self, topic, msg):
         """When the import preferences change, update the values."""
+        global dirPath
         topic = topic.split('.')
         if (topic[1] == 'import_location'):
             self.path = str(msg)
+            dirPath = self.path
             self.txtDicomImport.SetValue(self.path)
         elif (topic[1] == 'import_location_setting'):
             self.import_location_setting = msg
@@ -796,6 +800,7 @@ class DicomImporterDialog(wx.Dialog):
     def OnOK(self, evt):
         """Return the patient data if the patient is selected or the button
             is pressed."""
+        global dirPath
         item = self.tcPatients.GetSelection()
         if self.tcPatients.GetItemData(item):
             # Since we have decided to use this location to import from,
@@ -804,6 +809,7 @@ class DicomImporterDialog(wx.Dialog):
             if (self.import_location_setting == "Remember Last Used"):
                 pub.sendMessage('preferences.updated.value',
                     msg={'general.dicom.import_location':self.path})
+                dirPath = self.path
 
             # Since we have updated the search subfolders setting,
             # update the setting in preferences
