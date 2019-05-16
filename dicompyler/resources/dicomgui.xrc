@@ -176,7 +176,7 @@
               </object>
               <object class="sizeritem">
                 <object class="wxSpinCtrl" name="txtRxDose">
-                  <size>80,22</size>
+                  <size>80,25</size>
                   <value>1</value>
                   <min>1</min>
                   <max>99999</max>
