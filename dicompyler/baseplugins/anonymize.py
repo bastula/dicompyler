@@ -215,7 +215,7 @@ class plugin:
         self.updateElement(data, 'ReviewTime', '000000')
         self.updateElement(data, 'ReviewerName', 'anonymous')
         self.updateElement(data, 'IssuerOfPatientID', 'issuer')
-        self.updateElement(data, 'RequestingService'. 'requestingService')
+        self.updateElement(data, 'RequestingService', 'requestingService')
 
 class AnonymizeDialog(wx.Dialog):
     """Dialog th                                # Changed foundstructure to fixed 'True'
