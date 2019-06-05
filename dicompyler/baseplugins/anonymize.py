@@ -206,6 +206,14 @@ class plugin:
         self.updateElement(data, 'PatientWeight', 0)
         self.updateElement(data, 'PatientSize', 0)
         self.updateElement(data, 'PatientsAddress', 'address')
+        self.updateElement(data, 'PatientTelephoneNumbers', '')
+        self.updateElement(data, 'PatientReligiousPreference', '')
+        self.updateElement(data, 'PatientMotherBirthName', '')
+        self.updateElement(data, 'PatientBirthName', '')
+        self.updateElement(data, 'PerformedProcedureStepID', '')
+        self.updateElement(data, 'PerformedProcedureStepDescription', '')
+        self.updateElement(data, 'RequestedProcedureDescription', '')
+        self.updateElement(data, 'PerformedProcedureStepID', '')
         self.updateElement(data, 'AdditionalPatientHistory', '')
         self.updateElement(data, 'EthnicGroup', 'ethnicity')
         self.updateElement(data, 'StudyID', '1')
@@ -215,7 +223,8 @@ class plugin:
         self.updateElement(data, 'ReviewTime', '000000')
         self.updateElement(data, 'ReviewerName', 'anonymous')
         self.updateElement(data, 'RequestingService', 'requestingService')
-        self.updateElement(data, 'IssuerOfPatientID', 'issuer')
+        self.updateElement(data, 'AcquisitionDate', '')
+        self.updateElement(data, 'AcquisitionTime', '')
 
 class AnonymizeDialog(wx.Dialog):
     """Dialog th                                # Changed foundstructure to fixed 'True'
