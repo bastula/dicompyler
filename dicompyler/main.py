@@ -27,6 +27,7 @@ from dicompyler import guiutil, util
 from dicompyler import dicomgui, dvhdata
 from dicompylercore.dicomparser import DicomParser as dp
 from dicompyler import plugin, preferences
+import csv
 
 class MainFrame(wx.Frame):
     def __init__(self, parent, id, title, res):
@@ -462,7 +463,20 @@ class MainFrame(wx.Frame):
         if ('dvhs' in patient) and ('structures' in patient):
             # If the DVHs are not present, calculate them
             i = 0
+            # Grabbing patient ID
+            dvh_patientID = ptdata['rtdose'].PatientID
+            csv_filename = str(dvh_patientID) + '.csv'
+
+            dvh_csv_list = [] 
+            # maximum dose of all ROIs
+            max_roi_dose = 0
+            # csv Header
+            csv_header = []
+
             for key, structure in patient['structures'].items():
+                # Initialize a list for dvh exporting to csv
+                dvh_roi_list = []
+                
                 # Only calculate DVHs if they are not present for the structure
                 # or recalc all DVHs if the preference is set
                 if ((not (key in patient['dvhs'].keys())) or
@@ -478,11 +492,44 @@ class MainFrame(wx.Frame):
                                  '...')
                     # Limit DVH bins to 500 Gy due to high doses in brachy
                     dvh = dvhcalc.get_dvh(ptdata['rtss'], patient['dose'].ds, key, 50000)
+                    # Retrieve roi name
+                    dvh_roiName = dvh.name
+                    # Retrieve roi dvh volume
+                    dvh_roiVolume = dvh.volume
+                    # Append info
+                    dvh_roi_list.append(dvh_patientID)
+                    dvh_roi_list.append(dvh_roiName)
+                    dvh_roi_list.append(dvh_roiVolume)
+                    # 
+                    dvh_roiDose = dvh.relative_volume.counts
+
+                    for i in range(0, len(dvh_roiDose)+1, 100):
+                        dvh_roi_list.append(dvh_roiDose[i])
+                        if i > max_roi_dose:
+                            max_roi_dose = i
+
+                    dvh_csv_list.append(dvh_roi_list)
+
                     if len(dvh.counts):
                         patient['dvhs'][key] = dvh
                     i += 1
+            csv_header.append('Hash ID')
+            csv_header.append('ROI')
+            csv_header.append('Volume')
+
+            print(max_roi_dose)
+
+            for i in range(0, max_roi_dose+1, 100):
+                csv_header.append(str(i)+'cGy')
+
+            with open(csv_filename, 'w') as csv_file:
+                writer = csv.writer(csv_file)
+                writer.writerow(csv_header)
+                writer.writerows(dvh_csv_list)
+                
             for key, dvh in patient['dvhs'].items():
                 dvh.rx_dose = patient['plan']['rxdose'] / 100
+
         wx.CallAfter(progressFunc, 100, 100, 'Done')
         wx.CallAfter(updateFunc, patient)
 
