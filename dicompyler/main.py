@@ -27,7 +27,7 @@ from dicompyler import guiutil, util
 from dicompyler import dicomgui, dvhdata
 from dicompylercore.dicomparser import DicomParser as dp
 from dicompyler import plugin, preferences
-import csv
+import pandas as pd
 
 class MainFrame(wx.Frame):
     def __init__(self, parent, id, title, res):
@@ -503,7 +503,7 @@ class MainFrame(wx.Frame):
                     # 
                     dvh_roiDose = dvh.relative_volume.counts
 
-                    for i in range(0, len(dvh_roiDose)+1, 100):
+                    for i in range(0, len(dvh_roiDose)+1, 10):
                         dvh_roi_list.append(dvh_roiDose[i])
                         if i > max_roi_dose:
                             max_roi_dose = i
@@ -513,19 +513,20 @@ class MainFrame(wx.Frame):
                     if len(dvh.counts):
                         patient['dvhs'][key] = dvh
                     i += 1
+
             csv_header.append('Hash ID')
             csv_header.append('ROI')
-            csv_header.append('Volume')
+            csv_header.append('Volume (mL)')
 
             print(max_roi_dose)
 
-            for i in range(0, max_roi_dose+1, 100):
+            for i in range(0, max_roi_dose+1, 10):
                 csv_header.append(str(i)+'cGy')
+            
+            pddf_csv = pd.DataFrame(dvh_csv_list, columns=csv_header).round(2)
+            pddf_csv.fillna(0.0, inplace=True)
 
-            with open(csv_filename, 'w') as csv_file:
-                writer = csv.writer(csv_file)
-                writer.writerow(csv_header)
-                writer.writerows(dvh_csv_list)
+            pddf_csv.to_csv(csv_filename)
                 
             for key, dvh in patient['dvhs'].items():
                 dvh.rx_dose = patient['plan']['rxdose'] / 100
