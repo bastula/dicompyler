@@ -10,7 +10,7 @@
 from setuptools import setup, find_packages
 
 requires = [
-    'matplotlib>=1.3.0',
+    'matplotlib>=1.3.0,<2.2',
     'numpy>=1.2.1',
     'pillow>=1.0',
     'dicompyler-core>=0.5.2',
