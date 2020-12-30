@@ -8,4 +8,3 @@ dependencies:
   - pydicom
   - matplotlib=2.1
   - pillow
-prefix: /home/szmurlor/miniconda3/envs/dicompyler
