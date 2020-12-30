@@ -8,3 +8,6 @@ dependencies:
   - pydicom
   - matplotlib=2.1
   - pillow
+  - pip
+  - pip:
+    - dicompyler-core     
