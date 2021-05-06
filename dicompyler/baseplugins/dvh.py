@@ -12,7 +12,7 @@
 
 import wx
 from wx.xrc import XmlResource, XRCCTRL, XRCID
-from wx.lib.pubsub import pub
+from pubsub import pub
 from dicompyler import guiutil, util
 from dicompyler import guidvh
 import numpy as np

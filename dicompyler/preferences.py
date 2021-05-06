@@ -10,7 +10,7 @@
 import os
 import wx
 from wx.xrc import *
-from wx.lib.pubsub import pub
+from pubsub import pub
 from dicompyler import guiutil, util
 
 try:
@@ -377,7 +377,7 @@ def main():
 
     import tempfile, os
     import wx
-    from wx.lib.pubsub import Publisher as pub
+    from pubsub import Publisher as pub
 
     app = wx.App(False)
 
