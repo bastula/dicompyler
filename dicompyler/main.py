@@ -20,7 +20,7 @@ from wx.xrc import *
 import wx.adv
 import wx.lib.dialogs, webbrowser
 import pydicom
-from wx.lib.pubsub import pub
+from pubsub import pub
 from dicompylercore import dvhcalc
 from dicompyler import __version__
 from dicompyler import guiutil, util
