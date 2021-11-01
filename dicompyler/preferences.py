@@ -377,7 +377,7 @@ def main():
 
     import tempfile, os
     import wx
-    from pubsub import Publisher as pub
+    from pubsub import pub
 
     app = wx.App(False)
 
