@@ -12,7 +12,7 @@
                   <style>wxTE_READONLY</style>
                 </object>
                 <option>1</option>
-                <flag>wxALIGN_LEFT|wxALIGN_CENTRE_VERTICAL</flag>
+                <flag>wxALIGN_CENTRE_VERTICAL</flag>
               </object>
               <object class="spacer">
                 <size>5,0</size>
