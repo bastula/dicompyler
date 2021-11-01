@@ -25,7 +25,7 @@
           <orient>wxVERTICAL</orient>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>1</border>
       </object>
       <object class="spacer">
@@ -39,16 +39,16 @@
               <object class="sizeritem">
                 <object class="unknown" name="tlcTreeView"/>
                 <option>1</option>
-                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE|wxADJUST_MINSIZE</flag>
+                <flag>wxALL|wxEXPAND|wxADJUST_MINSIZE</flag>
               </object>
             </object>
             <option>3</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+            <flag>wxALL|wxEXPAND</flag>
           </object>
           <orient>wxVERTICAL</orient>
         </object>
         <option>5</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+        <flag>wxALL|wxEXPAND</flag>
       </object>
       <orient>wxVERTICAL</orient>
     </object>

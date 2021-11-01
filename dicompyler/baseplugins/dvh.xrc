@@ -10,12 +10,12 @@
           <object class="sizeritem">
             <object class="unknown" name="panelDVH"/>
             <option>1</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE|wxADJUST_MINSIZE</flag>
+            <flag>wxALL|wxEXPAND|wxADJUST_MINSIZE</flag>
             <border>4</border>
           </object>
         </object>
         <option>5</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+        <flag>wxALL|wxEXPAND</flag>
       </object>
       <object class="sizeritem">
         <object class="wxBoxSizer">
@@ -74,7 +74,7 @@
                   <min>0</min>
                 </object>
                 <option>4</option>
-                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                <flag>wxALL|wxEXPAND</flag>
               </object>
               <object class="spacer">
                 <size>3,0</size>
@@ -126,12 +126,12 @@
               </object>
             </object>
             <option>2</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+            <flag>wxALL|wxEXPAND</flag>
           </object>
           <orient>wxHORIZONTAL</orient>
         </object>
         <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+        <flag>wxALL|wxEXPAND</flag>
       </object>
       <orient>wxVERTICAL</orient>
     </object>
