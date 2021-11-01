@@ -27,7 +27,7 @@
                 <object class="wxStaticText" name="lblType">
                   <label>Type:</label>
                 </object>
-                <flag>wxALIGN_RIGHT|wxALIGN_CENTRE_VERTICAL</flag>
+                <flag>wxALIGN_CENTRE_VERTICAL</flag>
               </object>
               <object class="spacer">
                 <size>3,0</size>
@@ -42,7 +42,7 @@
                   </content>
                   <selection>0</selection>
                 </object>
-                <flag>wxALIGN_LEFT|wxALIGN_CENTRE_VERTICAL</flag>
+                <flag>wxALIGN_CENTRE_VERTICAL</flag>
               </object>
               <object class="spacer">
                 <size>5,0</size>
@@ -52,7 +52,7 @@
                 <object class="wxStaticText" name="lblConstraintType">
                   <label>   Dose:</label>
                 </object>
-                <flag>wxALIGN_RIGHT|wxALIGN_CENTRE_VERTICAL</flag>
+                <flag>wxALIGN_CENTRE_VERTICAL</flag>
               </object>
               <object class="spacer">
                 <size>3,0</size>
@@ -83,7 +83,7 @@
                 <object class="wxStaticText" name="lblConstraintTypeUnits">
                   <label>%  </label>
                 </object>
-                <flag>wxALIGN_LEFT|wxALIGN_CENTRE_VERTICAL</flag>
+                <flag>wxALIGN_CENTRE_VERTICAL</flag>
               </object>
               <object class="spacer">
                 <size>5,0</size>
