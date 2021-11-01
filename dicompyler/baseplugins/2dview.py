@@ -674,7 +674,7 @@ class plugin2DView(wx.Panel):
             # Custom cursors with > 2 colors only works on Windows currently
             if guiutil.IsMSWindows():
                 image = wx.Image(util.GetResourcePath('contrast_high.png'))
-                self.SetCursor(wx.CursorFromImage(image))
+                self.SetCursor(wx.Cursor(image))
         # Update the positon and values of the mouse cursor
         self.mousepos = evt.GetPosition()
         self.OnUpdatePositionValues(evt)
