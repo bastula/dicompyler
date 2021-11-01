@@ -22,7 +22,7 @@
                       <label>-</label>
                     </object>
                     <option>1</option>
-                    <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                    <flag>wxALL|wxEXPAND</flag>
                   </object>
                   <object class="sizeritem">
                     <object class="wxStaticText"/>
@@ -38,7 +38,7 @@
                       <label>-</label>
                     </object>
                     <option>1</option>
-                    <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                    <flag>wxALL|wxEXPAND</flag>
                   </object>
                   <object class="sizeritem">
                     <object class="wxStaticText">
@@ -53,10 +53,10 @@
                   <growablecols>1</growablecols>
                 </object>
                 <option>1</option>
-                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                <flag>wxALL|wxEXPAND</flag>
               </object>
             </object>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+            <flag>wxALL|wxEXPAND</flag>
           </object>
           <object class="sizeritem">
             <object class="wxBoxSizer">
@@ -64,11 +64,11 @@
               <object class="sizeritem">
                 <object class="wxNotebook" name="notebookTools"/>
                 <option>1</option>
-                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                <flag>wxALL|wxEXPAND</flag>
               </object>
             </object>
             <option>3</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+            <flag>wxALL|wxEXPAND</flag>
           </object>
           <object class="sizeritem">
             <object class="wxStaticBoxSizer">
@@ -80,7 +80,7 @@
                   <selection>1</selection>
                   <enabled>0</enabled>
                 </object>
-                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                <flag>wxALL|wxEXPAND</flag>
                 <ratio>0</ratio>
               </object>
               <object class="spacer">
@@ -159,17 +159,17 @@
                   <growablecols>1</growablecols>
                 </object>
                 <option>1</option>
-                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                <flag>wxALL|wxEXPAND</flag>
               </object>
               <label>Structure Information</label>
               <orient>wxVERTICAL</orient>
             </object>
-            <flag>wxLEFT|wxRIGHT|wxEXPAND|wxALIGN_CENTRE</flag>
+            <flag>wxLEFT|wxRIGHT|wxEXPAND</flag>
           </object>
           <orient>wxVERTICAL</orient>
         </object>
         <option>3</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>1</border>
       </object>
       <object class="sizeritem">
@@ -188,7 +188,7 @@
                     <object class="wxStaticText" name="lblPatientName">
                     </object>
                     <option>1</option>
-                    <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                    <flag>wxALL|wxEXPAND</flag>
                   </object>
                   <object class="sizeritem">
                     <object class="wxStaticText">
@@ -199,7 +199,7 @@
                   <object class="sizeritem">
                     <object class="wxStaticText" name="lblPatientID"/>
                     <option>1</option>
-                    <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                    <flag>wxALL|wxEXPAND</flag>
                   </object>
                   <object class="sizeritem">
                     <object class="wxStaticText">
@@ -209,7 +209,7 @@
                   <object class="sizeritem">
                     <object class="wxStaticText" name="lblPatientGender"/>
                     <option>1</option>
-                    <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                    <flag>wxALL|wxEXPAND</flag>
                   </object>
                   <object class="sizeritem">
                     <object class="wxStaticText">
@@ -219,7 +219,7 @@
                   <object class="sizeritem">
                     <object class="wxStaticText" name="lblPatientDOB"/>
                     <option>1</option>
-                    <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                    <flag>wxALL|wxEXPAND</flag>
                   </object>
                   <cols>8</cols>
                   <rows>2</rows>
@@ -234,28 +234,28 @@
               <orient>wxVERTICAL</orient>
             </object>
             <option>0</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+            <flag>wxALL|wxEXPAND</flag>
           </object>
           <object class="sizeritem">
             <object class="wxBoxSizer">
               <object class="spacer">
                 <size>0,2</size>
-                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                <flag>wxALL|wxEXPAND</flag>
               </object>
               <object class="sizeritem">
                 <object class="wxNotebook" name="notebook"/>
                 <option>1</option>
-                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                <flag>wxALL|wxEXPAND</flag>
               </object>
               <orient>wxVERTICAL</orient>
             </object>
             <option>1</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+            <flag>wxALL|wxEXPAND</flag>
           </object>
           <orient>wxVERTICAL</orient>
         </object>
         <option>11</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>3</border>
       </object>
     </object>
@@ -267,13 +267,13 @@
         <object class="wxBoxSizer">
           <object class="spacer">
             <option>1</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+            <flag>wxALL|wxEXPAND</flag>
           </object>
           <object class="sizeritem">
             <object class="wxBoxSizer">
               <object class="spacer">
                 <option>1</option>
-                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                <flag>wxALL|wxEXPAND</flag>
               </object>
               <object class="sizeritem">
                 <object class="wxBoxSizer">
@@ -288,35 +288,35 @@
                     <object class="wxBoxSizer">
                       <object class="spacer">
                         <option>1</option>
-                        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                        <flag>wxALL|wxEXPAND</flag>
                       </object>
                       <object class="sizeritem">
                         <object class="wxStaticText" name="lblVersion">
                           <label>Version xxxx</label>
                           <style>wxALIGN_RIGHT</style>
                         </object>
-                        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                        <flag>wxALL|wxEXPAND</flag>
                       </object>
                       <orient>wxHORIZONTAL</orient>
                     </object>
-                    <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                    <flag>wxALL|wxEXPAND</flag>
                   </object>
                 </object>
               </object>
               <object class="spacer">
                 <option>1</option>
-                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                <flag>wxALL|wxEXPAND</flag>
               </object>
               <orient>wxHORIZONTAL</orient>
             </object>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+            <flag>wxALL|wxEXPAND</flag>
           </object>
           <orient>wxVERTICAL</orient>
           <object class="sizeritem">
             <object class="wxBoxSizer">
               <object class="spacer">
                 <option>1</option>
-                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                <flag>wxALL|wxEXPAND</flag>
               </object>
               <object class="sizeritem">
                 <object class="wxBoxSizer">
@@ -324,22 +324,22 @@
                     <object class="wxBoxSizer">
                       <object class="spacer">
                         <option>1</option>
-                        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                        <flag>wxALL|wxEXPAND</flag>
                       </object>
                       <object class="sizeritem">
                         <object class="wxStaticText" name="lblGetStarted">
                           <label>\n\nWelcome to dicompyler. To get started, open a patient file.</label>
                           <style>wxALIGN_CENTRE</style>
                         </object>
-                        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                        <flag>wxALL|wxEXPAND</flag>
                       </object>
                       <object class="spacer">
                         <option>1</option>
-                        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                        <flag>wxALL|wxEXPAND</flag>
                       </object>
                       <orient>wxHORIZONTAL</orient>
                     </object>
-                    <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                    <flag>wxALL|wxEXPAND</flag>
                   </object>
                   <object class="sizeritem">
                     <object class="wxBoxSizer">
@@ -357,11 +357,11 @@
                         <object class="wxStaticText" name="lblDisclaimerHeader">
                           <label>\n\n\nDisclaimer:</label>
                         </object>
-                        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                        <flag>wxALL|wxEXPAND</flag>
                       </object>
                       <orient>wxHORIZONTAL</orient>
                     </object>
-                    <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                    <flag>wxALL|wxEXPAND</flag>
                   </object>
                   <object class="sizeritem">
                     <object class="wxStaticText" name="lblDisclaimer">
@@ -370,23 +370,23 @@
                   </object>
                   <orient>wxVERTICAL</orient>
                 </object>
-                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                <flag>wxALL|wxEXPAND</flag>
               </object>
               <object class="spacer">
                 <option>1</option>
-                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                <flag>wxALL|wxEXPAND</flag>
               </object>
               <orient>wxHORIZONTAL</orient>
             </object>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+            <flag>wxALL|wxEXPAND</flag>
           </object>
           <object class="spacer">
             <option>1</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+            <flag>wxALL|wxEXPAND</flag>
           </object>
         </object>
         <option>1</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+        <flag>wxALL|wxEXPAND</flag>
       </object>
       <object class="sizeritem">
         <object class="wxBoxSizer">

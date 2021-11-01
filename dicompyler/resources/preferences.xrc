@@ -7,7 +7,7 @@
           <size>550,350</size>
         </object>
         <option>1</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>7</border>
       </object>
       <orient>wxVERTICAL</orient>
@@ -19,7 +19,7 @@
             </object>
           </object>
         </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>7</border>
       </object>
     </object>

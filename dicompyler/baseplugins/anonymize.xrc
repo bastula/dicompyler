@@ -23,12 +23,12 @@
                 </object>
               </object>
             </object>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+            <flag>wxALL|wxEXPAND</flag>
           </object>
           <label>Folder for Anonymized DICOM Files</label>
           <orient>wxVERTICAL</orient>
         </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>3</border>
       </object>
       <object class="sizeritem">
@@ -63,7 +63,7 @@
               <object class="sizeritem">
                 <object class="wxTextCtrl" name="txtFirstName"/>
                 <option>2</option>
-                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                <flag>wxALL|wxEXPAND</flag>
               </object>
               <object class="spacer">
                 <size>7,0</size>
@@ -83,12 +83,12 @@
                   <value>anonymous</value>
                 </object>
                 <option>2</option>
-                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                <flag>wxALL|wxEXPAND</flag>
               </object>
               <orient>wxHORIZONTAL</orient>
             </object>
             <option>1</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+            <flag>wxALL|wxEXPAND</flag>
           </object>
           <object class="spacer">
             <size>0,5</size>
@@ -124,7 +124,7 @@
                 <flag>wxALIGN_CENTRE</flag>
               </object>
             </object>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+            <flag>wxALL|wxEXPAND</flag>
           </object>
           <object class="spacer">
             <size>0,5</size>
@@ -169,7 +169,7 @@
           <label>Options</label>
           <orient>wxVERTICAL</orient>
         </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>3</border>
       </object>
       <object class="spacer">
@@ -191,7 +191,7 @@
             </object>
           </object>
         </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>3</border>
       </object>
       <object class="spacer">

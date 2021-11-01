@@ -129,11 +129,11 @@ class MainFrame(wx.Frame):
         mainGrid = wx.BoxSizer(wx.VERTICAL)
         hGrid = wx.BoxSizer(wx.HORIZONTAL)
         if guiutil.IsMac():
-            hGrid.Add(self.panelGeneral, 1, flag=wx.EXPAND|wx.ALL|wx.ALIGN_CENTRE, border=4)
+            hGrid.Add(self.panelGeneral, 1, flag=wx.EXPAND|wx.ALL, border=4)
         else:
-            hGrid.Add(self.panelGeneral, 1, flag=wx.EXPAND|wx.ALL|wx.ALIGN_CENTRE)
+            hGrid.Add(self.panelGeneral, 1, flag=wx.EXPAND|wx.ALL)
 
-        mainGrid.Add(hGrid, 1, flag=wx.EXPAND|wx.ALL|wx.ALIGN_CENTRE)
+        mainGrid.Add(hGrid, 1, flag=wx.EXPAND|wx.ALL)
 
         # Load the menu for the frame
         menuMain = self.res.LoadMenuBar('menuMain')
