@@ -83,3 +83,11 @@ Citing dicompyler:
 * If you need to cite dicompyler as a reference in your publication, please use the following citation:
   * **A Panchal and R Keyes**. "SU-GG-T-260: dicompyler: An Open Source Radiation Therapy Research Platform with a Plugin Architecture" Med. Phys. 37, 3245, 2010
   * The reference in Medical Physics can be accessed via [http://dx.doi.org/10.1118/1.3468652](http://dx.doi.org/10.1118/1.3468652)
+
+## Collaborators
+<!-- readme: collaborators -start -->
+<!-- readme: collaborators -end -->
+
+## Contributors
+<!-- readme: contributors -start -->
+<!-- readme: contributors -end -->
