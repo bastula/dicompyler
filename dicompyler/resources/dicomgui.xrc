@@ -12,7 +12,7 @@
                   <style>wxTE_READONLY</style>
                 </object>
                 <option>1</option>
-                <flag>wxALIGN_LEFT|wxALIGN_CENTRE_VERTICAL</flag>
+                <flag>wxALIGN_CENTRE_VERTICAL</flag>
               </object>
               <object class="spacer">
                 <size>5,0</size>
@@ -23,7 +23,7 @@
                 </object>
               </object>
             </object>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+            <flag>wxALL|wxEXPAND</flag>
           </object>
           <label>DICOM Import Location</label>
           <orient>wxVERTICAL</orient>
@@ -41,7 +41,7 @@
             </object>
           </object>
         </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>3</border>
       </object>
       <object class="sizeritem">
@@ -50,18 +50,18 @@
             <object class="wxBoxSizer">
               <object class="spacer">
                 <size>2,0</size>
-                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                <flag>wxALL|wxEXPAND</flag>
               </object>
               <object class="sizeritem">
                 <object class="wxStaticBitmap" name="bmpDirections">
                   <bitmap>accept.png</bitmap>
                 </object>
-                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                <flag>wxALL|wxEXPAND</flag>
                 <minsize>16,16</minsize>
               </object>
               <object class="spacer">
                 <size>2,0</size>
-                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                <flag>wxALL|wxEXPAND</flag>
               </object>
               <object class="sizeritem">
                 <object class="wxBoxSizer">
@@ -82,11 +82,11 @@
                   <orient>wxVERTICAL</orient>
                 </object>
                 <option>1</option>
-                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                <flag>wxALL|wxEXPAND</flag>
               </object>
               <orient>wxHORIZONTAL</orient>
             </object>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+            <flag>wxALL|wxEXPAND</flag>
           </object>
           <object class="spacer">
             <size>0,5</size>
@@ -97,7 +97,7 @@
               <style>wxSUNKEN_BORDER|wxTR_HAS_BUTTONS|wxTR_LINES_AT_ROOT|wxTR_SINGLE</style>
             </object>
             <option>1</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+            <flag>wxALL|wxEXPAND</flag>
           </object>
           <object class="spacer">
             <size>0,5</size>
@@ -148,7 +148,7 @@
               </object>
               <orient>wxHORIZONTAL</orient>
             </object>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+            <flag>wxALL|wxEXPAND</flag>
           </object>
           <object class="spacer">
             <size>0,5</size>
@@ -200,14 +200,14 @@
               </object>
               <orient>wxHORIZONTAL</orient>
             </object>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+            <flag>wxALL|wxEXPAND</flag>
           </object>
           <object class="spacer">
             <size>0,9</size>
           </object>
           <orient>wxVERTICAL</orient>
         </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>3</border>
       </object>
       <object class="spacer">
@@ -229,7 +229,7 @@
             </object>
           </object>
         </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>3</border>
       </object>
       <object class="spacer">

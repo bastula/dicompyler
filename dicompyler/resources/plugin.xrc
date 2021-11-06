@@ -25,11 +25,11 @@
                         <style>wxNO_BORDER|wxTR_NO_BUTTONS|wxTR_NO_LINES|wxTR_FULL_ROW_HIGHLIGHT|wxTR_HIDE_ROOT</style>
                       </object>
                       <option>1</option>
-                      <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                      <flag>wxALL|wxEXPAND</flag>
                     </object>
                   </object>
                 </object>
-                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                <flag>wxALL|wxEXPAND</flag>
               </object>
               <object class="spacer">
                 <size>10,0</size>
@@ -67,7 +67,7 @@
                         <object class="spacer">
                           <size>5,0</size>
                           <option>1</option>
-                          <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                          <flag>wxALL|wxEXPAND</flag>
                         </object>
                         <object class="sizeritem">
                           <object class="wxStaticText" name="lblVersion">
@@ -84,7 +84,7 @@
                         </object>
                         <orient>wxHORIZONTAL</orient>
                       </object>
-                      <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                      <flag>wxALL|wxEXPAND</flag>
                     </object>
                     <object class="spacer">
                       <size>0,7</size>
@@ -110,7 +110,7 @@
                         <object class="spacer">
                           <size>5,0</size>
                           <option>1</option>
-                          <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                          <flag>wxALL|wxEXPAND</flag>
                         </object>
                         <object class="sizeritem">
                           <object class="wxCheckBox" name="checkEnabled">
@@ -119,7 +119,7 @@
                         </object>
                         <orient>wxHORIZONTAL</orient>
                       </object>
-                      <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                      <flag>wxALL|wxEXPAND</flag>
                     </object>
                     <object class="spacer">
                       <size>0,5</size>
@@ -137,29 +137,29 @@
                                 <label>Description</label>
                               </object>
                               <option>1</option>
-                              <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                              <flag>wxALL|wxEXPAND</flag>
                             </object>
                             <orient>wxHORIZONTAL</orient>
                           </object>
                           <option>1</option>
-                          <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                          <flag>wxALL|wxEXPAND</flag>
                         </object>
                         <orient>wxVERTICAL</orient>
                       </object>
                       <option>1</option>
-                      <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                      <flag>wxALL|wxEXPAND</flag>
                     </object>
                   </object>
                 </object>
                 <option>1</option>
-                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+                <flag>wxALL|wxEXPAND</flag>
               </object>
               <object class="spacer">
                 <size>5,5</size>
               </object>
             </object>
             <option>1</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+            <flag>wxALL|wxEXPAND</flag>
           </object>
           <object class="spacer">
             <size>0,5</size>
@@ -167,7 +167,7 @@
           <orient>wxVERTICAL</orient>
         </object>
         <option>1</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>3</border>
       </object>
       <object class="sizeritem">
@@ -175,7 +175,7 @@
           <object class="spacer">
             <size>0,5</size>
             <option>1</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+            <flag>wxALL|wxEXPAND</flag>
           </object>
           <object class="sizeritem">
             <object class="wxStaticText" name="lblMessage">
@@ -187,28 +187,28 @@
           <object class="spacer">
             <size>0,5</size>
             <option>1</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+            <flag>wxALL|wxEXPAND</flag>
           </object>
           <object class="sizeritem">
             <object class="wxButton" name="wxID_OK">
               <label>&amp;Close</label>
             </object>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>3</border>
           </object>
           <object class="spacer">
             <size>0,5</size>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+            <flag>wxALL|wxEXPAND</flag>
             <border>3</border>
           </object>
           <orient>wxHORIZONTAL</orient>
         </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+        <flag>wxALL|wxEXPAND</flag>
       </object>
       <orient>wxVERTICAL</orient>
       <object class="spacer">
         <size>10,10</size>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+        <flag>wxALL|wxEXPAND</flag>
       </object>
     </object>
     <size>600,400</size>

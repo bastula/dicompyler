@@ -22,7 +22,7 @@
               </object>
               <orient>wxHORIZONTAL</orient>
             </object>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+            <flag>wxALL|wxEXPAND</flag>
           </object>
           <object class="spacer">
             <size>5,0</size>
@@ -34,7 +34,7 @@
               <value>0</value>
               <style>wxGA_HORIZONTAL|wxGA_SMOOTH</style>
             </object>
-            <flag>wxLEFT|wxRIGHT|wxEXPAND|wxALIGN_CENTRE</flag>
+            <flag>wxLEFT|wxRIGHT|wxEXPAND</flag>
           </object>
           <object class="sizeritem">
             <object class="wxBoxSizer">
@@ -64,7 +64,7 @@
           <growablerows>1</growablerows>
         </object>
         <option>1</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE</flag>
+        <flag>wxALL|wxEXPAND</flag>
         <border>10</border>
       </object>
     </object>

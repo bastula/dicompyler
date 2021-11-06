@@ -20,7 +20,7 @@ from wx.xrc import *
 import wx.adv
 import wx.lib.dialogs, webbrowser
 import pydicom
-from wx.lib.pubsub import pub
+from pubsub import pub
 from dicompylercore import dvhcalc
 from dicompyler import __version__
 from dicompyler import guiutil, util
@@ -129,11 +129,11 @@ class MainFrame(wx.Frame):
         mainGrid = wx.BoxSizer(wx.VERTICAL)
         hGrid = wx.BoxSizer(wx.HORIZONTAL)
         if guiutil.IsMac():
-            hGrid.Add(self.panelGeneral, 1, flag=wx.EXPAND|wx.ALL|wx.ALIGN_CENTRE, border=4)
+            hGrid.Add(self.panelGeneral, 1, flag=wx.EXPAND|wx.ALL, border=4)
         else:
-            hGrid.Add(self.panelGeneral, 1, flag=wx.EXPAND|wx.ALL|wx.ALIGN_CENTRE)
+            hGrid.Add(self.panelGeneral, 1, flag=wx.EXPAND|wx.ALL)
 
-        mainGrid.Add(hGrid, 1, flag=wx.EXPAND|wx.ALL|wx.ALIGN_CENTRE)
+        mainGrid.Add(hGrid, 1, flag=wx.EXPAND|wx.ALL)
 
         # Load the menu for the frame
         menuMain = self.res.LoadMenuBar('menuMain')

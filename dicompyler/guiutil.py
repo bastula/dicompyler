@@ -10,7 +10,7 @@
 from dicompyler import util
 import wx
 from wx.xrc import XmlResource, XRCCTRL, XRCID
-from wx.lib.pubsub import pub
+from pubsub import pub
 
 def IsMSWindows():
     """Are we running on Windows?
@@ -200,7 +200,7 @@ class ColorCheckBox(wx.Panel):
         grid.Add((3,0), 0)
         grid.Add(self.colorbox, 0, flag=wx.ALIGN_CENTRE)
         grid.Add((5,0), 0)
-        grid.Add(self.checkbox, 1, flag=wx.EXPAND|wx.ALL|wx.ALIGN_CENTRE)
+        grid.Add(self.checkbox, 1, flag=wx.EXPAND|wx.ALL)
 
         # Decrease the font size on Mac
         if IsMac():
