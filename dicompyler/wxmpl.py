@@ -1136,14 +1136,6 @@ class PlotPanel(FigureCanvasWxAgg):
         """
         pass
 
-    # def OnDestroy(self, evt):
-    #     """
-    #     Handles the wxPython window destruction event.
-    #     """
-    #     if self.GetId() == evt.GetEventObject().GetId():
-    #         # unregister the activation event handler for this PlotPanel
-    #         topwin = toplevel_parent_of_window(self)
-
     def _onPaint(self, evt):
         """
         Overrides the C{FigureCanvasWxAgg} paint event to redraw the

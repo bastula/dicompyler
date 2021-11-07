@@ -14,7 +14,7 @@ import logging
 logger = logging.getLogger('dicompyler.dicomgui')
 import hashlib, os, threading
 import wx
-from wx.xrc import *
+from wx.xrc import XRCCTRL, XRCID, XmlResource
 from pubsub import pub
 import numpy as np
 from dicompylercore import dicomparser
@@ -230,7 +230,6 @@ class DicomImporterDialog(wx.Dialog):
                         logger.debug("Reading: %s", files[n])
                         dp = dicomparser.DicomParser(files[n])
                     except (AttributeError, EOFError, IOError, KeyError):
-                        pass
                         logger.info("%s is not a valid DICOM file.", files[n])
                     else:
                         patient = dp.GetDemographics()
@@ -624,10 +623,7 @@ class DicomImporterDialog(wx.Dialog):
         # Add the respective rtss files to the filearray if they exist
         if 'structures' in patient:
             for structureid, structure in patient['structures'].items():
-                if 'rtss' in item and (structureid == item['rtss']):
-                    filearray.append(structure['filename'])
-                    break
-                elif (structure['referenceframe'] == item['referenceframe']):
+                if 'rtss' in item and (structureid == item['rtss']) or (structure['referenceframe'] == item['referenceframe']):
                     filearray.append(structure['filename'])
                     break
                 # If no referenced rtss, but ref'd rtplan, check rtplan->rtss
@@ -638,7 +634,7 @@ class DicomImporterDialog(wx.Dialog):
         # Add the respective rtplan files to the filearray if they exist
         if 'plans' in patient:
             for planid, plan in patient['plans'].items():
-                if 'rtplan' in item and if (planid == item['rtplan']):
+                if 'rtplan' in item and (planid == item['rtplan']):
                     filearray.append(plan['filename'])
         if not rxdose:
             self.tcPatients.SetItemData(item['treeid'], {'filearray':filearray})

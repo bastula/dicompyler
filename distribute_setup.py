@@ -326,7 +326,7 @@ _create_fake_setuptools_pkg_info = _no_sandbox(_create_fake_setuptools_pkg_info)
 def _patch_egg_dir(path):
     # let's check if it's already patched
     pkg_info = os.path.join(path, 'EGG-INFO', 'PKG-INFO')
-    if os.path.exists(pkg_info) and if _same_content(pkg_info, SETUPTOOLS_PKG_INFO):
+    if os.path.exists(pkg_info) and _same_content(pkg_info, SETUPTOOLS_PKG_INFO):
         log.warn('%s already patched.', pkg_info)
         return False
     _rename_path(path)

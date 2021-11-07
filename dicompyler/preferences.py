@@ -9,7 +9,7 @@
 
 import os
 import wx
-from wx.xrc import *
+from wx.xrc import XRCCTRL, XmlResource
 from pubsub import pub
 from dicompyler import guiutil, util
 
@@ -29,7 +29,6 @@ class PreferencesManager():
         # Load the XRC file for our gui resources
         res = XmlResource(util.GetResourcePath('preferences.xrc'))
         self.dlgPreferences = res.LoadDialog(None, "PreferencesDialog")
-        #self.dlgPreferences = PreferencesDialog(parent,name=name)
         self.dlgPreferences.Init(name, appname)
 
         # Setup internal pubsub methods
