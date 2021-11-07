@@ -638,7 +638,7 @@ class DicomImporterDialog(wx.Dialog):
         # Add the respective rtplan files to the filearray if they exist
         if 'plans' in patient:
             for planid, plan in patient['plans'].items():
-                if 'rtplan' in item and if (planid == item['rtplan']):
+                if 'rtplan' in item and (planid == item['rtplan']):
                     filearray.append(plan['filename'])
         if not rxdose:
             self.tcPatients.SetItemData(item['treeid'], {'filearray':filearray})
