@@ -647,7 +647,7 @@ class DicomImporterDialog(wx.Dialog):
             for imageid, image in patient['images'].items():
                 appendImage = False
                 # used for image series
-                if 'id' in itemand(item['id'] == image['series']):
+                if 'id' in item and (item['id'] == image['series']):
                     appendImage = True
                 # used for RT structure set
                 if 'series' in item and (item['series'] == image['series']):
