@@ -624,10 +624,7 @@ class DicomImporterDialog(wx.Dialog):
         # Add the respective rtss files to the filearray if they exist
         if 'structures' in patient:
             for structureid, structure in patient['structures'].items():
-                if 'rtss' in item and (structureid == item['rtss']):
-                    filearray.append(structure['filename'])
-                    break
-                elif (structure['referenceframe'] == item['referenceframe']):
+                if 'rtss' in item and (structureid == item['rtss']) or (structure['referenceframe'] == item['referenceframe']):
                     filearray.append(structure['filename'])
                     break
                 # If no referenced rtss, but ref'd rtplan, check rtplan->rtss
