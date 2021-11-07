@@ -7,13 +7,15 @@
 #    See the file license.txt included with this distribution, also
 #    available at https://github.com/bastula/dicompyler/
 
+import os
+import imp
+from dicompyler import guiutil, util
+from pubsub import pub
+from wx.xrc import XRCCTRL, XRCID, XmlResource
+import wx
 import logging
 logger = logging.getLogger('dicompyler.plugin')
-import imp, os
-import wx
-from wx.xrc import XRCCTRL, XRCID, XmlResource
-from pubsub import pub
-from dicompyler import guiutil, util
+
 
 def import_plugins(userpath=None):
     """Find and import available plugins."""
@@ -40,7 +42,7 @@ def import_plugins(userpath=None):
             modules.append(module)
             try:
                 f, filename, description = \
-                        imp.find_module(module, [userpath, basepath])
+                    imp.find_module(module, [userpath, basepath])
             except ImportError:
                 # Not able to find module so pass
                 pass
@@ -59,6 +61,7 @@ def import_plugins(userpath=None):
                     f.close()
     return plugins
 
+
 def PluginManager(parent, plugins, pluginsDisabled):
     """Prepare to show the plugin manager dialog."""
 
@@ -70,6 +73,7 @@ def PluginManager(parent, plugins, pluginsDisabled):
 
     # Show the dialog
     dlgPluginManager.ShowModal()
+
 
 class PluginManagerDialog(wx.Dialog):
     """Manage the available plugins."""
@@ -105,20 +109,24 @@ class PluginManagerDialog(wx.Dialog):
         # Bind interface events to the proper methods
 #        wx.EVT_BUTTON(self, XRCID('btnDeletePlugin'), self.DeletePlugin)
         # wx.EVT_CHECKBOX(self, XRCID('checkEnabled'), self.OnEnablePlugin)
-        self.Bind(wx.EVT_CHECKBOX, self.OnEnablePlugin, id=XRCID('checkEnabled'))
+        self.Bind(wx.EVT_CHECKBOX, self.OnEnablePlugin,
+                  id=XRCID('checkEnabled'))
         # wx.EVT_TREE_ITEM_ACTIVATED(self, XRCID('tcPlugins'), self.OnEnablePlugin)
-        self.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.OnEnablePlugin, id=XRCID('tcPlugins'))
+        self.Bind(wx.EVT_TREE_ITEM_ACTIVATED,
+                  self.OnEnablePlugin, id=XRCID('tcPlugins'))
         # wx.EVT_TREE_SEL_CHANGED(self, XRCID('tcPlugins'), self.OnSelectTreeItem)
-        self.Bind(wx.EVT_TREE_SEL_CHANGED, self.OnSelectTreeItem, id=XRCID('tcPlugins'))
+        self.Bind(wx.EVT_TREE_SEL_CHANGED,
+                  self.OnSelectTreeItem, id=XRCID('tcPlugins'))
         # wx.EVT_TREE_SEL_CHANGING(self, XRCID('tcPlugins'), self.OnSelectRootItem)
-        self.Bind(wx.EVT_TREE_SEL_CHANGING, self.OnSelectRootItem, id=XRCID('tcPlugins'))
+        self.Bind(wx.EVT_TREE_SEL_CHANGING,
+                  self.OnSelectRootItem, id=XRCID('tcPlugins'))
 
         # Modify the control and font size as needed
         font = wx.SystemSettings.GetFont(wx.SYS_DEFAULT_GUI_FONT)
         if guiutil.IsMac():
             children = list(self.Children) + \
-                        list(self.panelTreeView.Children) + \
-                        list(self.panelProperties.Children)
+                list(self.panelTreeView.Children) + \
+                list(self.panelProperties.Children)
             for control in children:
                 control.SetFont(font)
                 control.SetWindowVariant(wx.WINDOW_VARIANT_SMALL)
@@ -157,9 +165,9 @@ class PluginManagerDialog(wx.Dialog):
         self.tcPlugins.AssignImageList(iList)
         self.root = self.tcPlugins.AddRoot('Plugins')
         self.baseroot = self.tcPlugins.AppendItem(
-                        self.root, "Built-In Plugins", 0)
+            self.root, "Built-In Plugins", 0)
         self.userroot = self.tcPlugins.AppendItem(
-                        self.root, "User Plugins", 0)
+            self.root, "User Plugins", 0)
 
         font = wx.SystemSettings.GetFont(wx.SYS_DEFAULT_GUI_FONT)
         font.SetWeight(wx.FONTWEIGHT_BOLD)
@@ -261,4 +269,4 @@ class PluginManagerDialog(wx.Dialog):
             logger.debug("%s disabled", p.__name__)
 
         pub.sendMessage('preferences.updated.value',
-                msg={'general.plugins.disabled_list': list(self.pluginsDisabled)})
+                        msg={'general.plugins.disabled_list': list(self.pluginsDisabled)})

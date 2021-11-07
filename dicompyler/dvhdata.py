@@ -12,6 +12,7 @@
 import numpy as np
 from six import itervalues
 
+
 class DVH:
     """Processes the dose volume histogram from DICOM DVH data."""
 
@@ -42,6 +43,7 @@ class DVH:
 
         return np.argmin(np.fabs(self.dvh - volume))*self.scaling
 
+
 def CalculateVolume(structure):
     """Calculates the volume for the given structure."""
 
@@ -71,7 +73,7 @@ def CalculateVolume(structure):
             for i in range(0, len(x)-1):
                 cArea = cArea + x[i]*y[i+1] - x[i+1]*y[i]
             cArea = abs(cArea / 2)
-            contours.append({'area':cArea, 'data':contour['data']})
+            contours.append({'area': cArea, 'data': contour['data']})
 
             # Determine which contour is the largest
             if (cArea > largest):
@@ -99,9 +101,11 @@ def CalculateVolume(structure):
         # If the plane is the first or last slice
         # only add half of the volume, otherwise add the full slice thickness
         if ((n == 0) or (n == len(sPlanes)-1)):
-            sVolume = float(sVolume) + float(area) * float(structure['thickness']) * 0.5
+            sVolume = float(sVolume) + float(area) * \
+                float(structure['thickness']) * 0.5
         else:
-            sVolume = float(sVolume) + float(area) * float(structure['thickness'])
+            sVolume = float(sVolume) + float(area) * \
+                float(structure['thickness'])
         # Increment the current plane number
         n = n + 1
 
@@ -109,6 +113,7 @@ def CalculateVolume(structure):
     volume = sVolume/1000
 
     return volume
+
 
 def PointInPolygon(x, y, poly):
     """Uses the Ray Casting method to determine whether a point is within
@@ -120,11 +125,11 @@ def PointInPolygon(x, y, poly):
     p1x, p1y, p1z = poly[0]
     for i in range(n+1):
         p2x, p2y, p2z = poly[i % n]
-        if y > min(p1y,p2y) and y <= max(p1y,p2y) and x <= max(p1x,p2x):
+        if y > min(p1y, p2y) and y <= max(p1y, p2y) and x <= max(p1x, p2x):
             if p1y != p2y:
                 xinters = (y-p1y)*(p2x-p1x)/(p2y-p1y)+p1x
             if p1x == p2x or x <= xinters:
                 inside = not inside
-        p1x,p1y = p2x,p2y
+        p1x, p1y = p2x, p2y
 
     return inside

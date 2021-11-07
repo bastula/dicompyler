@@ -12,23 +12,27 @@ import wx
 from wx.xrc import XmlResource, XRCCTRL, XRCID
 from pubsub import pub
 
+
 def IsMSWindows():
     """Are we running on Windows?
 
     @rtype: Bool"""
-    return wx.Platform=='__WXMSW__'
+    return wx.Platform == '__WXMSW__'
+
 
 def IsGtk():
     """Are we running on GTK (Linux)
 
     @rtype: Bool"""
-    return wx.Platform=='__WXGTK__'
+    return wx.Platform == '__WXGTK__'
+
 
 def IsMac():
     """Are we running on Mac
 
     @rtype: Bool"""
-    return wx.Platform=='__WXMAC__'
+    return wx.Platform == '__WXMAC__'
+
 
 def GetItemsList(wxCtrl):
     # Return the list of values stored in a wxCtrlWithItems
@@ -38,7 +42,8 @@ def GetItemsList(wxCtrl):
             value_list.append(wxCtrl.GetString(i))
     return value_list
 
-def SetItemsList(wxCtrl, list = [], data = []):
+
+def SetItemsList(wxCtrl, list=[], data=[]):
     # Set the wxCtrlWithItems to the given list and store the data in the item
     wxCtrl.Clear()
     i = 0
@@ -49,13 +54,15 @@ def SetItemsList(wxCtrl, list = [], data = []):
             wxCtrl.SetClientData(i, data[i])
         i = i + 1
     if not (wxCtrl.IsEmpty()):
-            wxCtrl.SetSelection(0)
+        wxCtrl.SetSelection(0)
+
 
 def get_data_dir():
     """Returns the data location for the application."""
 
     sp = wx.StandardPaths.Get()
     return wx.StandardPaths.GetUserLocalDataDir(sp)
+
 
 def get_icon():
     """Returns the icon for the application."""
@@ -67,11 +74,14 @@ def get_icon():
             exeName = sys.executable
             icon = wx.Icon(exeName, wx.BITMAP_TYPE_ICO)
         else:
-            icon = wx.Icon(util.GetResourcePath('dicompyler.ico'), wx.BITMAP_TYPE_ICO)
+            icon = wx.Icon(util.GetResourcePath(
+                'dicompyler.ico'), wx.BITMAP_TYPE_ICO)
     elif IsGtk():
-        icon = wx.Icon(util.GetResourcePath('dicompyler_icon11_16.png'), wx.BITMAP_TYPE_PNG)
+        icon = wx.Icon(util.GetResourcePath(
+            'dicompyler_icon11_16.png'), wx.BITMAP_TYPE_PNG)
 
     return icon
+
 
 def convert_pil_to_wx(pil, alpha=True):
     """ Convert a PIL Image into a wx.Image.
@@ -87,6 +97,7 @@ def convert_pil_to_wx(pil, alpha=True):
         image.SetData(data)
     return image
 
+
 def get_progress_dialog(parent, title="Loading..."):
     """Function to load the progress dialog."""
 
@@ -98,6 +109,7 @@ def get_progress_dialog(parent, title="Loading..."):
 
     return dialogProgress
 
+
 def adjust_control(control):
     """Adjust the control and font size on the Mac."""
 
@@ -107,12 +119,13 @@ def adjust_control(control):
         control.SetWindowVariant(wx.WINDOW_VARIANT_SMALL)
         control.SetFont(font)
 
+
 class ProgressDialog(wx.Dialog):
     """Dialog to show progress for certain long-running events."""
 
     def __init__(self):
         wx.Dialog.__init__(self)
-    
+
     def Init(self, res, title=None):
         """Method called after the dialog has been initialized."""
 
@@ -139,6 +152,7 @@ class ProgressDialog(wx.Dialog):
         if (message == 'Done'):
             self.EndModal(wx.ID_OK)
 
+
 class ColorCheckListBox(wx.ScrolledWindow):
     """Control similar to a wx.CheckListBox with additional color indication."""
 
@@ -159,8 +173,8 @@ class ColorCheckListBox(wx.ScrolledWindow):
         self.Clear()
 
     def Layout(self):
-        self.SetScrollbars(20,20,50,50)
-        super(ColorCheckListBox,self).Layout()
+        self.SetScrollbars(20, 20, 50, 50)
+        super(ColorCheckListBox, self).Layout()
 
     def Append(self, item, data=None, color=None, refresh=True):
         """Add an item to the control."""
@@ -168,7 +182,7 @@ class ColorCheckListBox(wx.ScrolledWindow):
         ccb = ColorCheckBox(self, item, data, color, self.pubsubname)
         self.items.append(ccb)
         self.grid.Add(ccb, 0, flag=wx.ALIGN_LEFT, border=4)
-        self.grid.Add((0,3), 0)
+        self.grid.Add((0, 3), 0)
         if refresh:
             self.Layout()
 
@@ -177,8 +191,9 @@ class ColorCheckListBox(wx.ScrolledWindow):
 
         self.items = []
         self.grid.Clear(True)
-        self.grid.Add((0,3), 0)
+        self.grid.Add((0, 3), 0)
         self.Layout()
+
 
 class ColorCheckBox(wx.Panel):
     """Control with a checkbox and a color indicator."""
@@ -197,10 +212,10 @@ class ColorCheckBox(wx.Panel):
 
         # Setup the layout for the frame
         grid = wx.BoxSizer(wx.HORIZONTAL)
-        grid.Add((3,0), 0)
+        grid.Add((3, 0), 0)
         grid.Add(self.colorbox, 0, flag=wx.ALIGN_CENTRE)
-        grid.Add((5,0), 0)
-        grid.Add(self.checkbox, 1, flag=wx.EXPAND|wx.ALL)
+        grid.Add((5, 0), 0)
+        grid.Add(self.checkbox, 1, flag=wx.EXPAND | wx.ALL)
 
         # Decrease the font size on Mac
         if IsMac():
@@ -220,19 +235,22 @@ class ColorCheckBox(wx.Panel):
     def OnCheck(self, evt):
         """Send a message via pubsub if the checkbox has been checked."""
 
-        message = {'item':self.item, 'data':self.data,
-                'color':self.colorbox.GetBackgroundColour()}
+        message = {'item': self.item, 'data': self.data,
+                   'color': self.colorbox.GetBackgroundColour()}
         if evt.IsChecked():
-            pub.sendMessage('colorcheckbox.checked.' + self.pubsubname, msg=message)
+            pub.sendMessage('colorcheckbox.checked.' +
+                            self.pubsubname, msg=message)
         else:
-            pub.sendMessage('colorcheckbox.unchecked.' + self.pubsubname, msg=message)
+            pub.sendMessage('colorcheckbox.unchecked.' +
+                            self.pubsubname, msg=message)
+
 
 class ColorBox(wx.Window):
     """Control that shows and stores a color."""
 
     def __init__(self, parent, color=[]):
         wx.Window.__init__(self, parent, -1)
-        self.SetMinSize((16,16))
+        self.SetMinSize((16, 16))
         col = []
         for val in color:
             col.append(int(val))

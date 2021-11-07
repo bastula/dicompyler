@@ -20,10 +20,11 @@ except ImportError:
     # Otherwise try simplejson: http://github.com/simplejson/simplejson
     import simplejson as json
 
+
 class PreferencesManager():
     """Class to access preferences and set up the preferences dialog."""
 
-    def __init__(self, parent, name = None, appname = "the application",
+    def __init__(self, parent, name=None, appname="the application",
                  filename='preferences.txt'):
 
         # Load the XRC file for our gui resources
@@ -32,7 +33,8 @@ class PreferencesManager():
         self.dlgPreferences.Init(name, appname)
 
         # Setup internal pubsub methods
-        pub.subscribe(self.SetPreferenceTemplate, 'preferences.updated.template')
+        pub.subscribe(self.SetPreferenceTemplate,
+                      'preferences.updated.template')
         pub.subscribe(self.SavePreferenceValues, 'preferences.updated.values')
 
         # Setup user pubsub methods
@@ -50,7 +52,7 @@ class PreferencesManager():
 
         # Destroy the dialog when the preferences manager object is deleted
         if self.dlgPreferences:
-            
+
             self.dlgPreferences.Destroy()
 
     def Show(self):
@@ -96,7 +98,8 @@ class PreferencesManager():
         query = msg.split('.')
         v = self.values
         if query[0] in v and query[1] in v[query[0]] and query[2] in v[query[0]][query[1]]:
-            pub.sendMessage(msg, topic=msg, msg=v[query[0]][query[1]][query[2]])
+            pub.sendMessage(
+                msg, topic=msg, msg=v[query[0]][query[1]][query[2]])
 
     def GetPreferenceValues(self, msg):
         """Publish the requested values for preference setting group."""
@@ -106,26 +109,29 @@ class PreferencesManager():
         if query[0] in v and query[1] in v[query[0]]:
             for setting, value in list(v[query[0]][query[1]].items()):
                 message = msg + '.' + setting
-                pub.sendMessage(message, topic='.'.join(['general',setting]), msg=value)
+                pub.sendMessage(message, topic='.'.join(
+                    ['general', setting]), msg=value)
 
     def SetPreferenceValue(self, msg):
         """Set the preference value for the given preference setting."""
 
-        #Using list() may break threading.  
-        #See https://blog.labix.org/2008/06/27/watch-out-for-listdictkeys-in-python-3
+        # Using list() may break threading.
+        # See https://blog.labix.org/2008/06/27/watch-out-for-listdictkeys-in-python-3
         SetValue(self.values, list(msg.keys())[0], list(msg.values())[0])
         pub.sendMessage('preferences.updated.values', msg=self.values)
-        pub.sendMessage(list(msg.keys())[0], topic=list(msg.keys())[0], msg=list(msg.values())[0]) 
+        pub.sendMessage(list(msg.keys())[0], topic=list(
+            msg.keys())[0], msg=list(msg.values())[0])
 
 ############################## Preferences Dialog ##############################
+
 
 class PreferencesDialog(wx.Dialog):
     """Dialog to display and change preferences."""
 
-    def __init__(self):      
+    def __init__(self):
         wx.Dialog.__init__(self)
 
-    def Init(self, name = None, appname = ""):
+    def Init(self, name=None, appname=""):
         """Method called after the panel has been initialized."""
 
         # Hide the close button on Mac
@@ -141,7 +147,7 @@ class PreferencesDialog(wx.Dialog):
 
         # Initialize controls
         self.notebook = XRCCTRL(self, 'notebook')
-        
+
         # Modify the control and font size on Mac
         for child in self.GetChildren():
             guiutil.adjust_control(child)
@@ -181,7 +187,7 @@ class PreferencesDialog(wx.Dialog):
         for group in prefpaneldata:
             # Create a header for each group of settings
             bsizer = wx.BoxSizer(wx.VERTICAL)
-            bsizer.Add((0,5))
+            bsizer.Add((0, 5))
             hsizer = wx.BoxSizer(wx.HORIZONTAL)
             hsizer.Add((12, 0))
             h = wx.StaticText(panel, -1, list(group.keys())[0])
@@ -190,7 +196,7 @@ class PreferencesDialog(wx.Dialog):
             h.SetFont(font)
             hsizer.Add(h)
             bsizer.Add(hsizer)
-            bsizer.Add((0,7))
+            bsizer.Add((0, 7))
             # Create a FlexGridSizer to contain the group of settings
             fgsizer = wx.FlexGridSizer(len(list(group.values())[0]), 4, 10, 4)
             fgsizer.AddGrowableCol(2, 1)
@@ -202,8 +208,8 @@ class PreferencesDialog(wx.Dialog):
                 if ('restart' in setting) and (setting['restart'] == True):
                     show_restart = True
                 t = wx.StaticText(panel, -1, setting['name']+restart+':',
-                    style=wx.ALIGN_RIGHT)
-                fgsizer.Add(t, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT)
+                                  style=wx.ALIGN_RIGHT)
+                fgsizer.Add(t, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALIGN_RIGHT)
                 sizer = wx.BoxSizer(wx.HORIZONTAL)
 
                 # Get the setting value
@@ -228,15 +234,15 @@ class PreferencesDialog(wx.Dialog):
                     t = c.GetPrevSibling()
                     t.SetLabel('')
                     # Adjust the sizer preceding the label
-                    fgsizer.GetItem(0).AssignSpacer((20,0))
+                    fgsizer.GetItem(0).AssignSpacer((20, 0))
                     # Add control to the callback dict
                     self.callbackdict[c] = setting['callback']
                     self.Bind(wx.EVT_CHECKBOX, self.OnUpdateCheckbox, c)
                 # If this is a range setting
                 elif (setting['type'] == 'range'):
                     s = wx.Slider(panel, -1, value,
-                        setting['values'][0], setting['values'][1],
-                        size=(120, -1), style=wx.SL_HORIZONTAL)
+                                  setting['values'][0], setting['values'][1],
+                                  size=(120, -1), style=wx.SL_HORIZONTAL)
                     sizer.Add(s, 0, wx.ALIGN_CENTER)
                     t = wx.StaticText(panel, -1, str(value))
                     sizer.Add((3, 0))
@@ -246,8 +252,10 @@ class PreferencesDialog(wx.Dialog):
                     sizer.Add(t, 0, wx.ALIGN_CENTER)
                     # Add control to the callback dict
                     self.callbackdict[s] = setting['callback']
-                    self.Bind(wx.EVT_COMMAND_SCROLL_THUMBTRACK, self.OnUpdateSlider, s)
-                    self.Bind(wx.EVT_COMMAND_SCROLL_CHANGED, self.OnUpdateSlider, s)
+                    self.Bind(wx.EVT_COMMAND_SCROLL_THUMBTRACK,
+                              self.OnUpdateSlider, s)
+                    self.Bind(wx.EVT_COMMAND_SCROLL_CHANGED,
+                              self.OnUpdateSlider, s)
                 # If this is a directory location setting
                 elif (setting['type'] == 'directory'):
                     # Check if the value is a valid directory,
@@ -266,27 +274,27 @@ class PreferencesDialog(wx.Dialog):
                 # Modify the control and font size on Mac
                 for child in panel.GetChildren():
                     guiutil.adjust_control(child)
-                fgsizer.Add(sizer, 1, wx.EXPAND|wx.ALL)
+                fgsizer.Add(sizer, 1, wx.EXPAND | wx.ALL)
                 fgsizer.Add((12, 0))
-            bsizer.Add(fgsizer, 0, wx.EXPAND|wx.ALL)
-            border.Add(bsizer, 0, wx.EXPAND|wx.ALL, 2)
-        border.Add((60, 20), 0, wx.EXPAND|wx.ALL)
+            bsizer.Add(fgsizer, 0, wx.EXPAND | wx.ALL)
+            border.Add(bsizer, 0, wx.EXPAND | wx.ALL, 2)
+        border.Add((60, 20), 0, wx.EXPAND | wx.ALL)
         # Show the restart text for this group if required for >= 1 setting
         if show_restart:
             r = wx.StaticText(panel, -1,
-                              '* Restart ' + self.appname + \
+                              '* Restart ' + self.appname +
                               ' for this setting to take effect.',
                               style=wx.ALIGN_CENTER)
             font = r.GetFont()
             font.SetWeight(wx.FONTWEIGHT_BOLD)
             r.SetFont(font)
-            border.Add((0,0), 1, wx.EXPAND|wx.ALL)
+            border.Add((0, 0), 1, wx.EXPAND | wx.ALL)
             rhsizer = wx.BoxSizer(wx.HORIZONTAL)
-            rhsizer.Add((0,0), 1, wx.EXPAND|wx.ALL)
+            rhsizer.Add((0, 0), 1, wx.EXPAND | wx.ALL)
             rhsizer.Add(r)
-            rhsizer.Add((0,0), 1, wx.EXPAND|wx.ALL)
-            border.Add(rhsizer, 0, wx.EXPAND|wx.ALL)
-            border.Add((0,5))
+            rhsizer.Add((0, 0), 1, wx.EXPAND | wx.ALL)
+            border.Add(rhsizer, 0, wx.EXPAND | wx.ALL)
+            border.Add((0, 5))
         panel.SetSizer(border)
 
         return panel
@@ -295,14 +303,16 @@ class PreferencesDialog(wx.Dialog):
         """Publish the updated choice when the value changes."""
 
         c = evt.GetEventObject()
-        pub.sendMessage(self.callbackdict[c], topic=self.callbackdict[c], msg=evt.GetString())
+        pub.sendMessage(
+            self.callbackdict[c], topic=self.callbackdict[c], msg=evt.GetString())
         SetValue(self.values, self.callbackdict[c], evt.GetString())
 
     def OnUpdateCheckbox(self, evt):
         """Publish the updated checkbox when the value changes."""
 
         c = evt.GetEventObject()
-        pub.sendMessage(self.callbackdict[c], topic=self.callbackdict[c], msg=evt.IsChecked())
+        pub.sendMessage(
+            self.callbackdict[c], topic=self.callbackdict[c], msg=evt.IsChecked())
         SetValue(self.values, self.callbackdict[c], evt.IsChecked())
 
     def OnUpdateSlider(self, evt):
@@ -312,7 +322,8 @@ class PreferencesDialog(wx.Dialog):
         # Update the associated label with the new number
         t = self.FindWindowById(s.NextControlId(s.GetId()))
         t.SetLabel(str(s.GetValue()))
-        pub.sendMessage(self.callbackdict[s], topic=self.callbackdict[s], msg=s.GetValue())
+        pub.sendMessage(
+            self.callbackdict[s], topic=self.callbackdict[s], msg=s.GetValue())
         SetValue(self.values, self.callbackdict[s], s.GetValue())
 
     def OnUpdateDirectory(self, evt):
@@ -321,13 +332,14 @@ class PreferencesDialog(wx.Dialog):
         b = evt.GetEventObject()
         # Get the the label associated with the browse button
         t = b.GetPrevSibling()
-        dlg = wx.DirDialog(self, defaultPath = t.GetValue())
+        dlg = wx.DirDialog(self, defaultPath=t.GetValue())
 
         if dlg.ShowModal() == wx.ID_OK:
             # Update the associated label with the new directory
             d = str(dlg.GetPath())
             t.SetValue(d)
-            pub.sendMessage(self.callbackdict[b], topic=self.callbackdict[b], msg=d)
+            pub.sendMessage(
+                self.callbackdict[b], topic=self.callbackdict[b], msg=d)
             SetValue(self.values, self.callbackdict[b], d)
         dlg.Destroy()
 
@@ -340,6 +352,7 @@ class PreferencesDialog(wx.Dialog):
 
 ############################ Get/Set Value Functions ###########################
 
+
 def GetValue(values, setting):
     """Get the saved setting value."""
 
@@ -351,6 +364,7 @@ def GetValue(values, setting):
     # Otherwise return the default value
     return value
 
+
 def SetValue(values, setting, value):
     """Save the new setting value."""
 
@@ -360,15 +374,17 @@ def SetValue(values, setting, value):
         if query[1] in values[query[0]]:
             values[query[0]][query[1]][query[2]] = value
         else:
-            values[query[0]].update({query[1]:{query[2]:value}})
+            values[query[0]].update({query[1]: {query[2]: value}})
     else:
-        values[query[0]] = {query[1]:{query[2]:value}}
+        values[query[0]] = {query[1]: {query[2]: value}}
 
 ############################### Test Preferences ###############################
 
+
 def main():
 
-    import tempfile, os
+    import tempfile
+    import os
     import wx
     from pubsub import pub
 
@@ -384,52 +400,52 @@ def main():
     app.SetTopWindow(frame)
 
     filename = t.name
-    frame.prefmgr = PreferencesManager(parent = frame, appname = 'preftest',
+    frame.prefmgr = PreferencesManager(parent=frame, appname='preftest',
                                        filename=filename)
 
     # Set up the preferences template
     grp1template = [
         {'Panel 1 Preference Group 1':
-            [{'name':'Choice Setting',
-             'type':'choice',
-           'values':['Choice 1', 'Choice 2', 'Choice 3'],
-          'default':'Choice 2',
-         'callback':'panel1.prefgrp1.choice_setting'},
-            {'name':'Directory setting',
-             'type':'directory',
-          'default':str(sp.GetDocumentsDir()),
-         'callback':'panel1.prefgrp1.directory_setting'}]
-        },
+            [{'name': 'Choice Setting',
+             'type': 'choice',
+              'values': ['Choice 1', 'Choice 2', 'Choice 3'],
+              'default':'Choice 2',
+              'callback':'panel1.prefgrp1.choice_setting'},
+             {'name': 'Directory setting',
+             'type': 'directory',
+              'default': str(sp.GetDocumentsDir()),
+              'callback': 'panel1.prefgrp1.directory_setting'}]
+         },
         {'Panel 1 Preference Group 2':
-            [{'name':'Range Setting',
-             'type':'range',
-           'values':[0, 100],
-          'default':50,
-            'units':'%',
-         'callback':'panel1.prefgrp2.range_setting'}]
-        }]
+            [{'name': 'Range Setting',
+             'type': 'range',
+              'values': [0, 100],
+              'default':50,
+              'units':'%',
+              'callback':'panel1.prefgrp2.range_setting'}]
+         }]
     grp2template = [
         {'Panel 2 Preference Group 1':
-           [{'name':'Range Setting',
-             'type':'range',
-           'values':[0, 100],
-          'default':50,
-            'units':'%',
-         'callback':'panel2.prefgrp1.range_setting',
-          'restart':True}]
-        },
+         [{'name': 'Range Setting',
+             'type': 'range',
+             'values': [0, 100],
+             'default':50,
+           'units':'%',
+             'callback':'panel2.prefgrp1.range_setting',
+             'restart':True}]
+         },
         {'Panel 2 Preference Group 2':
-           [{'name':'Directory setting',
-             'type':'directory',
-          'default':str(sp.GetUserDataDir()),
-         'callback':'panel2.prefgrp2.directory_setting'},
-            {'name':'Choice Setting',
-             'type':'choice',
-           'values':['Choice 1', 'Choice 2', 'Choice 3'],
-          'default':'Choice 2',
-         'callback':'panel2.prefgrp2.choice_setting'}]
-        }]
-    preftemplate = [{'Panel 1':grp1template}, {'Panel 2':grp2template}]
+         [{'name': 'Directory setting',
+             'type': 'directory',
+             'default': str(sp.GetUserDataDir()),
+             'callback': 'panel2.prefgrp2.directory_setting'},
+          {'name': 'Choice Setting',
+             'type': 'choice',
+             'values': ['Choice 1', 'Choice 2', 'Choice 3'],
+             'default':'Choice 2',
+             'callback':'panel2.prefgrp2.choice_setting'}]
+         }]
+    preftemplate = [{'Panel 1': grp1template}, {'Panel 2': grp2template}]
 
     def print_template_value(msg):
         """Print the received template message."""
@@ -454,6 +470,7 @@ def main():
         os.remove(filename)
     except WindowsError:
         print('\nCould not delete: '+filename+'. Please delete it manually.')
+
 
 if __name__ == '__main__':
     main()

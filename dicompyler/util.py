@@ -8,8 +8,11 @@
 #    available at https://github.com/bastula/dicompyler/
 
 from __future__ import with_statement
-import imp, os, sys
+import imp
+import os
+import sys
 import subprocess
+
 
 def platform():
     if sys.platform.startswith('win'):
@@ -18,12 +21,14 @@ def platform():
         return 'mac'
     return 'linux'
 
+
 def GetResourcePath(resource):
     """Return the specified item from the resources folder."""
 
     if main_is_frozen() and (platform() == 'mac'):
         return os.path.join((os.path.join(get_main_dir(), '../Resources')), resource)
     return os.path.join((os.path.join(get_main_dir(), 'resources')), resource)
+
 
 def GetBasePluginsPath(resource):
     """Return the specified item from the base plugins folder."""
@@ -33,15 +38,19 @@ def GetBasePluginsPath(resource):
     return os.path.join((os.path.join(get_main_dir(), 'baseplugins')), resource)
 
 # from http://www.py2exe.org/index.cgi/HowToDetermineIfRunningFromExe
+
+
 def main_is_frozen():
-   return (hasattr(sys, "frozen") or # new py2exe
-           hasattr(sys, "importers") # old py2exe
-           or imp.is_frozen("__main__")) # tools/freeze
+    return (hasattr(sys, "frozen") or  # new py2exe
+            hasattr(sys, "importers")  # old py2exe
+            or imp.is_frozen("__main__"))  # tools/freeze
+
 
 def get_main_dir():
     if main_is_frozen():
         return os.path.dirname(sys.executable)
     return os.path.dirname(__file__)
+
 
 def get_text_resources(resource):
     """Return the resources that are located in the root folder of the
@@ -55,6 +64,7 @@ def get_text_resources(resource):
 
     return resource
 
+
 def open_path(path):
     """Open the specified path in the system default folder viewer."""
 
@@ -65,9 +75,10 @@ def open_path(path):
     elif sys.platform == 'win32':
         subprocess.Popen("explorer " + path)
 
+
 def get_credits():
     """Read the credits file and return the data from it."""
-    
+
     developers = []
     artists = []
     with open(get_text_resources('credits.txt'), 'rU') as cf:
@@ -85,4 +96,4 @@ def get_credits():
                     if (a.strip() == ""):
                         break
                     artists.append(a.strip())
-    return {'developers':developers, 'artists':artists}
+    return {'developers': developers, 'artists': artists}
