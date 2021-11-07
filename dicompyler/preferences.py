@@ -9,7 +9,7 @@
 
 import os
 import wx
-from wx.xrc import *
+from wx.xrc import XRCCTRL, XmlResource
 from pubsub import pub
 from dicompyler import guiutil, util
 

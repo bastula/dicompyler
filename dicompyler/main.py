@@ -16,7 +16,7 @@ logger.setLevel(logging.DEBUG)
 import os, threading
 import sys, traceback
 import wx
-from wx.xrc import *
+from wx.xrc import XRCCTRL, XRCID, XmlResource
 import wx.adv
 import wx.lib.dialogs, webbrowser
 import pydicom
