@@ -895,9 +895,6 @@ class FigurePrintout(wx.Printout):
         else:
             raise ValueError('invalid aspect ratio')
 
-        # Device context to draw the page
-        dc = self.GetDC()
-
         # PPI_P: Pixels Per Inch of the Printer
         wPPI_P, hPPI_P = [float(x) for x in self.GetPPIPrinter()]
         PPI_P = (wPPI_P + hPPI_P)/2.0
@@ -935,13 +932,6 @@ class FigurePrintout(wx.Printout):
 
         # scale factor = device size / page size (equals 1.0 for real printing)
         S = ((wDev_Px/PPI)/wPg + (hDev_Px/PPI)/hPg)/2.0
-
-        # Fig_S: scaled printing size of the figure (inches)
-        # M_S: scaled minimum margins (inches)
-        wFig_S = S * wFig
-        hFig_S = S * hFig
-        wM_S = S * wM
-        hM_S = S * hM
 
         # Fig_Dx: scaled printing size of the figure (device pixels)
         # M_Dx: scaled minimum margins (device pixels)
