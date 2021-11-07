@@ -14,7 +14,7 @@ import logging
 logger = logging.getLogger('dicompyler.dicomgui')
 import hashlib, os, threading
 import wx
-from wx.xrc import *
+from wx.xrc import XRCCTRL, XRCID, XmlResource
 from pubsub import pub
 import numpy as np
 from dicompylercore import dicomparser
