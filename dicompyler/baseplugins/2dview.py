@@ -344,14 +344,10 @@ class plugin2DView(wx.Panel):
         # look up the value in the LUT and find the corresponding pixel pair
         for p, point in enumerate(contour):
             for xv, xval in enumerate(pixlut[0]):
-                if (xval > point[0] and not prone and not feetfirst):
+                if (xval > point[0] and not prone and not feetfirst) or (xval < point[0]) and feetfirst or prone:
                     break
-                elif (xval < point[0]) and feetfirst or prone:
-                        break
             for yv, yval in enumerate(pixlut[1]):
-                if (yval > point[1] and not prone):
-                    break
-                elif (yval < point[1] and prone):
+                if (yval > point[1] and not prone) or (yval < point[1] and prone):
                     break
             pixeldata.append((xv, yv))
 
