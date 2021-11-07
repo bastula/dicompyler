@@ -356,7 +356,6 @@ class plugin2DView(wx.Panel):
     def GetDoseGridPixelData(self, pixlut, doselut):
         """Convert dosegrid data into pixel data using the dose to pixel LUT."""
 
-        dosedata = []
         x = []
         y = []
         # Determine if the patient is prone or supine
