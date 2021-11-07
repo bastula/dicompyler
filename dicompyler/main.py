@@ -9,24 +9,28 @@
 #    available at https://github.com/bastula/dicompyler/
 
 # Configure logging for dicompyler
-import logging, logging.handlers
+import webbrowser
+import wx.lib.dialogs
+import traceback
+import sys
+import threading
+import os
+from dicompyler import plugin, preferences
+from dicompylercore.dicomparser import DicomParser as dp
+from dicompyler import dicomgui, dvhdata
+from dicompyler import guiutil, util
+from dicompyler import __version__
+from dicompylercore import dvhcalc
+from pubsub import pub
+import pydicom
+import wx.adv
+from wx.xrc import XRCCTRL, XRCID, XmlResource
+import wx
+import logging
+import logging.handlers
 logger = logging.getLogger('dicompyler')
 logger.setLevel(logging.DEBUG)
 
-import os, threading
-import sys, traceback
-import wx
-from wx.xrc import XRCCTRL, XRCID, XmlResource
-import wx.adv
-import wx.lib.dialogs, webbrowser
-import pydicom
-from pubsub import pub
-from dicompylercore import dvhcalc
-from dicompyler import __version__
-from dicompyler import guiutil, util
-from dicompyler import dicomgui, dvhdata
-from dicompylercore.dicomparser import DicomParser as dp
-from dicompyler import plugin, preferences
 
 class MainFrame(wx.Frame):
     def __init__(self, parent, id, title, res):
@@ -56,10 +60,10 @@ class MainFrame(wx.Frame):
         if not os.path.exists(logpath):
             os.makedirs(logpath)
         self.fh = logging.handlers.RotatingFileHandler(
-                os.path.join(logpath, 'dicompyler.log'),
-                maxBytes=524288, backupCount=7)
+            os.path.join(logpath, 'dicompyler.log'),
+            maxBytes=524288, backupCount=7)
         self.fh.setFormatter(logging.Formatter(
-                '%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+            '%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
         self.fh.setLevel(logging.WARNING)
         logger.addHandler(self.fh)
         pydicom_logger.addHandler(self.fh)
@@ -78,15 +82,15 @@ class MainFrame(wx.Frame):
             devnull = open(os.devnull, 'w')
             sys.stdout = devnull
             sys.stderr = devnull
-        
+
         # Set the window size
         if guiutil.IsMac():
-            size=(900, 700)
+            size = (900, 700)
         else:
-            size=(850, 625)
+            size = (850, 625)
 
         wx.Frame.__init__(self, parent, id, title, pos=wx.DefaultPosition,
-            size=size, style=wx.DEFAULT_FRAME_STYLE)
+                          size=size, style=wx.DEFAULT_FRAME_STYLE)
 
         # Set up the status bar
         self.sb = self.CreateStatusBar(3)
@@ -115,8 +119,10 @@ class MainFrame(wx.Frame):
         self.lblStructureMinDose = XRCCTRL(self, 'lblStructureMinDose')
         self.lblStructureMaxDose = XRCCTRL(self, 'lblStructureMaxDose')
         self.lblStructureMeanDose = XRCCTRL(self, 'lblStructureMeanDose')
-        self.cclbStructures = guiutil.ColorCheckListBox(self.notebookTools, 'structure')
-        self.cclbIsodoses = guiutil.ColorCheckListBox(self.notebookTools, 'isodose')
+        self.cclbStructures = guiutil.ColorCheckListBox(
+            self.notebookTools, 'structure')
+        self.cclbIsodoses = guiutil.ColorCheckListBox(
+            self.notebookTools, 'isodose')
 
         # Modify the control size on Mac
         controls = [self.notebookTools, self.choiceStructure]
@@ -129,11 +135,11 @@ class MainFrame(wx.Frame):
         mainGrid = wx.BoxSizer(wx.VERTICAL)
         hGrid = wx.BoxSizer(wx.HORIZONTAL)
         if guiutil.IsMac():
-            hGrid.Add(self.panelGeneral, 1, flag=wx.EXPAND|wx.ALL, border=4)
+            hGrid.Add(self.panelGeneral, 1, flag=wx.EXPAND | wx.ALL, border=4)
         else:
-            hGrid.Add(self.panelGeneral, 1, flag=wx.EXPAND|wx.ALL)
+            hGrid.Add(self.panelGeneral, 1, flag=wx.EXPAND | wx.ALL)
 
-        mainGrid.Add(hGrid, 1, flag=wx.EXPAND|wx.ALL)
+        mainGrid.Add(hGrid, 1, flag=wx.EXPAND | wx.ALL)
 
         # Load the menu for the frame
         menuMain = self.res.LoadMenuBar('menuMain')
@@ -148,18 +154,24 @@ class MainFrame(wx.Frame):
         self.SetMenuBar(menuMain)
 
         # Setup Tools menu
-        self.menuShowLogs = menuMain.FindItemById(XRCID('menuShowLogs')).GetMenu()
-        self.menuPlugins = menuMain.FindItemById(XRCID('menuPluginManager')).GetMenu()
+        self.menuShowLogs = menuMain.FindItemById(
+            XRCID('menuShowLogs')).GetMenu()
+        self.menuPlugins = menuMain.FindItemById(
+            XRCID('menuPluginManager')).GetMenu()
 
         # Setup Import menu
-        self.menuImport = menuMain.FindItemById(XRCID('menuImportPlaceholder')).GetMenu()
-        self.menuImport.Delete(menuMain.FindItemById(XRCID('menuImportPlaceholder')).GetId())
+        self.menuImport = menuMain.FindItemById(
+            XRCID('menuImportPlaceholder')).GetMenu()
+        self.menuImport.Delete(menuMain.FindItemById(
+            XRCID('menuImportPlaceholder')).GetId())
         self.menuImportItem = menuMain.FindItemById(XRCID('menuImport'))
         self.menuImportItem.Enable(False)
 
         # Setup Export menu
-        self.menuExport = menuMain.FindItemById(XRCID('menuExportPlaceholder')).GetMenu()
-        self.menuExport.Delete(menuMain.FindItemById(XRCID('menuExportPlaceholder')).GetId())
+        self.menuExport = menuMain.FindItemById(
+            XRCID('menuExportPlaceholder')).GetMenu()
+        self.menuExport.Delete(menuMain.FindItemById(
+            XRCID('menuExportPlaceholder')).GetId())
         self.menuExportItem = menuMain.FindItemById(XRCID('menuExport'))
         self.menuExportItem.Enable(False)
 
@@ -181,9 +193,9 @@ class MainFrame(wx.Frame):
 
         # Setup main toolbar controls
         folderbmp = wx.Bitmap(util.GetResourcePath('folder_user.png'))
-        self.maintools = [{'label':"Open Patient", 'bmp':folderbmp,
-                            'shortHelp':"Open Patient...",
-                            'eventhandler':self.OnOpenPatient}]
+        self.maintools = [{'label': "Open Patient", 'bmp': folderbmp,
+                           'shortHelp': "Open Patient...",
+                           'eventhandler': self.OnOpenPatient}]
         for m, tool in enumerate(self.maintools):
             self.toolbar.AddTool(m+1, tool['label'], tool['bmp'],
                                  shortHelp=tool['shortHelp'])
@@ -205,7 +217,7 @@ class MainFrame(wx.Frame):
         self.SetSizer(mainGrid)
         self.Layout()
 
-        #Set the Minumum size
+        # Set the Minumum size
         self.SetMinSize(size)
         self.Centre(wx.BOTH)
 
@@ -227,44 +239,44 @@ class MainFrame(wx.Frame):
         # Initialize the preferences
         if guiutil.IsMac():
             self.prefmgr = preferences.PreferencesManager(
-                parent = self, appname = 'dicompyler')
+                parent=self, appname='dicompyler')
         else:
             self.prefmgr = preferences.PreferencesManager(
-                parent = self, appname = 'dicompyler', name = 'Options')
+                parent=self, appname='dicompyler', name='Options')
         sp = wx.StandardPaths.Get()
         self.generalpreftemplate = [
             {'DICOM Import Settings':
-                [{'name':'Import Location',
-                 'type':'choice',
-               'values':['Remember Last Used', 'Always Use Default'],
-              'default':'Remember Last Used',
-             'callback':'general.dicom.import_location_setting'},
-                {'name':'Default Location',
-                 'type':'directory',
-              'default':sp.GetDocumentsDir(),
-             'callback':'general.dicom.import_location'}]
-            },
+                [{'name': 'Import Location',
+                 'type': 'choice',
+                  'values': ['Remember Last Used', 'Always Use Default'],
+                  'default':'Remember Last Used',
+                  'callback':'general.dicom.import_location_setting'},
+                 {'name': 'Default Location',
+                 'type': 'directory',
+                  'default': sp.GetDocumentsDir(),
+                  'callback': 'general.dicom.import_location'}]
+             },
             {'Plugin Settings':
-                [{'name':'User Plugins Location',
-                 'type':'directory',
-              'default':os.path.join(datapath, 'plugins'),
-             'callback':'general.plugins.user_plugins_location',
-             'restart':True}]
-            },
+                [{'name': 'User Plugins Location',
+                 'type': 'directory',
+                  'default': os.path.join(datapath, 'plugins'),
+                  'callback': 'general.plugins.user_plugins_location',
+                  'restart': True}]
+             },
             {'Calculation Settings':
-                [{'name':'DVH Calculation',
-                 'type':'choice',
-               'values':['Use RT Dose DVH if Present', 'Always Recalculate DVH'],
-              'default':'Use RT Dose DVH if Present',
-             'callback':'general.calculation.dvh_recalc'}]
-            },
+                [{'name': 'DVH Calculation',
+                 'type': 'choice',
+                  'values': ['Use RT Dose DVH if Present', 'Always Recalculate DVH'],
+                  'default':'Use RT Dose DVH if Present',
+                  'callback':'general.calculation.dvh_recalc'}]
+             },
             {'Advanced Settings':
-                [{'name':'Enable Detailed Logging',
-                 'type':'checkbox',
-              'default':False,
-             'callback':'general.advanced.detailed_logging'}]
-            }]
-        self.preftemplate = [{'General':self.generalpreftemplate}]
+                [{'name': 'Enable Detailed Logging',
+                 'type': 'checkbox',
+                  'default': False,
+                  'callback': 'general.advanced.detailed_logging'}]
+             }]
+        self.preftemplate = [{'General': self.generalpreftemplate}]
         pub.sendMessage('preferences.updated.template', msg=self.preftemplate)
 
         # Initialize variables
@@ -273,10 +285,12 @@ class MainFrame(wx.Frame):
         # Set up pubsub
         pub.subscribe(self.OnLoadPatientData, 'patient.updated.raw_data')
         pub.subscribe(self.OnStructureCheck, 'colorcheckbox.checked.structure')
-        pub.subscribe(self.OnStructureUncheck, 'colorcheckbox.unchecked.structure')
+        pub.subscribe(self.OnStructureUncheck,
+                      'colorcheckbox.unchecked.structure')
         pub.subscribe(self.OnIsodoseCheck, 'colorcheckbox.checked.isodose')
         pub.subscribe(self.OnIsodoseUncheck, 'colorcheckbox.unchecked.isodose')
-        pub.subscribe(self.OnUpdatePlugins, 'general.plugins.user_plugins_location')
+        pub.subscribe(self.OnUpdatePlugins,
+                      'general.plugins.user_plugins_location')
         pub.subscribe(self.OnUpdatePreferences, 'general')
         pub.subscribe(self.OnUpdateStatusBar, 'main.update_statusbar')
         pub.subscribe(self.OnOpenPatient, 'dicomgui.show')
@@ -293,7 +307,7 @@ class MainFrame(wx.Frame):
         # Load and initialize plugins
         self.plugins = []
         self.pluginsDisabled = []
-        pub.sendMessage('preferences.requested.value', 
+        pub.sendMessage('preferences.requested.value',
                         msg='general.plugins.user_plugins_location')
         pub.sendMessage('preferences.requested.value',
                         msg='general.calculation.dvh_recalc')
@@ -344,7 +358,7 @@ class MainFrame(wx.Frame):
                     del(menu)
                 self.menuExportDict = {}
             # Reset the preferences template
-            self.preftemplate = [{'General':self.generalpreftemplate}]
+            self.preftemplate = [{'General': self.generalpreftemplate}]
             # Initialize the list of subplugins
             subplugins = []
             # Set up the plugins for each plugin entry point of dicompyler
@@ -353,7 +367,7 @@ class MainFrame(wx.Frame):
                 # or actually is a proper Python module
                 p = plugin['plugin']
                 if not hasattr(p, 'pluginProperties') or \
-                    (p.__name__ in self.pluginsDisabled):
+                        (p.__name__ in self.pluginsDisabled):
                     continue
                 props = p.pluginProperties()
                 # Only load plugin versions that are qualified
@@ -400,19 +414,23 @@ class MainFrame(wx.Frame):
                             continue
                         # Add the plugin preferences if they exist
                         if hasattr(plugin, 'preferences'):
-                            self.preftemplate.append({props['name']:plugin.preferences})
-            pub.sendMessage('preferences.updated.template', msg=self.preftemplate)
+                            self.preftemplate.append(
+                                {props['name']: plugin.preferences})
+            pub.sendMessage('preferences.updated.template',
+                            msg=self.preftemplate)
 
             # Load the subplugins and notify the parent plugins
             for s in subplugins:
                 props = s.pluginProperties()
-                msg = 'plugin.loaded.' + props['plugin_type'] + '.' +s.__name__
+                msg = 'plugin.loaded.' + \
+                    props['plugin_type'] + '.' + s.__name__
                 pub.sendMessage(msg, msg=s)
 
-        dlgProgress = guiutil.get_progress_dialog(self, "Loading Patient Data...")
-        self.t=threading.Thread(target=self.LoadPatientDataThread,
-            args=(self, self.ptdata, dlgProgress.OnUpdateProgress,
-            self.OnUpdatePatientData))
+        dlgProgress = guiutil.get_progress_dialog(
+            self, "Loading Patient Data...")
+        self.t = threading.Thread(target=self.LoadPatientDataThread,
+                                  args=(self, self.ptdata, dlgProgress.OnUpdateProgress,
+                                        self.OnUpdatePatientData))
         self.t.start()
         dlgProgress.ShowModal()
         if dlgProgress:
@@ -426,13 +444,14 @@ class MainFrame(wx.Frame):
         patient = {}
 
         if not 'images' in ptdata:
-            #Look for DICOM data in the ptdata dictionary
+            # Look for DICOM data in the ptdata dictionary
             for rtdatatype in ptdata.keys():
                 if isinstance(ptdata[rtdatatype], pydicom.dataset.FileDataset):
                     patient.update(dp(ptdata[rtdatatype]).GetDemographics())
                     break
         if 'rtss' in ptdata:
-            wx.CallAfter(progressFunc, 20, 100, 'Processing RT Structure Set...')
+            wx.CallAfter(progressFunc, 20, 100,
+                         'Processing RT Structure Set...')
             d = dp(ptdata['rtss'])
             s = d.GetStructures()
             for k in s.keys():
@@ -466,18 +485,19 @@ class MainFrame(wx.Frame):
                 # Only calculate DVHs if they are not present for the structure
                 # or recalc all DVHs if the preference is set
                 if ((not (key in patient['dvhs'].keys())) or
-                    (self.dvhRecalc == 'Always Recalculate DVH')):
+                        (self.dvhRecalc == 'Always Recalculate DVH')):
                     # Only calculate DVHs for structures, not applicators
                     # and only if the dose grid is present
                     if ((structure['name'].startswith('Applicator')) or
-                        (not "PixelData" in patient['dose'].ds)):
+                            (not "PixelData" in patient['dose'].ds)):
                         continue
                     wx.CallAfter(progressFunc,
                                  10*i/len(patient['structures'])+90, 100,
                                  'Calculating DVH for ' + structure['name'] +
                                  '...')
                     # Limit DVH bins to 500 Gy due to high doses in brachy
-                    dvh = dvhcalc.get_dvh(ptdata['rtss'], patient['dose'].ds, key, 50000)
+                    dvh = dvhcalc.get_dvh(
+                        ptdata['rtss'], patient['dose'].ds, key, 50000)
                     if len(dvh.counts):
                         patient['dvhs'][key] = dvh
                     i += 1
@@ -502,7 +522,8 @@ class MainFrame(wx.Frame):
             self.PopulatePlan({})
 
         if ('dose' in patient and 'plan' in patient):
-            self.PopulateIsodoses('images' in patient, patient['plan'], patient['dose'])
+            self.PopulateIsodoses('images' in patient,
+                                  patient['plan'], patient['dose'])
         else:
             self.PopulateIsodoses('images' in patient, {}, {})
 
@@ -526,7 +547,7 @@ class MainFrame(wx.Frame):
             # Only append structures, don't include applicators
             if not(structure['name'].startswith('Applicator')):
                 self.cclbStructures.Append(structure['name'], structure, structure['color'],
-                    refresh=False)
+                                           refresh=False)
         # Refresh the structure list manually since we didn't want it to refresh
         # after adding each structure
         self.cclbStructures.Layout()
@@ -539,25 +560,29 @@ class MainFrame(wx.Frame):
 
         self.cclbIsodoses.Clear()
 
-        self.isodoseList={}
+        self.isodoseList = {}
         if (has_images and len(plan) and "PixelData" in dose.ds):
             dosedata = dose.GetDoseData()
-            dosemax = int(dosedata['dosemax'] * dosedata['dosegridscaling'] * 10000 / plan['rxdose'])
-            self.isodoses = [{'level':dosemax, 'color':wx.Colour(120, 0, 0), 'name':'Max'},
-                {'level':102, 'color':wx.Colour(170, 0, 0)},
-                {'level':100, 'color':wx.Colour(238, 69, 0)}, {'level':98, 'color':wx.Colour(255, 165, 0)},
-                {'level':95, 'color':wx.Colour(255, 255, 0)}, {'level':90, 'color':wx.Colour(0, 255, 0)},
-                {'level':80, 'color':wx.Colour(0, 139, 0)}, {'level':70, 'color':wx.Colour(0, 255, 255)},
-                {'level':50, 'color':wx.Colour(0, 0, 255)}, {'level':30, 'color':wx.Colour(0, 0, 128)}]
+            dosemax = int(
+                dosedata['dosemax'] * dosedata['dosegridscaling'] * 10000 / plan['rxdose'])
+            self.isodoses = [{'level': dosemax, 'color': wx.Colour(120, 0, 0), 'name': 'Max'},
+                             {'level': 102, 'color': wx.Colour(170, 0, 0)},
+                             {'level': 100, 'color': wx.Colour(238, 69, 0)}, {
+                'level': 98, 'color': wx.Colour(255, 165, 0)},
+                {'level': 95, 'color': wx.Colour(255, 255, 0)}, {
+                'level': 90, 'color': wx.Colour(0, 255, 0)},
+                {'level': 80, 'color': wx.Colour(0, 139, 0)}, {
+                'level': 70, 'color': wx.Colour(0, 255, 255)},
+                {'level': 50, 'color': wx.Colour(0, 0, 255)}, {'level': 30, 'color': wx.Colour(0, 0, 128)}]
             for isodose in self.isodoses:
                 # Calculate the absolute dose value
                 name = ' / ' + str("%.6g" %
-                (float(isodose['level']) * float(plan['rxdose']) / 100)) + \
-                ' cGy'
+                                   (float(isodose['level']) * float(plan['rxdose']) / 100)) + \
+                    ' cGy'
                 if 'name' in isodose:
                     name = name + ' [' + isodose['name'] + ']'
                 self.cclbIsodoses.Append(str(isodose['level'])+' %'+name, isodose, isodose['color'],
-                    refresh=False)
+                                         refresh=False)
         # Refresh the isodose list manually since we didn't want it to refresh
         # after adding each isodose
         self.cclbIsodoses.Layout()
@@ -604,7 +629,7 @@ class MainFrame(wx.Frame):
             # Otherwise calculate the volume from the structure data
             else:
                 self.structures[structure_id]['volume'] = dvhdata.CalculateVolume(
-                                                    self.structures[structure_id])
+                    self.structures[structure_id])
             structure['data']['volume'] = self.structures[structure_id]['volume']
         self.structureList[structure_id] = structure['data']
 
@@ -659,15 +684,19 @@ class MainFrame(wx.Frame):
         # Load the structure id chosen from the choice control
         structure_id = self.choiceStructure.GetClientData(choiceItem)
 
-        pub.sendMessage('structure.selected', msg={'id':structure_id})
+        pub.sendMessage('structure.selected', msg={'id': structure_id})
 
-        self.lblStructureVolume.SetLabel(str(self.structures[structure_id]['volume'])[0:7])
+        self.lblStructureVolume.SetLabel(
+            str(self.structures[structure_id]['volume'])[0:7])
         # make sure that the dvh has been calculated for each structure
         # before setting it
         if structure_id in self.dvhs:
-            self.lblStructureMinDose.SetLabel("%.3f" % self.dvhs[structure_id].min)
-            self.lblStructureMaxDose.SetLabel("%.3f" % self.dvhs[structure_id].max)
-            self.lblStructureMeanDose.SetLabel("%.3f" % self.dvhs[structure_id].mean)
+            self.lblStructureMinDose.SetLabel(
+                "%.3f" % self.dvhs[structure_id].min)
+            self.lblStructureMaxDose.SetLabel(
+                "%.3f" % self.dvhs[structure_id].max)
+            self.lblStructureMeanDose.SetLabel(
+                "%.3f" % self.dvhs[structure_id].mean)
         else:
             self.lblStructureMinDose.SetLabel('-')
             self.lblStructureMaxDose.SetLabel('-')
@@ -676,7 +705,7 @@ class MainFrame(wx.Frame):
     def OnStructureUnselect(self):
         """Clear the properties of the selected structure."""
 
-        pub.sendMessage('structures.selected', msg={'id':None})
+        pub.sendMessage('structures.selected', msg={'id': None})
 
         self.lblStructureVolume.SetLabel('-')
         self.lblStructureMinDose.SetLabel('-')
@@ -715,6 +744,7 @@ class MainFrame(wx.Frame):
             since this replaces a new-style class method."""
 
         run_old = threading.Thread.run
+
         def Run(*args, **kwargs):
             try:
                 run_old(*args, **kwargs)
@@ -731,15 +761,15 @@ class MainFrame(wx.Frame):
             self.dvhRecalc = msg
         elif (topic[1] == 'advanced') and \
                 (topic[2] == 'detailed_logging'):
-                    # Enable logging at the debug level if the value is set
-                    if msg:
-                        self.fh.setLevel(logging.DEBUG)
-                        if not util.main_is_frozen():
-                            self.ch.setLevel(logging.DEBUG)
-                    else:
-                        self.fh.setLevel(logging.WARNING)
-                        if not util.main_is_frozen():
-                            self.ch.setLevel(logging.WARNING)
+            # Enable logging at the debug level if the value is set
+            if msg:
+                self.fh.setLevel(logging.DEBUG)
+                if not util.main_is_frozen():
+                    self.ch.setLevel(logging.DEBUG)
+            else:
+                self.fh.setLevel(logging.WARNING)
+                if not util.main_is_frozen():
+                    self.ch.setLevel(logging.WARNING)
         elif (topic[1] == 'plugins') and (topic[2] == 'disabled_list'):
             self.pluginsDisabled = msg
         elif (topic[1] == 'window'):
@@ -768,18 +798,18 @@ class MainFrame(wx.Frame):
                 # or actually is a proper Python module or is disabled
                 p = pg['plugin']
                 if not hasattr(p, 'pluginProperties') or \
-                    (p.__name__ in self.pluginsDisabled):
+                        (p.__name__ in self.pluginsDisabled):
                     continue
                 props = p.pluginProperties()
                 # Only load plugin versions that are qualified
                 if ((props['plugin_version'] == 1) and
-                    (props['plugin_type'] == 'import')):
+                        (props['plugin_type'] == 'import')):
                     self.menuImportItem.Enable(True)
                     # Load the import menu plugins
                     if not len(self.menuImportDict):
                         self.menuImportItem.Enable(True)
                     self.menuImportDict[300+i] = self.menuImport.Append(
-                                        300+i, props['menuname'])
+                        300+i, props['menuname'])
                     pi = p.plugin(self)
                     self.Bind(wx.EVT_MENU, pi.pluginMenu, id=300+i)
                     # If the import plugin has toolbar items, display them
@@ -787,10 +817,12 @@ class MainFrame(wx.Frame):
                         for t, tool in enumerate(pi.tools):
                             self.maintools.append(tool)
                             self.toolbar.AddTool(
-                                        (300+i)*10+t, tool['label'],
-                                        tool['bmp'], shortHelp=tool['shortHelp'])
-                            self.Bind(wx.EVT_TOOL, tool['eventhandler'], id=(300+i)*10+t)
+                                (300+i)*10+t, tool['label'],
+                                tool['bmp'], shortHelp=tool['shortHelp'])
+                            self.Bind(
+                                wx.EVT_TOOL, tool['eventhandler'], id=(300+i)*10+t)
                         self.toolbar.Realize()
+
     def OnUpdateStatusBar(self, msg):
         """Update the status bar text."""
 
@@ -810,8 +842,8 @@ class MainFrame(wx.Frame):
         if hasattr(page, 'tools'):
             for t, tool in enumerate(page.tools):
                 self.toolbar.AddTool(
-                            (new+1)*10+t, tool['label'],
-                            tool['bmp'], shortHelp=tool['shortHelp'])
+                    (new+1)*10+t, tool['label'],
+                    tool['bmp'], shortHelp=tool['shortHelp'])
                 self.Bind(wx.EVT_TOOL, tool['eventhandler'], id=(new+1)*10+t)
             self.toolbar.Realize()
         # For all other tabs, notify that they don't have focus anymore
@@ -855,7 +887,8 @@ class MainFrame(wx.Frame):
     def OnPluginManager(self, evt):
         """Load and show the Plugin Manager dialog box."""
 
-        self.pm = plugin.PluginManager(self, self.plugins, self.pluginsDisabled)
+        self.pm = plugin.PluginManager(
+            self, self.plugins, self.pluginsDisabled)
 
     def OnAbout(self, evt):
         # First we create and fill the info object
@@ -866,9 +899,9 @@ class MainFrame(wx.Frame):
         our_credits = util.get_credits()
         info.Developers = our_credits['developers']
         info.Artists = our_credits['artists']
-        desc =  "Extensible radiation therapy research platform and viewer for DICOM and DICOM RT." + \
-                "\n\ndicompyler is released under a BSD license.\n" + \
-                "See the Help menu for license information."
+        desc = "Extensible radiation therapy research platform and viewer for DICOM and DICOM RT." + \
+            "\n\ndicompyler is released under a BSD license.\n" + \
+            "See the Help menu for license information."
         info.Description = desc
         if guiutil.IsGtk():
             info.WebSite = "https://github.com/bastula/dicompyler/"
@@ -880,20 +913,20 @@ class MainFrame(wx.Frame):
         """Show the homepage for dicompyler."""
 
         webbrowser.open_new_tab("https://github.com/bastula/dicompyler/")
-        
+
     def OnLicense(self, evt):
         """Show the license document in a new dialog."""
-        
+
         f = open(util.get_text_resources("license.txt"), "rU")
         msg = f.read()
         f.close()
 
         if guiutil.IsMSWindows():
             dlg = wx.lib.dialogs.ScrolledMessageDialog(self, msg,
-                "dicompyler License")
+                                                       "dicompyler License")
         else:
             dlg = wx.lib.dialogs.ScrolledMessageDialog(self, msg,
-                "dicompyler License", size=(650, 550))
+                                                       "dicompyler License", size=(650, 550))
 
         dlg.ShowModal()
         dlg.Destroy()
@@ -907,21 +940,22 @@ class MainFrame(wx.Frame):
             if not os.path.isdir(path):
                 path = os.path.split(path)[0]
             pub.sendMessage('preferences.updated.value',
-                        msg={'general.dicom.import_location':path})
+                            msg={'general.dicom.import_location': path})
             sys.argv.pop()
             self.OnOpenPatient(None)
         evt.Skip()
 
     def OnClose(self, _):
         pub.sendMessage('preferences.updated.value',
-                msg={'general.window.maximized':self.IsMaximized()})
+                        msg={'general.window.maximized': self.IsMaximized()})
         if not self.IsMaximized():
             pub.sendMessage('preferences.updated.value',
-                    msg={'general.window.size':tuple(self.GetSize())})
+                            msg={'general.window.size': tuple(self.GetSize())})
             pub.sendMessage('preferences.updated.value',
-                    msg={'general.window.position':tuple(self.GetPosition())})
+                            msg={'general.window.position': tuple(self.GetPosition())})
         self.Destroy()
         sys.exit(0)
+
 
 class dicompyler(wx.App):
     def OnInit(self):
@@ -937,9 +971,11 @@ class dicompyler(wx.App):
 
 # end of class dicompyler
 
+
 def start():
     app = dicompyler(0)
     app.MainLoop()
+
 
 if __name__ == '__main__':
     start()

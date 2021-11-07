@@ -12,13 +12,15 @@
 from dicompyler import wxmpl
 import numpy as np
 
+
 class guiDVH:
     """Displays and updates the dose volume histogram using WxMpl."""
+
     def __init__(self, parent):
 
         self.panelDVH = wxmpl.PlotPanel(parent, -1,
-                    size=(6, 4.50), dpi=68, crosshairs=False,
-                    autoscaleUnzoom=False)
+                                        size=(6, 4.50), dpi=68, crosshairs=False,
+                                        autoscaleUnzoom=False)
         self.Replot()
 
     def Replot(self, dvhlist=None, scalinglist=None, structures=None,
@@ -46,7 +48,8 @@ class guiDVH:
                             color = colorarray/255
                         else:
                             color = np.zeros(3)
-                        prefix = prefixes[d] if not (prefixes == None) else None
+                        prefix = prefixes[d] if not (
+                            prefixes == None) else None
                         linestyle = '-' if not (d % 2) else '--'
                         maxlen = self.DrawDVH(dvh, structures[id], axes, color,
                                               maxlen, scalinglist[d],
@@ -77,12 +80,13 @@ class guiDVH:
         dose = np.arange(len(dvh))
         if not (scaling == None):
             dose = dose * scaling[structure['id']]
-        name = prefix + ' ' + structure['name'] if prefix else structure['name']
+        name = prefix + ' ' + \
+            structure['name'] if prefix else structure['name']
         axes.plot(dose, dvh,
-                label=name,
-                color=color,
-                linewidth=2,
-                linestyle=linestyle)
+                  label=name,
+                  color=color,
+                  linewidth=2,
+                  linestyle=linestyle)
 
         return maxlen
 

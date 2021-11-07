@@ -11,8 +11,10 @@
 import wx
 from wx.xrc import XmlResource, XRCCTRL, XRCID
 from pubsub import pub
-import os, threading
+import os
+import threading
 from dicompyler import guiutil, util
+
 
 def pluginProperties():
     """Properties of the plugin."""
@@ -29,6 +31,7 @@ def pluginProperties():
     props['recommended_dicom'] = ['images', 'rtss', 'rtplan', 'rtdose']
 
     return props
+
 
 class plugin:
 
@@ -68,9 +71,9 @@ class plugin:
                 wx.GetApp().GetTopWindow(),
                 "Anonymizing DICOM data...")
             # Initialize and start the anonymization thread
-            self.t=threading.Thread(target=self.AnonymizeDataThread,
-                args=(self.data, path, name, patientid, privatetags,
-                dlgProgress.OnUpdateProgress))
+            self.t = threading.Thread(target=self.AnonymizeDataThread,
+                                      args=(self.data, path, name, patientid, privatetags,
+                                            dlgProgress.OnUpdateProgress))
             self.t.start()
             # Show the progress dialog
             dlgProgress.ShowModal()
@@ -82,7 +85,7 @@ class plugin:
         return
 
     def AnonymizeDataThread(self, data, path, name, patientid, privatetags,
-            progressFunc):
+                            progressFunc):
         """Anonmyize and save each DICOM / DICOM RT file."""
 
         length = 0
@@ -96,7 +99,7 @@ class plugin:
         if 'rtss' in data:
             rtss = data['rtss']
             wx.CallAfter(progressFunc, i, length,
-                'Anonymizing file ' + str(i) + ' of ' + str(length))
+                         'Anonymizing file ' + str(i) + ' of ' + str(length))
             self.updateCommonElements(rtss, name, patientid, privatetags)
             self.updateElement(rtss, 'SeriesDescription', 'RT Structure Set')
             self.updateElement(rtss, 'StructureSetDate', '19010101')
@@ -109,7 +112,7 @@ class plugin:
         if 'rtplan' in data:
             rtplan = data['rtplan']
             wx.CallAfter(progressFunc, i, length,
-                'Anonymizing file ' + str(i) + ' of ' + str(length))
+                         'Anonymizing file ' + str(i) + ' of ' + str(length))
             self.updateCommonElements(rtplan, name, patientid, privatetags)
             self.updateElement(rtplan, 'SeriesDescription', 'RT Plan')
             self.updateElement(rtplan, 'RTPlanName', 'plan')
@@ -117,34 +120,40 @@ class plugin:
             self.updateElement(rtplan, 'RTPlanTime', '000000')
             if 'ToleranceTables' in rtplan:
                 for item in rtplan.ToleranceTables:
-                    self.updateElement(item, 'ToleranceTableLabel', 'tolerance')
+                    self.updateElement(
+                        item, 'ToleranceTableLabel', 'tolerance')
             if 'Beams' in rtplan:
                 for item in rtplan.Beams:
                     self.updateElement(item, 'Manufacturer', 'manufacturer')
                     self.updateElement(item, 'InstitutionName', 'institution')
                     self.updateElement(item, 'InstitutionAddress', 'address')
-                    self.updateElement(item, 'InstitutionalDepartmentName', 'department')
+                    self.updateElement(
+                        item, 'InstitutionalDepartmentName', 'department')
                     self.updateElement(item, 'ManufacturersModelName', 'model')
-                    self.updateElement(item, 'TreatmentMachineName', 'txmachine')
+                    self.updateElement(
+                        item, 'TreatmentMachineName', 'txmachine')
             if 'TreatmentMachines' in rtplan:
                 for item in rtplan.TreatmentMachines:
                     self.updateElement(item, 'Manufacturer', 'manufacturer')
                     self.updateElement(item, 'InstitutionName', 'vendor')
                     self.updateElement(item, 'InstitutionAddress', 'address')
-                    self.updateElement(item, 'InstitutionalDepartmentName', 'department')
+                    self.updateElement(
+                        item, 'InstitutionalDepartmentName', 'department')
                     self.updateElement(item, 'ManufacturersModelName', 'model')
                     self.updateElement(item, 'DeviceSerialNumber', '0')
-                    self.updateElement(item, 'TreatmentMachineName', 'txmachine')
+                    self.updateElement(
+                        item, 'TreatmentMachineName', 'txmachine')
             if 'Sources' in rtplan:
                 for item in rtplan.Sources:
-                    self.updateElement(item, 'SourceManufacturer', 'manufacturer')
+                    self.updateElement(
+                        item, 'SourceManufacturer', 'manufacturer')
                     self.updateElement(item, 'SourceIsotopeName', 'isotope')
             rtplan.save_as(os.path.join(path, 'rtplan.dcm'))
             i = i + 1
         if 'rtdose' in data:
             rtdose = data['rtdose']
             wx.CallAfter(progressFunc, i, length,
-                'Anonymizing file ' + str(i) + ' of ' + str(length))
+                         'Anonymizing file ' + str(i) + ' of ' + str(length))
             self.updateCommonElements(rtdose, name, patientid, privatetags)
             self.updateElement(rtdose, 'SeriesDescription', 'RT Dose')
             rtdose.save_as(os.path.join(path, 'rtdose.dcm'))
@@ -153,7 +162,7 @@ class plugin:
             images = data['images']
             for n, image in enumerate(images):
                 wx.CallAfter(progressFunc, i, length,
-                    'Anonymizing file ' + str(i) + ' of ' + str(length))
+                             'Anonymizing file ' + str(i) + ' of ' + str(length))
                 self.updateCommonElements(image, name, patientid, privatetags)
                 self.updateElement(image, 'SeriesDate', '19010101')
                 self.updateElement(image, 'ContentDate', '19010101')
@@ -161,8 +170,10 @@ class plugin:
                 self.updateElement(image, 'ContentTime', '000000')
                 self.updateElement(image, 'InstitutionName', 'institution')
                 self.updateElement(image, 'InstitutionAddress', 'address')
-                self.updateElement(image, 'InstitutionalDepartmentName', 'department')
-                modality = image.SOPClassUID.name.partition(' Image Storage')[0]
+                self.updateElement(
+                    image, 'InstitutionalDepartmentName', 'department')
+                modality = image.SOPClassUID.name.partition(' Image Storage')[
+                    0]
                 image.save_as(
                     os.path.join(path, modality.lower() + '.' + str(n) + '.dcm'))
                 i = i + 1
@@ -173,7 +184,7 @@ class plugin:
         """Updates the element only if it exists in the original DICOM data."""
 
         if element in data:
-            data.update({element:value})
+            data.update({element: value})
 
     def updateCommonElements(self, data, name, patientid, privatetags):
         """Updates the element only if it exists in the original DICOM data."""
@@ -213,6 +224,7 @@ class plugin:
         self.updateElement(data, 'ReviewTime', '000000')
         self.updateElement(data, 'ReviewerName', 'anonymous')
 
+
 class AnonymizeDialog(wx.Dialog):
     """Dialog that shows the options to anonymize DICOM / DICOM RT data."""
 
@@ -239,7 +251,8 @@ class AnonymizeDialog(wx.Dialog):
 
         # Bind interface events to the proper methods
         wx.EVT_BUTTON(self, XRCID('btnFolderBrowse'), self.OnFolderBrowse)
-        wx.EVT_CHECKBOX(self, XRCID('checkPatientName'), self.OnCheckPatientName)
+        wx.EVT_CHECKBOX(self, XRCID('checkPatientName'),
+                        self.OnCheckPatientName)
         wx.EVT_CHECKBOX(self, XRCID('checkPatientID'), self.OnCheckPatientID)
         wx.EVT_BUTTON(self, wx.ID_OK, self.OnOK)
 
@@ -250,8 +263,10 @@ class AnonymizeDialog(wx.Dialog):
             self.lblDescription.SetFont(font)
 
         # Initialize the import location via pubsub
-        pub.subscribe(self.OnImportPrefsChange, 'general.dicom.import_location')
-        pub.sendMessage('preferences.requested.value', msg='general.dicom.import_location')
+        pub.subscribe(self.OnImportPrefsChange,
+                      'general.dicom.import_location')
+        pub.sendMessage('preferences.requested.value',
+                        msg='general.dicom.import_location')
 
         # Pre-select the text on the text controls due to a Mac OS X bug
         self.txtFirstName.SetSelection(-1, -1)
@@ -276,7 +291,7 @@ class AnonymizeDialog(wx.Dialog):
         """Get the directory selected by the user."""
 
         dlg = wx.DirDialog(
-            self, defaultPath = self.path,
+            self, defaultPath=self.path,
             message="Choose a folder to save the anonymized DICOM data...")
 
         if dlg.ShowModal() == wx.ID_OK:

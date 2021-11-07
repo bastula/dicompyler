@@ -19,27 +19,27 @@ requires = [
 
 setup(
     name="dicompyler",
-    version = "0.5.0",
-    include_package_data = True,
-    packages = find_packages(),
-    package_data = {'dicompyler':
-        ['*.txt', 'resources/*.png', 'resources/*.xrc', 'resources/*.ico',
-        'baseplugins/*.py', 'baseplugins/*.xrc']},
-    zip_safe = False,
-    install_requires = requires,
-    dependency_links = [
+    version="0.5.0",
+    include_package_data=True,
+    packages=find_packages(),
+    package_data={'dicompyler':
+                  ['*.txt', 'resources/*.png', 'resources/*.xrc', 'resources/*.ico',
+                   'baseplugins/*.py', 'baseplugins/*.xrc']},
+    zip_safe=False,
+    install_requires=requires,
+    dependency_links=[
         'git+https://github.com/darcymason/pydicom.git#egg=pydicom-1.0.0'],
-    entry_points={'console_scripts':['dicompyler = dicompyler.main:start']},
+    entry_points={'console_scripts': ['dicompyler = dicompyler.main:start']},
 
     # metadata for upload to PyPI
-    author = "Aditya Panchal",
-    author_email = "apanchal@bastula.org",
-    description = "Extensible radiation therapy research platform and " + \
-        "viewer for DICOM and DICOM RT.",
-    license = "BSD License",
-    keywords = "radiation therapy research python dicom dicom-rt",
-    url = "https://github.com/bastula/dicompyler/",
-    classifiers = [
+    author="Aditya Panchal",
+    author_email="apanchal@bastula.org",
+    description="Extensible radiation therapy research platform and " + \
+    "viewer for DICOM and DICOM RT.",
+    license="BSD License",
+    keywords="radiation therapy research python dicom dicom-rt",
+    url="https://github.com/bastula/dicompyler/",
+    classifiers=[
         "License :: OSI Approved :: BSD License",
         "Intended Audience :: Developers",
         "Intended Audience :: Healthcare Industry",
@@ -54,7 +54,7 @@ setup(
         "Topic :: Scientific/Engineering :: Medical Science Apps.",
         "Topic :: Scientific/Engineering :: Physics",
         "Topic :: Scientific/Engineering :: Visualization"],
-    long_description = """
+    long_description="""
     dicompyler
     ==========
     
