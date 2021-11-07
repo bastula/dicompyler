@@ -704,12 +704,12 @@ class plugin2DView(wx.Panel):
         menu = wx.Menu()
         if len(self.plugins):
             for name, p in self.plugins.items():
-                id = wx.NewId()
-                self.Bind(wx.EVT_MENU, p.pluginMenu, id=id)
-                menu.Append(id, name)
+                identifier = wx.NewId()
+                self.Bind(wx.EVT_MENU, p.pluginMenu, id=identifier)
+                menu.Append(identifier, name)
         else:
-            id = wx.NewId()
-            menu.Append(id, "No tools found")
-            menu.Enable(id, False)
+            identifier = wx.NewId()
+            menu.Append(identifier, "No tools found")
+            menu.Enable(identifier, False)
         self.PopupMenu(menu)
         menu.Destroy()

@@ -250,7 +250,7 @@ class pluginDVH(wx.Panel):
 
         self.txtConstraint.SetValue(slidervalue)
         self.sliderConstraint.SetValue(slidervalue)
-        id = self.structureid
+        structure_id = self.structureid
         dvh = self.dvhs[self.structureid]
 
         constrainttype = self.choiceConstraint.GetSelection()
@@ -263,7 +263,7 @@ class pluginDVH(wx.Panel):
             self.lblConstraintUnits.SetLabel(str(cc))
             self.lblConstraintPercent.SetLabel(str(constraint))
             self.guiDVH.Replot([self.dvharray], [self.dvhscaling],
-                self.checkedstructures, ([absDose], [constraint.value]), id)
+                self.checkedstructures, ([absDose], [constraint.value]), structure_id)
         # Volume constraint in Gy
         elif (constrainttype == 1):
             absDose = slidervalue*100
@@ -274,7 +274,7 @@ class pluginDVH(wx.Panel):
             self.lblConstraintUnits.SetLabel(str(cc))
             self.lblConstraintPercent.SetLabel(str(constraint))
             self.guiDVH.Replot([self.dvharray], [self.dvhscaling],
-                self.checkedstructures, ([absDose], [constraint.value]), id)
+                self.checkedstructures, ([absDose], [constraint.value]), structure_id)
         # Dose constraint
         elif (constrainttype == 2):
             dose = dvh.dose_constraint(slidervalue)
@@ -284,10 +284,10 @@ class pluginDVH(wx.Panel):
             self.lblConstraintPercent.SetLabel(str(relative_dose))
             self.guiDVH.Replot([self.dvharray], [self.dvhscaling],
                 self.checkedstructures,
-                ([dose.value * 100], [slidervalue]), id)
+                ([dose.value * 100], [slidervalue]), structure_id)
         # Dose constraint in cc
         elif (constrainttype == 3):
-            volumepercent = slidervalue*100/self.structures[id]['volume']
+            volumepercent = slidervalue*100/self.structures[structure_id]['volume']
             dose = dvh.dose_constraint(slidervalue, dvh.volume_units)
             relative_dose = dvh.relative_dose().dose_constraint(
                 slidervalue, dvh.volume_units)
@@ -296,4 +296,4 @@ class pluginDVH(wx.Panel):
             self.lblConstraintPercent.SetLabel(str(relative_dose))
             self.guiDVH.Replot([self.dvharray], [self.dvhscaling],
                 self.checkedstructures,
-                ([dose.value * 100], [volumepercent]), id)
+                ([dose.value * 100], [volumepercent]), structure_id)

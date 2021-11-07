@@ -592,26 +592,26 @@ class MainFrame(wx.Frame):
         structure = msg
 
         # Get the structure number
-        id = structure['data']['id']
+        structure_id = structure['data']['id']
         structure['data']['color'] = structure['color'].Get()
 
         # Make sure that the volume has been calculated for each structure
         # before setting it
-        if not 'volume' in self.structures[id]:
+        if not 'volume' in self.structures[structure_id]:
             # Use the volume units from the DVH if they are absolute volume
-            if id in self.dvhs and (self.dvhs[id].volume_units == 'cm3'):
-                self.structures[id]['volume'] = self.dvhs[id].volume
+            if structure_id in self.dvhs and (self.dvhs[structure_id].volume_units == 'cm3'):
+                self.structures[structure_id]['volume'] = self.dvhs[structure_id].volume
             # Otherwise calculate the volume from the structure data
             else:
-                self.structures[id]['volume'] = dvhdata.CalculateVolume(
-                                                    self.structures[id])
-            structure['data']['volume'] = self.structures[id]['volume']
-        self.structureList[id] = structure['data']
+                self.structures[structure_id]['volume'] = dvhdata.CalculateVolume(
+                                                    self.structures[structure_id])
+            structure['data']['volume'] = self.structures[structure_id]['volume']
+        self.structureList[structure_id] = structure['data']
 
         # Populate the structure choice box with the checked structures
         self.choiceStructure.Enable()
         i = self.choiceStructure.Append(structure['data']['name'])
-        self.choiceStructure.SetClientData(i, id)
+        self.choiceStructure.SetClientData(i, structure_id)
         # Select the first structure
         self.OnStructureSelect()
 
@@ -623,15 +623,15 @@ class MainFrame(wx.Frame):
         structure = msg
 
         # Get the structure number
-        id = structure['data']['id']
+        structure_id = structure['data']['id']
 
         # Remove the structure from the structure list
-        if id in self.structureList:
-            del self.structureList[id]
+        if structure_id in self.structureList:
+            del self.structureList[structure_id]
 
         # Remove the structure from the structure choice box
         for n in range(self.choiceStructure.GetCount()):
-            if (id == self.choiceStructure.GetClientData(n)):
+            if (structure_id == self.choiceStructure.GetClientData(n)):
                 # Save if the currently selected item's position
                 currSelection = self.choiceStructure.GetSelection()
                 self.choiceStructure.Delete(n)
@@ -658,17 +658,17 @@ class MainFrame(wx.Frame):
         else:
             choiceItem = evt.GetInt()
         # Load the structure id chosen from the choice control
-        id = self.choiceStructure.GetClientData(choiceItem)
+        structure_id = self.choiceStructure.GetClientData(choiceItem)
 
-        pub.sendMessage('structure.selected', msg={'id':id})
+        pub.sendMessage('structure.selected', msg={'id':structure_id})
 
-        self.lblStructureVolume.SetLabel(str(self.structures[id]['volume'])[0:7])
+        self.lblStructureVolume.SetLabel(str(self.structures[structure_id]['volume'])[0:7])
         # make sure that the dvh has been calculated for each structure
         # before setting it
-        if id in self.dvhs:
-            self.lblStructureMinDose.SetLabel("%.3f" % self.dvhs[id].min)
-            self.lblStructureMaxDose.SetLabel("%.3f" % self.dvhs[id].max)
-            self.lblStructureMeanDose.SetLabel("%.3f" % self.dvhs[id].mean)
+        if structure_id in self.dvhs:
+            self.lblStructureMinDose.SetLabel("%.3f" % self.dvhs[structure_id].min)
+            self.lblStructureMaxDose.SetLabel("%.3f" % self.dvhs[structure_id].max)
+            self.lblStructureMeanDose.SetLabel("%.3f" % self.dvhs[structure_id].mean)
         else:
             self.lblStructureMinDose.SetLabel('-')
             self.lblStructureMaxDose.SetLabel('-')
@@ -698,11 +698,11 @@ class MainFrame(wx.Frame):
         """Remove the unchecked isodoses."""
 
         isodose = msg
-        id = isodose['data']['level']
+        level_id = isodose['data']['level']
 
         # Remove the isodose from the isodose list
-        if id in self.isodoseList:
-            del self.isodoseList[id]
+        if level_id in self.isodoseList:
+            del self.isodoseList[level_id]
 
         pub.sendMessage('isodoses.checked', msg=self.isodoseList)
 
@@ -864,9 +864,9 @@ class MainFrame(wx.Frame):
         info.Name = "dicompyler"
         info.Version = __version__
         info.Copyright = "(c) 2009-2017 Aditya Panchal"
-        credits = util.get_credits()
-        info.Developers = credits['developers']
-        info.Artists = credits['artists']
+        our_credits = util.get_credits()
+        info.Developers = our_credits['developers']
+        info.Artists = our_credits['artists']
         desc =  "Extensible radiation therapy research platform and viewer for DICOM and DICOM RT." + \
                 "\n\ndicompyler is released under a BSD license.\n" + \
                 "See the Help menu for license information."

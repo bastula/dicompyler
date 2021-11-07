@@ -73,17 +73,17 @@ def get_credits():
     developers = []
     artists = []
     with open(get_text_resources('credits.txt'), 'rU') as cf:
-        credits = cf.readlines()
-        for i, v in enumerate(credits):
+        our_credits = cf.readlines()
+        for i, v in enumerate(our_credits):
             if (v == "Lead Developer\n"):
-                developers.append(credits[i+1].strip())
+                developers.append(our_credits[i+1].strip())
             if (v == "Developers\n"):
-                for d in credits[i+1:len(credits)]:
+                for d in our_credits[i+1:len(our_credits)]:
                     if (d.strip() == ""):
                         break
                     developers.append(d.strip())
             if (v == "Artists\n"):
-                for a in credits[i+1:len(credits)]:
+                for a in our_credits[i+1:len(our_credits)]:
                     if (a.strip() == ""):
                         break
                     artists.append(a.strip())
