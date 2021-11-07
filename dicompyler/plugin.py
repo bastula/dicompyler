@@ -177,7 +177,6 @@ class PluginManagerDialog(wx.Dialog):
             if not hasattr(p, 'pluginProperties'):
                 continue
             props = p.pluginProperties()
-            root = self.userroot
             if (plugin['location'] == 'base'):
                 root = self.baseroot
             else:
