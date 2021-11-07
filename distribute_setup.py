@@ -326,10 +326,9 @@ _create_fake_setuptools_pkg_info = _no_sandbox(_create_fake_setuptools_pkg_info)
 def _patch_egg_dir(path):
     # let's check if it's already patched
     pkg_info = os.path.join(path, 'EGG-INFO', 'PKG-INFO')
-    if os.path.exists(pkg_info):
-        if _same_content(pkg_info, SETUPTOOLS_PKG_INFO):
-            log.warn('%s already patched.', pkg_info)
-            return False
+    if os.path.exists(pkg_info) and if _same_content(pkg_info, SETUPTOOLS_PKG_INFO):
+        log.warn('%s already patched.', pkg_info)
+        return False
     _rename_path(path)
     os.mkdir(path)
     os.mkdir(os.path.join(path, 'EGG-INFO'))
@@ -357,10 +356,9 @@ def _under_prefix(location):
             if arg.startswith('%s=' % option):
                 top_dir = arg.split('root=')[-1]
                 return location.startswith(top_dir)
-            elif arg == option:
-                if len(args) > index:
-                    top_dir = args[index+1]
-                    return location.startswith(top_dir)
+            elif arg == option and len(args) > index:
+                top_dir = args[index+1]
+                return location.startswith(top_dir)
         if arg == '--user' and USER_SITE is not None:
             return location.startswith(USER_SITE)
     return True

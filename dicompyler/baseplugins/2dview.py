@@ -346,8 +346,7 @@ class plugin2DView(wx.Panel):
             for xv, xval in enumerate(pixlut[0]):
                 if (xval > point[0] and not prone and not feetfirst):
                     break
-                elif (xval < point[0]):
-                    if feetfirst or prone:
+                elif (xval < point[0]) and feetfirst or prone:
                         break
             for yv, yval in enumerate(pixlut[1]):
                 if (yval > point[1] and not prone):
@@ -595,14 +594,12 @@ class plugin2DView(wx.Panel):
             nextkey = [wx.WXK_DOWN, wx.WXK_PAGEDOWN]
             zoominkey = [43, 61, 388] # Keys: +, =, Numpad add
             zoomoutkey = [45, 95, 390] # Keys: -, _, Numpad subtract
-            if (keyname in prevkey):
-                if (self.imagenum > 1):
-                    self.imagenum -= 1
-                    self.Refresh()
-            if (keyname in nextkey):
-                if (self.imagenum < len(self.images)):
-                    self.imagenum += 1
-                    self.Refresh()
+            if (keyname in prevkey) and (self.imagenum > 1):
+                self.imagenum -= 1
+                self.Refresh()
+            if (keyname in nextkey) and (self.imagenum < len(self.images)):
+                self.imagenum += 1
+                self.Refresh()
             if (keyname == wx.WXK_HOME):
                 self.imagenum = 1
                 self.Refresh()
@@ -625,10 +622,9 @@ class plugin2DView(wx.Panel):
                 if (self.imagenum > 1):
                     self.imagenum -= 1
                     self.Refresh()
-            if (rot <= -1):
-                if (self.imagenum < len(self.images)):
-                    self.imagenum += 1
-                    self.Refresh()
+            if (rot <= -1) and (self.imagenum < len(self.images)):
+                self.imagenum += 1
+                self.Refresh()
 
     def OnMouseDown(self, evt):
         """Get the initial position of the mouse when dragging."""

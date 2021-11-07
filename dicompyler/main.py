@@ -639,9 +639,8 @@ class MainFrame(wx.Frame):
 
         # If the currently selected item will be deleted,
         # select the last item instead
-        if (n == currSelection):
-            if (self.choiceStructure.GetCount() >= 1):
-                self.OnStructureSelect()
+        if (n == currSelection) and (self.choiceStructure.GetCount() >= 1):
+            self.OnStructureSelect()
         # Disable the control if it is the last item
         if (self.choiceStructure.GetCount() == 0):
             self.choiceStructure.Enable(False)

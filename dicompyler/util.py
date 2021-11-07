@@ -21,17 +21,15 @@ def platform():
 def GetResourcePath(resource):
     """Return the specified item from the resources folder."""
 
-    if main_is_frozen():
-        if (platform() == 'mac'):
-            return os.path.join((os.path.join(get_main_dir(), '../Resources')), resource)
+    if main_is_frozen() and (platform() == 'mac'):
+        return os.path.join((os.path.join(get_main_dir(), '../Resources')), resource)
     return os.path.join((os.path.join(get_main_dir(), 'resources')), resource)
 
 def GetBasePluginsPath(resource):
     """Return the specified item from the base plugins folder."""
 
-    if main_is_frozen():
-        if (platform() == 'mac'):
-            return os.path.join((os.path.join(get_main_dir(), '../PlugIns')), resource)
+    if main_is_frozen() and (platform() == 'mac'):
+        return os.path.join((os.path.join(get_main_dir(), '../PlugIns')), resource)
     return os.path.join((os.path.join(get_main_dir(), 'baseplugins')), resource)
 
 # from http://www.py2exe.org/index.cgi/HowToDetermineIfRunningFromExe
