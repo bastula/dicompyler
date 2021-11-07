@@ -230,7 +230,6 @@ class DicomImporterDialog(wx.Dialog):
                         logger.debug("Reading: %s", files[n])
                         dp = dicomparser.DicomParser(files[n])
                     except (AttributeError, EOFError, IOError, KeyError):
-                        pass
                         logger.info("%s is not a valid DICOM file.", files[n])
                     else:
                         patient = dp.GetDemographics()
