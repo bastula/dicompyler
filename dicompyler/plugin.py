@@ -35,29 +35,28 @@ def import_plugins(userpath=None):
     plugins = []
     for p in possibleplugins:
         module = p['plugin'].split('.')[0]
-        if module not in modules:
-            if not ((module == "__init__") or (module == "")):
-                # only try to import the module once
-                modules.append(module)
+        if module not in modules and not ((module == "__init__") or (module == "")):
+            # only try to import the module once
+            modules.append(module)
+            try:
+                f, filename, description = \
+                        imp.find_module(module, [userpath, basepath])
+            except ImportError:
+                # Not able to find module so pass
+                pass
+            else:
+                # Try to import the module if no exception occurred
                 try:
-                    f, filename, description = \
-                            imp.find_module(module, [userpath, basepath])
+                    m = imp.load_module(module, f, filename, description)
                 except ImportError:
-                    # Not able to find module so pass
-                    pass
+                    logger.exception("%s could not be loaded", module)
                 else:
-                    # Try to import the module if no exception occurred
-                    try:
-                        m = imp.load_module(module, f, filename, description)
-                    except ImportError:
-                        logger.exception("%s could not be loaded", module)
-                    else:
-                        plugins.append({'plugin': m,
-                                        'location': p['location']})
-                        logger.debug("%s loaded", module)
-                    # If the module is a single file, close it
-                    if not (description[2] == imp.PKG_DIRECTORY):
-                        f.close()
+                    plugins.append({'plugin': m,
+                                    'location': p['location']})
+                    logger.debug("%s loaded", module)
+                # If the module is a single file, close it
+                if not (description[2] == imp.PKG_DIRECTORY):
+                    f.close()
     return plugins
 
 def PluginManager(parent, plugins, pluginsDisabled):

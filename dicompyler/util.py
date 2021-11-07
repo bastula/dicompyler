@@ -21,17 +21,15 @@ def platform():
 def GetResourcePath(resource):
     """Return the specified item from the resources folder."""
 
-    if main_is_frozen():
-        if (platform() == 'mac'):
-            return os.path.join((os.path.join(get_main_dir(), '../Resources')), resource)
+    if main_is_frozen() and (platform() == 'mac'):
+        return os.path.join((os.path.join(get_main_dir(), '../Resources')), resource)
     return os.path.join((os.path.join(get_main_dir(), 'resources')), resource)
 
 def GetBasePluginsPath(resource):
     """Return the specified item from the base plugins folder."""
 
-    if main_is_frozen():
-        if (platform() == 'mac'):
-            return os.path.join((os.path.join(get_main_dir(), '../PlugIns')), resource)
+    if main_is_frozen() and (platform() == 'mac'):
+        return os.path.join((os.path.join(get_main_dir(), '../PlugIns')), resource)
     return os.path.join((os.path.join(get_main_dir(), 'baseplugins')), resource)
 
 # from http://www.py2exe.org/index.cgi/HowToDetermineIfRunningFromExe
@@ -73,17 +71,17 @@ def get_credits():
     developers = []
     artists = []
     with open(get_text_resources('credits.txt'), 'rU') as cf:
-        credits = cf.readlines()
-        for i, v in enumerate(credits):
+        our_credits = cf.readlines()
+        for i, v in enumerate(our_credits):
             if (v == "Lead Developer\n"):
-                developers.append(credits[i+1].strip())
+                developers.append(our_credits[i+1].strip())
             if (v == "Developers\n"):
-                for d in credits[i+1:len(credits)]:
+                for d in our_credits[i+1:len(our_credits)]:
                     if (d.strip() == ""):
                         break
                     developers.append(d.strip())
             if (v == "Artists\n"):
-                for a in credits[i+1:len(credits)]:
+                for a in our_credits[i+1:len(our_credits)]:
                     if (a.strip() == ""):
                         break
                     artists.append(a.strip())

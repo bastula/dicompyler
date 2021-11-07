@@ -549,9 +549,8 @@ class DicomImporterDialog(wx.Dialog):
                         if 'structures' in patient:
                             for structureid, structure in patient['structures'].items():
                                 foundstructure = False
-                                if 'rtss' in dose:
-                                    if (structureid == dose['rtss']):
-                                        foundstructure = True
+                                if 'rtss' in dose and (structureid == dose['rtss']):
+                                    foundstructure = True
                                 if (structure['referenceframe'] == dose['referenceframe']):
                                     foundstructure = True
                                 if foundstructure:
@@ -612,44 +611,35 @@ class DicomImporterDialog(wx.Dialog):
             for imageid, image in patient['images'].items():
                 appendImage = False
                 # used for image series
-                if 'id' in item:
-                    if (item['id'] == image['series']):
-                        appendImage = True
+                if 'id' in itemand (item['id'] == image['series']):
+                    appendImage = True
                 # used for RT structure set
-                if 'series' in item:
-                    if (item['series'] == image['series']):
-                        appendImage = True
+                if 'series' in item and (item['series'] == image['series']):
+                    appendImage = True
                 # used for RT plan / dose
-                if 'referenceframe' in item:
-                    if (item['referenceframe'] == image['referenceframe']):
-                        if not 'numimages' in item:
-                            appendImage = True
+                if 'referenceframe' in item and (item['referenceframe'] == image['referenceframe']) and not 'numimages' in item:
+                    appendImage = True
                 if appendImage:
                     filearray.append(image['filename'])
         # Add the respective rtss files to the filearray if they exist
         if 'structures' in patient:
             for structureid, structure in patient['structures'].items():
-                if 'rtss' in item:
-                    if (structureid == item['rtss']):
-                        filearray.append(structure['filename'])
-                        break
-                    elif (structure['referenceframe'] == item['referenceframe']):
-                        filearray.append(structure['filename'])
-                        break
+                if 'rtss' in item and (structureid == item['rtss']):
+                    filearray.append(structure['filename'])
+                    break
+                elif (structure['referenceframe'] == item['referenceframe']):
+                    filearray.append(structure['filename'])
+                    break
                 # If no referenced rtss, but ref'd rtplan, check rtplan->rtss
-                if 'rtplan' in item:
-                    if 'plans' in patient:
-                        for planid, plan in patient['plans'].items():
-                            if (planid == item['rtplan']):
-                                if 'rtss' in plan:
-                                    if (structureid == plan['rtss']):
-                                        filearray.append(structure['filename'])
+                if 'rtplan' in item and 'plans' in patient:
+                    for planid, plan in patient['plans'].items():
+                        if (planid == item['rtplan']) and 'rtss' in plan and (structureid == plan['rtss']):
+                            filearray.append(structure['filename'])
         # Add the respective rtplan files to the filearray if they exist
         if 'plans' in patient:
             for planid, plan in patient['plans'].items():
-                if 'rtplan' in item:
-                    if (planid == item['rtplan']):
-                        filearray.append(plan['filename'])
+                if 'rtplan' in item and if (planid == item['rtplan']):
+                    filearray.append(plan['filename'])
         if not rxdose:
             self.tcPatients.SetItemData(item['treeid'], {'filearray':filearray})
         else:
@@ -674,9 +664,8 @@ class DicomImporterDialog(wx.Dialog):
                 rxdose = data['rxdose']
             else:
                 parentdata = self.tcPatients.GetItemData(parent)
-                if not (parentdata == None):
-                    if 'rxdose' in parentdata:
-                        rxdose = parentdata['rxdose']
+                if not (parentdata == None) and 'rxdose' in parentdata:
+                    rxdose = parentdata['rxdose']
             # Show the rxdose text box if no rxdose was found
             # and if it is an RT plan or RT dose file
             self.txtRxDose.SetValue(rxdose)

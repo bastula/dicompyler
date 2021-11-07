@@ -344,15 +344,10 @@ class plugin2DView(wx.Panel):
         # look up the value in the LUT and find the corresponding pixel pair
         for p, point in enumerate(contour):
             for xv, xval in enumerate(pixlut[0]):
-                if (xval > point[0] and not prone and not feetfirst):
+                if (xval > point[0] and not prone and not feetfirst) or (xval < point[0]) and feetfirst or prone:
                     break
-                elif (xval < point[0]):
-                    if feetfirst or prone:
-                        break
             for yv, yval in enumerate(pixlut[1]):
-                if (yval > point[1] and not prone):
-                    break
-                elif (yval < point[1] and prone):
+                if (yval > point[1] and not prone) or (yval < point[1] and prone):
                     break
             pixeldata.append((xv, yv))
 
@@ -595,14 +590,12 @@ class plugin2DView(wx.Panel):
             nextkey = [wx.WXK_DOWN, wx.WXK_PAGEDOWN]
             zoominkey = [43, 61, 388] # Keys: +, =, Numpad add
             zoomoutkey = [45, 95, 390] # Keys: -, _, Numpad subtract
-            if (keyname in prevkey):
-                if (self.imagenum > 1):
-                    self.imagenum -= 1
-                    self.Refresh()
-            if (keyname in nextkey):
-                if (self.imagenum < len(self.images)):
-                    self.imagenum += 1
-                    self.Refresh()
+            if (keyname in prevkey) and (self.imagenum > 1):
+                self.imagenum -= 1
+                self.Refresh()
+            if (keyname in nextkey) and (self.imagenum < len(self.images)):
+                self.imagenum += 1
+                self.Refresh()
             if (keyname == wx.WXK_HOME):
                 self.imagenum = 1
                 self.Refresh()
@@ -625,10 +618,9 @@ class plugin2DView(wx.Panel):
                 if (self.imagenum > 1):
                     self.imagenum -= 1
                     self.Refresh()
-            if (rot <= -1):
-                if (self.imagenum < len(self.images)):
-                    self.imagenum += 1
-                    self.Refresh()
+            if (rot <= -1) and (self.imagenum < len(self.images)):
+                self.imagenum += 1
+                self.Refresh()
 
     def OnMouseDown(self, evt):
         """Get the initial position of the mouse when dragging."""
@@ -704,12 +696,12 @@ class plugin2DView(wx.Panel):
         menu = wx.Menu()
         if len(self.plugins):
             for name, p in self.plugins.items():
-                id = wx.NewId()
-                self.Bind(wx.EVT_MENU, p.pluginMenu, id=id)
-                menu.Append(id, name)
+                identifier = wx.NewId()
+                self.Bind(wx.EVT_MENU, p.pluginMenu, id=identifier)
+                menu.Append(identifier, name)
         else:
-            id = wx.NewId()
-            menu.Append(id, "No tools found")
-            menu.Enable(id, False)
+            identifier = wx.NewId()
+            menu.Append(identifier, "No tools found")
+            menu.Enable(identifier, False)
         self.PopupMenu(menu)
         menu.Destroy()

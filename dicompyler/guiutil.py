@@ -32,11 +32,11 @@ def IsMac():
 
 def GetItemsList(wxCtrl):
     # Return the list of values stored in a wxCtrlWithItems
-    list = []
+    value_list = []
     if not (wxCtrl.IsEmpty()):
         for i in range(wxCtrl.GetCount()):
-            list.append(wxCtrl.GetString(i))
-    return list
+            value_list.append(wxCtrl.GetString(i))
+    return value_list
 
 def SetItemsList(wxCtrl, list = [], data = []):
     # Set the wxCtrlWithItems to the given list and store the data in the item

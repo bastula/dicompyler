@@ -1375,41 +1375,41 @@ class PlotFrame(wx.Frame):
         mainMenu = wx.MenuBar()
         menu = wx.Menu()
 
-        id = wx.NewId()
-        menu.Append(id, '&Save As...\tCtrl+S',
+        entry_id = wx.NewId()
+        menu.Append(entry_id, '&Save As...\tCtrl+S',
             'Save a copy of the current plot')
-        wx.EVT_MENU(self, id, self.OnMenuFileSave)
+        wx.EVT_MENU(self, entry_id, self.OnMenuFileSave)
 
         menu.AppendSeparator()
 
         if wx.Platform != '__WXMAC__':
-            id = wx.NewId()
-            menu.Append(id, 'Page Set&up...',
+            entry_id = wx.NewId()
+            menu.Append(entry_id, 'Page Set&up...',
                 'Set the size and margins of the printed figure')
-            wx.EVT_MENU(self, id, self.OnMenuFilePageSetup)
+            wx.EVT_MENU(self, entry_id, self.OnMenuFilePageSetup)
 
-            id = wx.NewId()
-            menu.Append(id, 'Print Pre&view...',
+            entry_id = wx.NewId()
+            menu.Append(entry_id, 'Print Pre&view...',
                 'Preview the print version of the current plot')
-            wx.EVT_MENU(self, id, self.OnMenuFilePrintPreview)
+            wx.EVT_MENU(self, entry_id, self.OnMenuFilePrintPreview)
 
-        id = wx.NewId()
-        menu.Append(id, '&Print...\tCtrl+P', 'Print the current plot')
-        wx.EVT_MENU(self, id, self.OnMenuFilePrint)
+        entry_id = wx.NewId()
+        menu.Append(entry_id, '&Print...\tCtrl+P', 'Print the current plot')
+        wx.EVT_MENU(self, entry_id, self.OnMenuFilePrint)
 
         menu.AppendSeparator()
 
-        id = wx.NewId()
-        menu.Append(id, '&Close Window\tCtrl+W',
+        entry_id = wx.NewId()
+        menu.Append(entry_id, '&Close Window\tCtrl+W',
             'Close the current plot window')
-        wx.EVT_MENU(self, id, self.OnMenuFileClose)
+        wx.EVT_MENU(self, entry_id, self.OnMenuFileClose)
 
         mainMenu.Append(menu, '&File')
         menu = wx.Menu()
 
-        id = wx.NewId()
-        menu.Append(id, '&About...', 'Display version information')
-        wx.EVT_MENU(self, id, self.OnMenuHelpAbout)
+        entry_id = wx.NewId()
+        menu.Append(entry_id, '&About...', 'Display version information')
+        wx.EVT_MENU(self, entry_id, self.OnMenuHelpAbout)
 
         mainMenu.Append(menu, '&Help')
         self.SetMenuBar(mainMenu)

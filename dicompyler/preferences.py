@@ -96,21 +96,18 @@ class PreferencesManager():
 
         query = msg.split('.')
         v = self.values
-        if query[0] in v:
-            if query[1] in v[query[0]]:
-                if query[2] in v[query[0]][query[1]]:
-                    pub.sendMessage(msg, topic=msg, msg=v[query[0]][query[1]][query[2]])
+        if query[0] in v and query[1] in v[query[0]] and query[2] in v[query[0]][query[1]]:
+            pub.sendMessage(msg, topic=msg, msg=v[query[0]][query[1]][query[2]])
 
     def GetPreferenceValues(self, msg):
         """Publish the requested values for preference setting group."""
 
         query = msg.split('.')
         v = self.values
-        if query[0] in v:
-            if query[1] in v[query[0]]:
-                for setting, value in list(v[query[0]][query[1]].items()):
-                    message = msg + '.' + setting
-                    pub.sendMessage(message, topic='.'.join(['general',setting]), msg=value)
+        if query[0] in v and query[1] in v[query[0]]:
+            for setting, value in list(v[query[0]][query[1]].items()):
+                message = msg + '.' + setting
+                pub.sendMessage(message, topic='.'.join(['general',setting]), msg=value)
 
     def SetPreferenceValue(self, msg):
         """Set the preference value for the given preference setting."""
@@ -203,9 +200,8 @@ class PreferencesDialog(wx.Dialog):
                 fgsizer.Add((24, 0))
                 # Show the restart asterisk for this setting if required
                 restart = str('*' if 'restart' in setting else '')
-                if ('restart' in setting):
-                    if (setting['restart'] == True):
-                        show_restart = True
+                if ('restart' in setting) and (setting['restart'] == True):
+                    show_restart = True
                 t = wx.StaticText(panel, -1, setting['name']+restart+':',
                     style=wx.ALIGN_RIGHT)
                 fgsizer.Add(t, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT)
@@ -351,10 +347,8 @@ def GetValue(values, setting):
     # Look for the saved value and return it if it exists
     query = setting['callback'].split('.')
     value = setting['default']
-    if query[0] in values:
-        if query[1] in values[query[0]]:
-            if query[2] in values[query[0]][query[1]]:
-                value = values[query[0]][query[1]][query[2]]
+    if query[0] in values and query[1] in values[query[0]] and query[2] in values[query[0]][query[1]]:
+        value = values[query[0]][query[1]][query[2]]
     # Otherwise return the default value
     return value
 
