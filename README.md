@@ -1,7 +1,7 @@
 dicompyler
 ============
 
-**NOTE**: [dicompyler will be archived soon!](https://github.com/bastula/dicompyler/issues/144) The developers of dicompyler and DVH Analytics have teamed up to form [ONCurate](https://www.oncurate.com).
+**NOTE**: dicompyler has been archived and is no longer supported. The developers of dicompyler and DVH Analytics have teamed up to form [ONCurate](https://www.oncurate.com).
 
 <img src='https://raw.githubusercontent.com/wiki/bastula/dicompyler/images/0.3/2dview_mac_thumb.png' align='right' height='240' width='287' alt="dicompyler screenshot">
 dicompyler is an extensible open source radiation therapy research platform based on the DICOM standard. It also functions as a cross-platform DICOM RT viewer.
