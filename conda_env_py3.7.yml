@@ -1,0 +1,13 @@
+name: dicompyler
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.7
+  - wxpython
+  - pydicom
+  - matplotlib=2.1
+  - pillow
+  - pip
+  - pip:
+    - dicompyler-core     
