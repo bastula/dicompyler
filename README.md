@@ -115,6 +115,13 @@ Citing dicompyler:
             <br />
             <sub><b>Stephen Terry</b></sub>
         </a>
+    </td>
+    <td align="center">
+        <a href="https://github.com/jmartens">
+            <img src="https://avatars.githubusercontent.com/u/593327?v=4" width="100;" alt="jmartens"/>
+            <br />
+            <sub><b>Jonathan Martens</b></sub>
+        </a>
     </td></tr>
 </table>
 <!-- readme: contributors -end -->
