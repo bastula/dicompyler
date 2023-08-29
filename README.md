@@ -110,13 +110,6 @@ Citing dicompyler:
         </a>
     </td>
     <td align="center">
-        <a href="https://github.com/jmartens">
-            <img src="https://avatars.githubusercontent.com/u/593327?v=4" width="100;" alt="jmartens"/>
-            <br />
-            <sub><b>Jonathan Martens</b></sub>
-        </a>
-    </td>
-    <td align="center">
         <a href="https://github.com/StephenTerry">
             <img src="https://avatars.githubusercontent.com/u/677664?v=4" width="100;" alt="StephenTerry"/>
             <br />
