@@ -10,7 +10,7 @@
 from setuptools import setup, find_packages
 
 requires = [
-    'matplotlib>=1.3.0,<2.2',
+    'matplotlib>=2.2',
     'numpy>=1.2.1',
     'pillow>=1.0',
     'dicompyler-core>=0.5.2',
@@ -83,7 +83,7 @@ setup(
     
     - Python 2.7 or 3.5 or higher 
     - wxPython (Phoenix) 4.0.0b2 or higher
-    - matplotlib 1.3.0 or higher
+    - matplotlib 2.2.0 or higher
     - numpy 1.3.1 or higher
     - Pillow 1.0 or higher
     - dicompyler-core 0.5.2 or higher

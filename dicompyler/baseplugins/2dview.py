@@ -11,7 +11,7 @@
 import wx
 from wx.xrc import XmlResource, XRCCTRL, XRCID
 from pubsub import pub
-from matplotlib import _cntr as cntr
+from legacycontour import _cntr as cntr
 from matplotlib import __version__ as mplversion
 import numpy as np
 from dicompyler import guiutil, util

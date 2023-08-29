@@ -1,8 +1,11 @@
 dicompyler-core[image]>=0.5.2
 wxPython>=4.0.0b2
-matplotlib>=1.3,<2.2
+matplotlib>=2.2
 numpy>=1.13.1
 https://github.com/darcymason/pydicom/archive/master.zip
 
 # Fix #131
 PyPubSub
+
+# Better fix for #122 allowing more recent matplotlib versions
+git+https://github.com/matplotlib/legacycontour.git
